@@ -276,6 +276,7 @@ int drawable ic_radio_default 0x7f070064
 int drawable logo_evropa2 0x7f070065
 int drawable logo_frekvence1 0x7f070066
 int drawable logo_impuls 0x7f070067
+int drawable logo_kiss 0x7f070069
 int drawable logo_radiozet 0x7f070068
 int drawable notification_action_background 0x7f070057
 int drawable notification_bg 0x7f070058

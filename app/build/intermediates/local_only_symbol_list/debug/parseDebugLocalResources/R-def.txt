@@ -13,6 +13,7 @@ drawable ic_radio_default
 drawable logo_evropa2
 drawable logo_frekvence1
 drawable logo_impuls
+drawable logo_kiss
 drawable logo_radiozet
 mipmap ic_launcher
 mipmap ic_launcher_round

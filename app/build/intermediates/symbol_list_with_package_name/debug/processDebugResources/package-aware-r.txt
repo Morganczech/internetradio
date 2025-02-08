@@ -277,6 +277,7 @@ drawable ic_radio_default
 drawable logo_evropa2
 drawable logo_frekvence1
 drawable logo_impuls
+drawable logo_kiss
 drawable logo_radiozet
 drawable notification_action_background
 drawable notification_bg
