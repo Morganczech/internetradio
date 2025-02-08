@@ -1,6 +1,0 @@
-/home/miroslav/Dokumenty/android/app/src/main/java/cz/internetradio/app/di/AppModule.kt
-/home/miroslav/Dokumenty/android/app/src/main/java/cz/internetradio/app/RadioApplication.kt
-/home/miroslav/Dokumenty/android/app/src/main/java/cz/internetradio/app/viewmodel/RadioViewModel.kt
-/home/miroslav/Dokumenty/android/app/src/main/java/cz/internetradio/app/model/Radio.kt
-/home/miroslav/Dokumenty/android/app/src/main/java/cz/internetradio/app/MainActivity.kt
-/home/miroslav/Dokumenty/android/app/src/main/java/cz/internetradio/app/repository/RadioRepository.kt

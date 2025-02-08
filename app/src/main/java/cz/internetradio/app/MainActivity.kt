@@ -12,6 +12,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.VolumeDown
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -171,8 +174,13 @@ fun RadioItem(
 fun PlayerControls(
     radio: Radio,
     isPlaying: Boolean,
-    onPlayPauseClick: () -> Unit
+    onPlayPauseClick: () -> Unit,
+    viewModel: RadioViewModel = hiltViewModel()
 ) {
+    val volume by viewModel.volume.collectAsState()
+    val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
+    val currentMetadata by viewModel.currentMetadata.collectAsState()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -189,13 +197,79 @@ fun PlayerControls(
                 fontWeight = FontWeight.Bold
             )
             
-            IconButton(
-                onClick = onPlayPauseClick,
-                modifier = Modifier.padding(top = 8.dp)
+            // Zobrazení aktuální skladby
+            currentMetadata?.let { metadata ->
+                Text(
+                    text = "Nyní hraje: $metadata",
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                )
+            }
+            
+            // Ovládání hlasitosti
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) "Pozastavit" else "Přehrát"
+                    imageVector = Icons.Default.VolumeDown,
+                    contentDescription = "Snížit hlasitost"
+                )
+                Slider(
+                    value = volume,
+                    onValueChange = { viewModel.setVolume(it) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.VolumeUp,
+                    contentDescription = "Zvýšit hlasitost"
+                )
+            }
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Tlačítko přehrát/pozastavit
+                IconButton(onClick = onPlayPauseClick) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pozastavit" else "Přehrát"
+                    )
+                }
+                
+                // Časovač vypnutí
+                IconButton(
+                    onClick = {
+                        when (sleepTimer) {
+                            null -> viewModel.setSleepTimer(30)
+                            30 -> viewModel.setSleepTimer(60)
+                            60 -> viewModel.setSleepTimer(90)
+                            else -> viewModel.setSleepTimer(null)
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = "Časovač vypnutí"
+                    )
+                }
+            }
+            
+            // Zobrazení časovače
+            sleepTimer?.let { minutes ->
+                Text(
+                    text = "Vypnutí za: $minutes min",
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
