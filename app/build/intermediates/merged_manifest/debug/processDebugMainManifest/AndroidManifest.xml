@@ -29,7 +29,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="true"
-        android:theme="@style/Theme.InternetRadio" >
+        android:theme="@style/Theme.InternetRadio"
+        android:usesCleartextTraffic="true" >
         <activity
             android:name="cz.internetradio.app.MainActivity"
             android:exported="true" >

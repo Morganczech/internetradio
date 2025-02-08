@@ -16,9 +16,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -89,18 +93,35 @@ fun RadioItem(
             .clickable(onClick = onRadioClick),
         elevation = if (isSelected) 8.dp else 2.dp
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = radio.name,
-                style = MaterialTheme.typography.h6,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-            )
-            radio.description?.let { description ->
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(top = 4.dp)
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(end = 16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(radio.imageResId),
+                    contentDescription = "Logo ${radio.name}",
+                    modifier = Modifier.fillMaxSize(),
+                    tint = Color.Unspecified
                 )
+            }
+            Column {
+                Text(
+                    text = radio.name,
+                    style = MaterialTheme.typography.h6,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                )
+                radio.description?.let { description ->
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
     }

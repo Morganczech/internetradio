@@ -66,6 +66,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
 
+    // Coil pro načítání obrázků
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
     // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 

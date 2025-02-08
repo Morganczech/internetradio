@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "cz.internetradio.app-mergeDebugResources-54:/values-ta/values-ta.xml",
+            "outputFile": "cz.internetradio.app-mergeDebugResources-56:/values-ta/values-ta.xml",
             "map": [
                 {
                     "source": "/home/miroslav/.gradle/caches/8.10.2/transforms/40832cd6ebac2261ca8656bbb492dc11/transformed/jetified-ui-release/res/values-ta/values-ta.xml",

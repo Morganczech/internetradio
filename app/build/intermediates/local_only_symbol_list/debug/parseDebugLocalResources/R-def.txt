@@ -9,6 +9,11 @@ color teal_200
 color teal_700
 color white
 drawable ic_launcher_foreground
+drawable ic_radio_default
+drawable logo_evropa2
+drawable logo_frekvence1
+drawable logo_impuls
+drawable logo_radiozet
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
