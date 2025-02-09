@@ -14,7 +14,7 @@ class RadioRepository @Inject constructor() {
             name = "Evropa 2",
             streamUrl = "https://ice.actve.net/fm-evropa2-128",
             imageUrl = "https://m.actve.net/e2/favicon/apple-touch-icon.png",
-            description = "Nejlepší hudba - 88.2 FM",
+            description = "MaXXimum muziky",
             startColor = Color(0xFF0066CC),
             endColor = Color(0xFF003366)
         ),
