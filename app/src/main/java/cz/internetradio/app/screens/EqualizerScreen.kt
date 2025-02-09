@@ -16,6 +16,8 @@ import cz.internetradio.app.viewmodel.RadioViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.layout
 
 @Composable
 fun EqualizerScreen(
@@ -129,44 +131,50 @@ fun EqualizerScreen(
                 )
 
                 // Posuvníky pro jednotlivá pásma
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     bandValues.forEachIndexed { index, value ->
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = "${value.toInt()}dB",
-                                style = MaterialTheme.typography.caption,
-                                color = Color.White.copy(alpha = 0.7f)
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = when (index) {
+                                        0 -> "60Hz"
+                                        1 -> "230Hz"
+                                        2 -> "910Hz"
+                                        3 -> "3.6kHz"
+                                        else -> "14kHz"
+                                    },
+                                    style = MaterialTheme.typography.caption,
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    text = "${value.toInt()}dB",
+                                    style = MaterialTheme.typography.caption,
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                            }
                             
                             Slider(
                                 value = value,
                                 onValueChange = { viewModel.setBandValue(index, it) },
                                 valueRange = -12f..12f,
                                 modifier = Modifier
-                                    .height(200.dp)
-                                    .width(40.dp),
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
                                 colors = SliderDefaults.colors(
                                     thumbColor = Color.White,
-                                    activeTrackColor = MaterialTheme.colors.primary
+                                    activeTrackColor = MaterialTheme.colors.primary,
+                                    inactiveTrackColor = MaterialTheme.colors.primary.copy(alpha = 0.24f)
                                 )
-                            )
-                            
-                            Text(
-                                text = when (index) {
-                                    0 -> "60Hz"
-                                    1 -> "230Hz"
-                                    2 -> "910Hz"
-                                    3 -> "3.6kHz"
-                                    else -> "14kHz"
-                                },
-                                style = MaterialTheme.typography.caption,
-                                color = Color.White.copy(alpha = 0.7f)
                             )
                         }
                     }
