@@ -71,8 +71,10 @@ class RadioRepository @Inject constructor(
     )
 
     suspend fun initializeDefaultRadios() {
-        defaultRadioStations.forEach { radio ->
-            radioDao.insertRadio(RadioEntity.fromRadio(radio))
+        if (radioDao.getStationCount() == 0) {
+            defaultRadioStations.forEach { radio ->
+                radioDao.insertRadio(RadioEntity.fromRadio(radio))
+            }
         }
     }
 

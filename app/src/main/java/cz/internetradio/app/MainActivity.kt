@@ -11,13 +11,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -182,7 +186,12 @@ fun PlayerControls(
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
+    val remainingTime by viewModel.remainingTimeMinutes.collectAsState()
     val currentMetadata by viewModel.currentMetadata.collectAsState()
+    var showTimerDropdown by remember { mutableStateOf(false) }
+    val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
+
+    val timerOptions = (5..60 step 5).toList()
 
     Card(
         modifier = Modifier
@@ -190,85 +199,178 @@ fun PlayerControls(
             .padding(16.dp),
         elevation = 8.dp
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(radio.startColor, radio.endColor)
+                    )
+                )
         ) {
-            Text(
-                text = "Nyní hraje: ${radio.name}",
-                style = MaterialTheme.typography.subtitle1,
-                fontWeight = FontWeight.Bold
-            )
-            
-            currentMetadata?.let { metadata ->
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Název stanice
                 Text(
-                    text = metadata,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    text = "Nyní hraje: ${radio.name}",
+                    style = MaterialTheme.typography.subtitle1,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = Color.White
                 )
-            }
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.VolumeDown,
-                    contentDescription = "Snížit hlasitost"
-                )
-                Slider(
-                    value = volume,
-                    onValueChange = { viewModel.setVolume(it) },
+                
+                // Metadata (název písně)
+                currentMetadata?.let { metadata ->
+                    Text(
+                        text = metadata,
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
+
+                // Ovládání hlasitosti
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.VolumeUp,
-                    contentDescription = "Zvýšit hlasitost"
-                )
-            }
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onPlayPauseClick) {
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pozastavit" else "Přehrát"
+                        imageVector = Icons.Default.VolumeDown,
+                        contentDescription = "Snížit hlasitost",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.White
+                    )
+                    
+                    Slider(
+                        value = volume,
+                        onValueChange = { viewModel.setVolume(it) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        valueRange = 0f..1f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color.White,
+                            activeTrackColor = Color.White,
+                            inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                        )
+                    )
+                    
+                    Icon(
+                        imageVector = Icons.Default.VolumeUp,
+                        contentDescription = "Zvýšit hlasitost",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.White
                     )
                 }
                 
-                IconButton(
-                    onClick = {
-                        when (sleepTimer) {
-                            null -> viewModel.setSleepTimer(30)
-                            30 -> viewModel.setSleepTimer(60)
-                            60 -> viewModel.setSleepTimer(90)
-                            else -> viewModel.setSleepTimer(null)
+                // Ovládací tlačítka
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tlačítko předchozí
+                    IconButton(
+                        onClick = {
+                            val currentIndex = favoriteRadios.indexOfFirst { it.id == radio.id }
+                            if (currentIndex > 0) {
+                                viewModel.playRadio(favoriteRadios[currentIndex - 1])
+                            }
+                        },
+                        enabled = favoriteRadios.indexOfFirst { it.id == radio.id } > 0
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SkipPrevious,
+                            contentDescription = "Předchozí stanice",
+                            tint = Color.White
+                        )
+                    }
+
+                    // Tlačítko play/pause
+                    IconButton(
+                        onClick = onPlayPauseClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
+                            modifier = Modifier.size(32.dp),
+                            tint = Color.White
+                        )
+                    }
+
+                    // Tlačítko další
+                    IconButton(
+                        onClick = {
+                            val currentIndex = favoriteRadios.indexOfFirst { it.id == radio.id }
+                            if (currentIndex < favoriteRadios.size - 1) {
+                                viewModel.playRadio(favoriteRadios[currentIndex + 1])
+                            }
+                        },
+                        enabled = favoriteRadios.indexOfFirst { it.id == radio.id } < favoriteRadios.size - 1
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SkipNext,
+                            contentDescription = "Další stanice",
+                            tint = Color.White
+                        )
+                    }
+                }
+
+                // Timer
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(
+                        onClick = { showTimerDropdown = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Timer,
+                            contentDescription = "Časovač vypnutí",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showTimerDropdown,
+                        onDismissRequest = { showTimerDropdown = false }
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            viewModel.setSleepTimer(0)
+                            showTimerDropdown = false
+                        }) {
+                            Text("Vypnout časovač")
+                        }
+                        timerOptions.forEach { minutes ->
+                            DropdownMenuItem(onClick = {
+                                viewModel.setSleepTimer(minutes)
+                                showTimerDropdown = false
+                            }) {
+                                Text("$minutes minut")
+                            }
                         }
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Timer,
-                        contentDescription = "Časovač vypnutí"
-                    )
                 }
-            }
-            
-            sleepTimer?.let { minutes ->
-                Text(
-                    text = "Vypnutí za: $minutes min",
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                
+                // Zobrazení zbývajícího času časovače
+                remainingTime?.let { time ->
+                    if (time > 0) {
+                        Text(
+                            text = "Zbývá: $time min",
+                            style = MaterialTheme.typography.caption,
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = Color.White
+                        )
+                    }
+                }
             }
         }
     }

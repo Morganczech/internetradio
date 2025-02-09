@@ -35,6 +35,9 @@ class RadioViewModel @Inject constructor(
     private val _sleepTimerMinutes = MutableStateFlow<Int?>(null)
     val sleepTimerMinutes: StateFlow<Int?> = _sleepTimerMinutes
 
+    private val _remainingTimeMinutes = MutableStateFlow<Int?>(null)
+    val remainingTimeMinutes: StateFlow<Int?> = _remainingTimeMinutes
+
     private val _showOnlyFavorites = MutableStateFlow(false)
     val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
 
@@ -77,11 +80,13 @@ class RadioViewModel @Inject constructor(
                             rawMetadata.substringAfter("title=\"")
                                 .substringBefore("\"")
                                 .takeIf { it.isNotBlank() && it != "null" }
+                                ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
                         }
                         rawMetadata.contains("StreamTitle=") -> {
                             rawMetadata.substringAfter("StreamTitle='")
                                 .substringBefore("'")
                                 .takeIf { it.isNotBlank() && it != "null" }
+                                ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
                         }
                         else -> null
                     }
@@ -153,13 +158,26 @@ class RadioViewModel @Inject constructor(
 
     fun setSleepTimer(minutes: Int?) {
         _sleepTimerMinutes.value = minutes
+        _remainingTimeMinutes.value = minutes
         
         viewModelScope.launch {
             if (minutes != null) {
-                delay(minutes * 60 * 1000L)
+                val startTime = System.currentTimeMillis()
+                val endTime = startTime + (minutes * 60 * 1000L)
+
+                while (System.currentTimeMillis() < endTime && _sleepTimerMinutes.value == minutes) {
+                    val remaining = ((endTime - System.currentTimeMillis()) / 1000L / 60L).toInt()
+                    _remainingTimeMinutes.value = remaining
+                    delay(1000) // Aktualizace každou sekundu
+                }
+
                 if (_sleepTimerMinutes.value == minutes) {
                     stopPlayback()
+                    _sleepTimerMinutes.value = null
+                    _remainingTimeMinutes.value = null
                 }
+            } else {
+                _remainingTimeMinutes.value = null
             }
         }
     }

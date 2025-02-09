@@ -1,6 +1,7 @@
 package cz.internetradio.app.data.dao;
 
 import android.database.Cursor;
+import android.os.CancellationSignal;
 import androidx.annotation.NonNull;
 import androidx.room.CoroutinesRoom;
 import androidx.room.EntityDeletionOrUpdateAdapter;
@@ -14,6 +15,7 @@ import androidx.sqlite.db.SupportSQLiteStatement;
 import cz.internetradio.app.data.entity.RadioEntity;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -46,7 +48,7 @@ public final class RadioDao_Impl implements RadioDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `radio_stations` (`id`,`name`,`streamUrl`,`imageUrl`,`description`,`startColorValue`,`endColorValue`,`isFavorite`) VALUES (?,?,?,?,?,?,?,?)";
+        return "INSERT OR IGNORE INTO `radio_stations` (`id`,`name`,`streamUrl`,`imageUrl`,`description`,`startColorValue`,`endColorValue`,`isFavorite`) VALUES (?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -315,6 +317,34 @@ public final class RadioDao_Impl implements RadioDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getStationCount(final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM radio_stations";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmp;
+            _tmp = _cursor.getInt(0);
+            _result = _tmp;
+          } else {
+            _result = 0;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @NonNull

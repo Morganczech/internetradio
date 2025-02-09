@@ -12,7 +12,7 @@ interface RadioDao {
     @Query("SELECT * FROM radio_stations WHERE isFavorite = 1")
     fun getFavoriteRadios(): Flow<List<RadioEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRadio(radio: RadioEntity)
 
     @Update
@@ -20,6 +20,9 @@ interface RadioDao {
 
     @Query("UPDATE radio_stations SET isFavorite = :isFavorite WHERE id = :radioId")
     suspend fun updateFavoriteStatus(radioId: String, isFavorite: Boolean)
+
+    @Query("SELECT COUNT(*) FROM radio_stations")
+    suspend fun getStationCount(): Int
 
     @Delete
     suspend fun deleteRadio(radio: RadioEntity)
