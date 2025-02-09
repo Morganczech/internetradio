@@ -273,7 +273,11 @@ drawable ic_call_answer_video_low
 drawable ic_call_decline
 drawable ic_call_decline_low
 drawable ic_launcher_foreground
+drawable ic_pause
+drawable ic_play_arrow
 drawable ic_radio_default
+drawable ic_skip_next
+drawable ic_skip_previous
 drawable logo_evropa2
 drawable logo_frekvence1
 drawable logo_impuls
@@ -301,6 +305,8 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable widget_background
+drawable widget_preview
 font roboto_medium_numbers
 id accessibility_action_clickable_span
 id accessibility_custom_action_0
@@ -466,6 +472,12 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible_removing_fragment_view_tag
 id when_playing
+id widget_metadata
+id widget_next
+id widget_play_pause
+id widget_previous
+id widget_radio_icon
+id widget_radio_name
 id wrapped_composition_tag
 id zoom
 integer cancel_button_image_alpha
@@ -500,6 +512,7 @@ layout notification_template_media
 layout notification_template_media_custom
 layout notification_template_part_chronometer
 layout notification_template_part_time
+layout widget_player
 mipmap ic_launcher
 mipmap ic_launcher_round
 plurals exo_controls_fastforward_by_amount_description
@@ -667,3 +680,4 @@ styleable PlayerView ad_marker_color ad_marker_width animation_enabled artwork_d
 styleable RecyclerView android_orientation android_clipToPadding android_descendantFocusability fastScrollEnabled fastScrollHorizontalThumbDrawable fastScrollHorizontalTrackDrawable fastScrollVerticalThumbDrawable fastScrollVerticalTrackDrawable layoutManager reverseLayout spanCount stackFromEnd
 styleable StateListDrawable android_dither android_visible android_variablePadding android_constantSize android_enterFadeDuration android_exitFadeDuration
 styleable StateListDrawableItem android_drawable
+xml radio_widget_info

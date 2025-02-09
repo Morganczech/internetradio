@@ -41,6 +41,20 @@
             </intent-filter>
         </activity>
 
+        <!-- Widget -->
+        <receiver
+            android:name="cz.internetradio.app.widget.RadioWidgetProvider"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="cz.internetradio.app.ACTION_PLAY_PAUSE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/radio_widget_info" />
+        </receiver>
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="cz.internetradio.app.androidx-startup"

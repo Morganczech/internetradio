@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-26:12
-INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-26:12
-INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-26:12
-INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-26:12
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-39:12
+INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-39:12
+INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-39:12
+INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:2:1-39:12
 MERGED from [androidx.media3:media3-ui:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/3547c6a6ff1738f15746c67cd8645dcd/transformed/jetified-media3-ui-1.2.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-session:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/b81ec20ef52e30f787c752a528c02fc8/transformed/jetified-media3-session-1.2.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-extractor:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/cb4e766f4137b11e0e45a3505628b070/transformed/jetified-media3-extractor-1.2.1/AndroidManifest.xml:17:1-22:12
@@ -103,8 +103,8 @@ ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:6:5
 	android:name
 		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:6:22-74
 application
-ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:8:5-25:19
-INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:8:5-25:19
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:8:5-38:19
+INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:8:5-38:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:23:5-33:19
@@ -155,6 +155,28 @@ category#android.intent.category.LAUNCHER
 ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:22:17-77
 	android:name
 		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:22:27-74
+receiver#cz.internetradio.app.widget.RadioWidgetProvider
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:27:9-37:20
+	android:exported
+		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:29:13-36
+	android:name
+		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:28:13-55
+intent-filter#action:name:android.appwidget.action.APPWIDGET_UPDATE+action:name:cz.internetradio.app.ACTION_PLAY_PAUSE
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:30:13-33:29
+action#android.appwidget.action.APPWIDGET_UPDATE
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:31:17-84
+	android:name
+		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:31:25-81
+action#cz.internetradio.app.ACTION_PLAY_PAUSE
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:32:17-81
+	android:name
+		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:32:25-78
+meta-data#android.appwidget.provider
+ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:34:13-36:61
+	android:resource
+		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:36:17-58
+	android:name
+		ADDED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:35:17-58
 uses-sdk
 INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml
