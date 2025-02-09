@@ -39,6 +39,7 @@ fun AllStationsScreen(
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
+    val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -204,6 +205,23 @@ fun AllStationsScreen(
                 )
             }
         }
+    }
+
+    // Dialog s upozorněním na maximální počet oblíbených stanic
+    if (showMaxFavoritesError) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissMaxFavoritesError() },
+            title = { Text("Maximální počet oblíbených") },
+            text = { 
+                val maxFavorites by viewModel.maxFavorites.collectAsState()
+                Text("Můžete mít maximálně $maxFavorites oblíbených stanic. Prosím, odeberte některou stanici z oblíbených před přidáním nové, nebo zvyšte limit v nastavení aplikace.") 
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissMaxFavoritesError() }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 

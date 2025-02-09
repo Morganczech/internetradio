@@ -14,161 +14,164 @@
 12    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 12-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:6:5-77
 12-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:6:22-74
-13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-13-->[androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
-13-->[androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:22-76
-14
-15    <permission
-15-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
-16        android:name="cz.internetradio.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-16-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
-17        android:protectionLevel="signature" />
-17-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
-18
-19    <uses-permission android:name="cz.internetradio.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-19-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
-19-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
-20
-21    <application
-21-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:8:5-38:19
-22        android:name="cz.internetradio.app.RadioApplication"
-22-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:9:9-41
-23        android:allowBackup="true"
-23-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:10:9-35
-24        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-24-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
-25        android:debuggable="true"
-26        android:extractNativeLibs="false"
-27        android:icon="@mipmap/ic_launcher"
-27-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:11:9-43
-28        android:label="@string/app_name"
-28-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:12:9-41
-29        android:roundIcon="@mipmap/ic_launcher_round"
-29-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:13:9-54
-30        android:supportsRtl="true"
-30-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:14:9-35
-31        android:testOnly="true"
-32        android:theme="@style/Theme.InternetRadio"
-32-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:16:9-51
-33        android:usesCleartextTraffic="true" >
-33-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:15:9-44
-34        <activity
-34-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:17:9-24:20
-35            android:name="cz.internetradio.app.MainActivity"
-35-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:18:13-41
-36            android:exported="true" >
-36-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:19:13-36
-37            <intent-filter>
-37-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:20:13-23:29
-38                <action android:name="android.intent.action.MAIN" />
-38-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:21:17-69
-38-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:21:25-66
-39
-40                <category android:name="android.intent.category.LAUNCHER" />
-40-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:22:17-77
-40-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:22:27-74
-41            </intent-filter>
-42        </activity>
-43
-44        <!-- Widget -->
-45        <receiver
-45-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:27:9-37:20
-46            android:name="cz.internetradio.app.widget.RadioWidgetProvider"
-46-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:28:13-55
-47            android:exported="true" >
-47-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:29:13-36
-48            <intent-filter>
-48-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:30:13-33:29
-49                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-49-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:31:17-84
-49-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:31:25-81
-50                <action android:name="cz.internetradio.app.ACTION_PLAY_PAUSE" />
-50-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:32:17-81
-50-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:32:25-78
-51            </intent-filter>
-52
-53            <meta-data
-53-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:34:13-36:61
-54                android:name="android.appwidget.provider"
-54-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:35:17-58
-55                android:resource="@xml/radio_widget_info" />
+13    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+13-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:7:5-80
+13-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:7:22-77
+14    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+14-->[androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
+14-->[androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:22-76
+15
+16    <permission
+16-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+17        android:name="cz.internetradio.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+17-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+18        android:protectionLevel="signature" />
+18-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+19
+20    <uses-permission android:name="cz.internetradio.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+20-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+20-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+21
+22    <application
+22-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:9:5-39:19
+23        android:name="cz.internetradio.app.RadioApplication"
+23-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:10:9-41
+24        android:allowBackup="true"
+24-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:11:9-35
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:icon="@mipmap/ic_launcher"
+28-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:12:9-43
+29        android:label="@string/app_name"
+29-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:13:9-41
+30        android:roundIcon="@mipmap/ic_launcher_round"
+30-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:14:9-54
+31        android:supportsRtl="true"
+31-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:15:9-35
+32        android:testOnly="true"
+33        android:theme="@style/Theme.InternetRadio"
+33-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:17:9-51
+34        android:usesCleartextTraffic="true" >
+34-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:16:9-44
+35        <activity
+35-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:18:9-25:20
+36            android:name="cz.internetradio.app.MainActivity"
+36-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:19:13-41
+37            android:exported="true" >
+37-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:20:13-36
+38            <intent-filter>
+38-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:21:13-24:29
+39                <action android:name="android.intent.action.MAIN" />
+39-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:22:17-69
+39-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:22:25-66
+40
+41                <category android:name="android.intent.category.LAUNCHER" />
+41-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:23:17-77
+41-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:23:27-74
+42            </intent-filter>
+43        </activity>
+44
+45        <!-- Widget -->
+46        <receiver
+46-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:28:9-38:20
+47            android:name="cz.internetradio.app.widget.RadioWidgetProvider"
+47-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:29:13-55
+48            android:exported="true" >
+48-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:30:13-36
+49            <intent-filter>
+49-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:31:13-34:29
+50                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+50-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:32:17-84
+50-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:32:25-81
+51                <action android:name="cz.internetradio.app.ACTION_PLAY_PAUSE" />
+51-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:33:17-81
+51-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:33:25-78
+52            </intent-filter>
+53
+54            <meta-data
+54-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:35:13-37:61
+55                android:name="android.appwidget.provider"
 55-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:36:17-58
-56        </receiver>
-57
-58        <provider
-58-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
-59            android:name="androidx.startup.InitializationProvider"
-59-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:25:13-67
-60            android:authorities="cz.internetradio.app.androidx-startup"
-60-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:26:13-68
-61            android:exported="false" >
-61-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:27:13-37
-62            <meta-data
-62-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
-63                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-63-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:30:17-75
-64                android:value="androidx.startup" />
-64-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:31:17-49
-65            <meta-data
-65-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
-66                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-66-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
-67                android:value="androidx.startup" />
-67-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
-68            <meta-data
-68-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
-69                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-69-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
-70                android:value="androidx.startup" />
-70-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
-71        </provider>
-72
-73        <service
-73-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:24:9-28:63
-74            android:name="androidx.room.MultiInstanceInvalidationService"
-74-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:25:13-74
-75            android:directBootAware="true"
-75-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:26:13-43
-76            android:exported="false" />
-76-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:27:13-37
-77
-78        <receiver
-78-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
-79            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-79-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
-80            android:directBootAware="false"
-80-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
-81            android:enabled="true"
-81-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
-82            android:exported="true"
-82-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
-83            android:permission="android.permission.DUMP" >
-83-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
-84            <intent-filter>
-84-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
-85                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-85-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
-85-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
-86            </intent-filter>
-87            <intent-filter>
-87-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
-88                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-88-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
-88-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
-89            </intent-filter>
-90            <intent-filter>
-90-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
-91                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-91-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
-91-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
-92            </intent-filter>
-93            <intent-filter>
-93-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
-94                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-94-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
-94-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
-95            </intent-filter>
-96        </receiver>
-97    </application>
-98
-99</manifest>
+56                android:resource="@xml/radio_widget_info" />
+56-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:37:17-58
+57        </receiver>
+58
+59        <provider
+59-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
+60            android:name="androidx.startup.InitializationProvider"
+60-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:25:13-67
+61            android:authorities="cz.internetradio.app.androidx-startup"
+61-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:26:13-68
+62            android:exported="false" >
+62-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:27:13-37
+63            <meta-data
+63-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
+64                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+64-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:30:17-75
+65                android:value="androidx.startup" />
+65-->[androidx.emoji2:emoji2:1.4.0] /home/miroslav/.gradle/caches/8.10.2/transforms/9fe945931c9ef51c077770b003ab1c84/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:31:17-49
+66            <meta-data
+66-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+67                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+67-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+68                android:value="androidx.startup" />
+68-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e6eed4835dbb38b212a21d9310069fb0/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+69            <meta-data
+69-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+70                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+70-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+71                android:value="androidx.startup" />
+71-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+72        </provider>
+73
+74        <service
+74-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:24:9-28:63
+75            android:name="androidx.room.MultiInstanceInvalidationService"
+75-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:25:13-74
+76            android:directBootAware="true"
+76-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:26:13-43
+77            android:exported="false" />
+77-->[androidx.room:room-runtime:2.6.1] /home/miroslav/.gradle/caches/8.10.2/transforms/76ebdb3dac17b8f0a5b79d5e3222a4eb/transformed/room-runtime-2.6.1/AndroidManifest.xml:27:13-37
+78
+79        <receiver
+79-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+80            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+80-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+81            android:directBootAware="false"
+81-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+82            android:enabled="true"
+82-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+83            android:exported="true"
+83-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+84            android:permission="android.permission.DUMP" >
+84-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+85            <intent-filter>
+85-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+86                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+86-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+86-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+87            </intent-filter>
+88            <intent-filter>
+88-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+89                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+89-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+89-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+90            </intent-filter>
+91            <intent-filter>
+91-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+92                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+92-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+92-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+93            </intent-filter>
+94            <intent-filter>
+94-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+95                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+95-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+95-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/miroslav/.gradle/caches/8.10.2/transforms/77b176257020030234d96cc0609c7926/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+96            </intent-filter>
+97        </receiver>
+98    </application>
+99
+100</manifest>

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.media3.exoplayer.ExoPlayer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import cz.internetradio.app.audio.EqualizerManager;
 import cz.internetradio.app.data.RadioDatabase;
 import cz.internetradio.app.data.dao.RadioDao;
 import cz.internetradio.app.di.AppModule;
@@ -452,7 +453,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       public T get() {
         switch (id) {
           case 0: // cz.internetradio.app.viewmodel.RadioViewModel 
-          return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+          return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), singletonCImpl.equalizerManagerProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);
         }
@@ -539,6 +540,8 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     private Provider<ExoPlayer> provideExoPlayerProvider;
 
+    private Provider<EqualizerManager> equalizerManagerProvider;
+
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
       initialize(applicationContextModuleParam);
@@ -554,6 +557,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<RadioDatabase>(singletonCImpl, 1));
       this.radioRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RadioRepository>(singletonCImpl, 0));
       this.provideExoPlayerProvider = DoubleCheck.provider(new SwitchingProvider<ExoPlayer>(singletonCImpl, 2));
+      this.equalizerManagerProvider = DoubleCheck.provider(new SwitchingProvider<EqualizerManager>(singletonCImpl, 3));
     }
 
     @Override
@@ -597,6 +601,9 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
           case 2: // androidx.media3.exoplayer.ExoPlayer 
           return (T) AppModule_ProvideExoPlayerFactory.provideExoPlayer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 3: // cz.internetradio.app.audio.EqualizerManager 
+          return (T) new EqualizerManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);
         }

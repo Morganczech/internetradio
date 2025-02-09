@@ -15,11 +15,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import cz.internetradio.app.model.EqualizerPreset
+import cz.internetradio.app.audio.EqualizerManager
+import androidx.media3.common.C
 
 @HiltViewModel
 class RadioViewModel @Inject constructor(
     private val radioRepository: RadioRepository,
     private val exoPlayer: ExoPlayer,
+    private val equalizerManager: EqualizerManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -46,6 +50,28 @@ class RadioViewModel @Inject constructor(
     private val _showOnlyFavorites = MutableStateFlow(false)
     val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
 
+    private val _showMaxFavoritesError = MutableStateFlow(false)
+    val showMaxFavoritesError: StateFlow<Boolean> = _showMaxFavoritesError
+
+    private val _maxFavorites = MutableStateFlow(8)
+    val maxFavorites: StateFlow<Int> = _maxFavorites
+
+    private val _currentPreset = MutableStateFlow(EqualizerPreset.NORMAL)
+    val currentPreset: StateFlow<EqualizerPreset> = _currentPreset
+
+    private val _equalizerEnabled = MutableStateFlow(false)
+    val equalizerEnabled: StateFlow<Boolean> = _equalizerEnabled
+
+    private val _bandValues = MutableStateFlow(List(5) { 0f })
+    val bandValues: StateFlow<List<Float>> = _bandValues
+
+    private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
+
+    companion object {
+        const val DEFAULT_MAX_FAVORITES = 8
+        const val PREFS_MAX_FAVORITES = "max_favorites"
+    }
+
     val radioStations: StateFlow<List<Radio>> = if (_showOnlyFavorites.value) {
         radioRepository.getFavoriteRadios().stateIn(
             viewModelScope,
@@ -64,6 +90,12 @@ class RadioViewModel @Inject constructor(
         setupPlayerListener()
         initializeDatabase()
         loadSavedState()
+        _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
+        _bandValues.value = _currentPreset.value.bands
+        loadEqualizerState()
+        
+        // Nastavení equalizeru pro ExoPlayer
+        equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
     }
 
     private fun initializeDatabase() {
@@ -169,14 +201,28 @@ class RadioViewModel @Inject constructor(
 
     fun getFavoriteRadios(): Flow<List<Radio>> = radioRepository.getFavoriteRadios()
 
+    fun setMaxFavorites(value: Int) {
+        _maxFavorites.value = value
+        prefs.edit().putInt(PREFS_MAX_FAVORITES, value).apply()
+    }
+
     fun toggleFavorite(radio: Radio) {
         viewModelScope.launch {
             if (radio.isFavorite) {
                 radioRepository.removeFavorite(radio.id)
             } else {
+                val favoriteCount = radioRepository.getFavoriteRadios().first().size
+                if (favoriteCount >= maxFavorites.value) {
+                    _showMaxFavoritesError.value = true
+                    return@launch
+                }
                 radioRepository.toggleFavorite(radio.id)
             }
         }
+    }
+
+    fun dismissMaxFavoritesError() {
+        _showMaxFavoritesError.value = false
     }
 
     fun playRadio(radio: Radio) {
@@ -250,8 +296,50 @@ class RadioViewModel @Inject constructor(
         }
     }
 
+    private fun loadEqualizerState() {
+        _equalizerEnabled.value = prefs.getBoolean("equalizer_enabled", false)
+        val presetName = prefs.getString("equalizer_preset", EqualizerPreset.NORMAL.name)
+        _currentPreset.value = EqualizerPreset.valueOf(presetName ?: EqualizerPreset.NORMAL.name)
+        applyEqualizerSettings()
+    }
+
+    fun setEqualizerEnabled(enabled: Boolean) {
+        _equalizerEnabled.value = enabled
+        prefs.edit().putBoolean("equalizer_enabled", enabled).apply()
+        equalizerManager.setEnabled(enabled)
+        applyEqualizerSettings()
+    }
+
+    fun setEqualizerPreset(preset: EqualizerPreset) {
+        _currentPreset.value = preset
+        _bandValues.value = preset.bands
+        prefs.edit().putString("equalizer_preset", preset.name).apply()
+        if (_equalizerEnabled.value) {
+            equalizerManager.applyPreset(preset)
+        }
+    }
+
+    fun setBandValue(index: Int, value: Float) {
+        val newValues = _bandValues.value.toMutableList()
+        newValues[index] = value
+        _bandValues.value = newValues
+        if (_equalizerEnabled.value) {
+            equalizerManager.setBandLevel(index, value)
+        }
+    }
+
+    private fun applyEqualizerSettings() {
+        if (_equalizerEnabled.value) {
+            equalizerManager.setEnabled(true)
+            equalizerManager.applyPreset(_currentPreset.value)
+        } else {
+            equalizerManager.setEnabled(false)
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
+        equalizerManager.release()
         exoPlayer.release()
     }
 } 

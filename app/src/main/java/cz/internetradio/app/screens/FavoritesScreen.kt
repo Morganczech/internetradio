@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,11 +26,13 @@ import androidx.compose.animation.slideOutVertically
 @Composable
 fun FavoritesScreen(
     viewModel: RadioViewModel,
-    onNavigateToAllStations: () -> Unit
+    onNavigateToAllStations: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
+    val maxFavorites by viewModel.maxFavorites.collectAsState()
 
     Column(
         modifier = Modifier
@@ -51,17 +54,32 @@ fun FavoritesScreen(
                 color = Color.White
             )
             
-            IconButton(
-                onClick = onNavigateToAllStations,
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Přidat stanice",
-                    tint = Color.White
-                )
+            Row {
+                IconButton(
+                    onClick = onNavigateToSettings,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Nastavení",
+                        tint = Color.White
+                    )
+                }
+                
+                IconButton(
+                    onClick = onNavigateToAllStations,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Přidat stanice",
+                        tint = Color.White
+                    )
+                }
             }
         }
 
@@ -105,7 +123,7 @@ fun FavoritesScreen(
                 contentPadding = PaddingValues(bottom = if (currentRadio != null) 0.dp else 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(favoriteRadios.take(8)) { radio ->
+                items(favoriteRadios.take(maxFavorites)) { radio ->
                     RadioItem(
                         radio = radio,
                         isSelected = radio.id == currentRadio?.id,
