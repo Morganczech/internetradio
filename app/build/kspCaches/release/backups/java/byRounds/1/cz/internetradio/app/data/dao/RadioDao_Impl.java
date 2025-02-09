@@ -1,6 +1,7 @@
 package cz.internetradio.app.data.dao;
 
 import android.database.Cursor;
+import android.os.CancellationSignal;
 import androidx.annotation.NonNull;
 import androidx.room.CoroutinesRoom;
 import androidx.room.EntityDeletionOrUpdateAdapter;
@@ -14,6 +15,7 @@ import androidx.sqlite.db.SupportSQLiteStatement;
 import cz.internetradio.app.data.entity.RadioEntity;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -46,7 +48,7 @@ public final class RadioDao_Impl implements RadioDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `radio_stations` (`id`,`name`,`streamUrl`,`imageUrl`,`description`,`startColorValue`,`endColorValue`,`isFavorite`) VALUES (?,?,?,?,?,?,?,?)";
+        return "INSERT OR IGNORE INTO `radio_stations` (`id`,`name`,`streamUrl`,`imageUrl`,`description`,`startColorValue`,`endColorValue`,`isFavorite`,`category`) VALUES (?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -65,6 +67,7 @@ public final class RadioDao_Impl implements RadioDao {
         statement.bindLong(7, entity.getEndColorValue());
         final int _tmp = entity.isFavorite() ? 1 : 0;
         statement.bindLong(8, _tmp);
+        statement.bindString(9, entity.getCategory());
       }
     };
     this.__deletionAdapterOfRadioEntity = new EntityDeletionOrUpdateAdapter<RadioEntity>(__db) {
@@ -84,7 +87,7 @@ public final class RadioDao_Impl implements RadioDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `radio_stations` SET `id` = ?,`name` = ?,`streamUrl` = ?,`imageUrl` = ?,`description` = ?,`startColorValue` = ?,`endColorValue` = ?,`isFavorite` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `radio_stations` SET `id` = ?,`name` = ?,`streamUrl` = ?,`imageUrl` = ?,`description` = ?,`startColorValue` = ?,`endColorValue` = ?,`isFavorite` = ?,`category` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -103,7 +106,8 @@ public final class RadioDao_Impl implements RadioDao {
         statement.bindLong(7, entity.getEndColorValue());
         final int _tmp = entity.isFavorite() ? 1 : 0;
         statement.bindLong(8, _tmp);
-        statement.bindString(9, entity.getId());
+        statement.bindString(9, entity.getCategory());
+        statement.bindString(10, entity.getId());
       }
     };
     this.__preparedStmtOfUpdateFavoriteStatus = new SharedSQLiteStatement(__db) {
@@ -217,6 +221,7 @@ public final class RadioDao_Impl implements RadioDao {
           final int _cursorIndexOfStartColorValue = CursorUtil.getColumnIndexOrThrow(_cursor, "startColorValue");
           final int _cursorIndexOfEndColorValue = CursorUtil.getColumnIndexOrThrow(_cursor, "endColorValue");
           final int _cursorIndexOfIsFavorite = CursorUtil.getColumnIndexOrThrow(_cursor, "isFavorite");
+          final int _cursorIndexOfCategory = CursorUtil.getColumnIndexOrThrow(_cursor, "category");
           final List<RadioEntity> _result = new ArrayList<RadioEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final RadioEntity _item;
@@ -242,7 +247,9 @@ public final class RadioDao_Impl implements RadioDao {
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfIsFavorite);
             _tmpIsFavorite = _tmp != 0;
-            _item = new RadioEntity(_tmpId,_tmpName,_tmpStreamUrl,_tmpImageUrl,_tmpDescription,_tmpStartColorValue,_tmpEndColorValue,_tmpIsFavorite);
+            final String _tmpCategory;
+            _tmpCategory = _cursor.getString(_cursorIndexOfCategory);
+            _item = new RadioEntity(_tmpId,_tmpName,_tmpStreamUrl,_tmpImageUrl,_tmpDescription,_tmpStartColorValue,_tmpEndColorValue,_tmpIsFavorite,_tmpCategory);
             _result.add(_item);
           }
           return _result;
@@ -276,6 +283,7 @@ public final class RadioDao_Impl implements RadioDao {
           final int _cursorIndexOfStartColorValue = CursorUtil.getColumnIndexOrThrow(_cursor, "startColorValue");
           final int _cursorIndexOfEndColorValue = CursorUtil.getColumnIndexOrThrow(_cursor, "endColorValue");
           final int _cursorIndexOfIsFavorite = CursorUtil.getColumnIndexOrThrow(_cursor, "isFavorite");
+          final int _cursorIndexOfCategory = CursorUtil.getColumnIndexOrThrow(_cursor, "category");
           final List<RadioEntity> _result = new ArrayList<RadioEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final RadioEntity _item;
@@ -301,7 +309,9 @@ public final class RadioDao_Impl implements RadioDao {
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfIsFavorite);
             _tmpIsFavorite = _tmp != 0;
-            _item = new RadioEntity(_tmpId,_tmpName,_tmpStreamUrl,_tmpImageUrl,_tmpDescription,_tmpStartColorValue,_tmpEndColorValue,_tmpIsFavorite);
+            final String _tmpCategory;
+            _tmpCategory = _cursor.getString(_cursorIndexOfCategory);
+            _item = new RadioEntity(_tmpId,_tmpName,_tmpStreamUrl,_tmpImageUrl,_tmpDescription,_tmpStartColorValue,_tmpEndColorValue,_tmpIsFavorite,_tmpCategory);
             _result.add(_item);
           }
           return _result;
@@ -315,6 +325,34 @@ public final class RadioDao_Impl implements RadioDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getStationCount(final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM radio_stations";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmp;
+            _tmp = _cursor.getInt(0);
+            _result = _tmp;
+          } else {
+            _result = 0;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @NonNull

@@ -33,12 +33,12 @@ public final class RadioDatabase_Impl extends RadioDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(1) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS `radio_stations` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `streamUrl` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `description` TEXT, `startColorValue` INTEGER NOT NULL, `endColorValue` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `radio_stations` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `streamUrl` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `description` TEXT, `startColorValue` INTEGER NOT NULL, `endColorValue` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `category` TEXT NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '63f5a7cb79ae9eb718770d8132c56224')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5eb0ab1533b6d1aa04ba6c921e9b3c0')");
       }
 
       @Override
@@ -87,7 +87,7 @@ public final class RadioDatabase_Impl extends RadioDatabase {
       @NonNull
       public RoomOpenHelper.ValidationResult onValidateSchema(
           @NonNull final SupportSQLiteDatabase db) {
-        final HashMap<String, TableInfo.Column> _columnsRadioStations = new HashMap<String, TableInfo.Column>(8);
+        final HashMap<String, TableInfo.Column> _columnsRadioStations = new HashMap<String, TableInfo.Column>(9);
         _columnsRadioStations.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsRadioStations.put("name", new TableInfo.Column("name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsRadioStations.put("streamUrl", new TableInfo.Column("streamUrl", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -96,6 +96,7 @@ public final class RadioDatabase_Impl extends RadioDatabase {
         _columnsRadioStations.put("startColorValue", new TableInfo.Column("startColorValue", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsRadioStations.put("endColorValue", new TableInfo.Column("endColorValue", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsRadioStations.put("isFavorite", new TableInfo.Column("isFavorite", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsRadioStations.put("category", new TableInfo.Column("category", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysRadioStations = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesRadioStations = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoRadioStations = new TableInfo("radio_stations", _columnsRadioStations, _foreignKeysRadioStations, _indicesRadioStations);
@@ -107,7 +108,7 @@ public final class RadioDatabase_Impl extends RadioDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "63f5a7cb79ae9eb718770d8132c56224", "93b79a737fc3ad1023a6d76d992ec964");
+    }, "f5eb0ab1533b6d1aa04ba6c921e9b3c0", "d6a1097f3eadc1361c0f2e88257046f6");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
