@@ -2,10 +2,24 @@ package cz.internetradio.app.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.data.entity.RadioEntity
+import cz.internetradio.app.model.RadioCategory
 
-@Database(entities = [RadioEntity::class], version = 1)
+@Database(entities = [RadioEntity::class], version = 2)
 abstract class RadioDatabase : RoomDatabase() {
     abstract fun radioDao(): RadioDao
+
+    companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Přidání sloupce category s výchozí hodnotou CESKE
+                database.execSQL(
+                    "ALTER TABLE radio_stations ADD COLUMN category TEXT NOT NULL DEFAULT '${RadioCategory.CESKE.name}'"
+                )
+            }
+        }
+    }
 } 

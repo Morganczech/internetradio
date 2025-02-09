@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import cz.internetradio.app.model.Radio
 import androidx.compose.ui.graphics.Color
+import cz.internetradio.app.model.RadioCategory
 
 @Entity(tableName = "radio_stations")
 data class RadioEntity(
@@ -15,7 +16,8 @@ data class RadioEntity(
     val description: String?,
     val startColorValue: Long,
     val endColorValue: Long,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val category: String = RadioCategory.CESKE.name
 ) {
     fun toRadio(): Radio = Radio(
         id = id,
@@ -25,7 +27,8 @@ data class RadioEntity(
         description = description,
         startColor = Color(startColorValue.toULong()),
         endColor = Color(endColorValue.toULong()),
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        category = RadioCategory.valueOf(category)
     )
 
     companion object {
@@ -37,7 +40,8 @@ data class RadioEntity(
             description = radio.description,
             startColorValue = radio.startColor.value.toLong(),
             endColorValue = radio.endColor.value.toLong(),
-            isFavorite = radio.isFavorite
+            isFavorite = radio.isFavorite,
+            category = radio.category.name
         )
     }
 } 

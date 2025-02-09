@@ -29,7 +29,8 @@ object AppModule {
             context,
             RadioDatabase::class.java,
             "radio_database"
-        ).fallbackToDestructiveMigration()
+        )
+        .addMigrations(RadioDatabase.MIGRATION_1_2)
         .build()
     }
 
