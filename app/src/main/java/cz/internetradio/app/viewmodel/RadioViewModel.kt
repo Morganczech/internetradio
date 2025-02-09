@@ -19,6 +19,7 @@ import cz.internetradio.app.model.EqualizerPreset
 import cz.internetradio.app.audio.EqualizerManager
 import androidx.media3.common.C
 import cz.internetradio.app.audio.AudioSpectrumProcessor
+import android.util.Log
 
 @HiltViewModel
 class RadioViewModel @Inject constructor(
@@ -69,8 +70,6 @@ class RadioViewModel @Inject constructor(
 
     private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
 
-    val spectrumData: StateFlow<FloatArray> = audioSpectrumProcessor.spectrumData
-
     companion object {
         const val DEFAULT_MAX_FAVORITES = 8
         const val PREFS_MAX_FAVORITES = "max_favorites"
@@ -112,10 +111,12 @@ class RadioViewModel @Inject constructor(
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 _isPlaying.value = playbackState == Player.STATE_READY && exoPlayer.playWhenReady
+                Log.d("RadioViewModel", "Playback state changed: $playbackState, isPlaying: ${_isPlaying.value}")
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
+                Log.d("RadioViewModel", "Is playing changed: $isPlaying")
             }
 
             override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
@@ -171,6 +172,7 @@ class RadioViewModel @Inject constructor(
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                 _isPlaying.value = false
+                Log.e("RadioViewModel", "Player error", error)
             }
         })
     }
@@ -232,6 +234,7 @@ class RadioViewModel @Inject constructor(
     fun playRadio(radio: Radio) {
         viewModelScope.launch {
             try {
+                Log.d("RadioViewModel", "Starting playback of radio: ${radio.name}")
                 _currentRadio.value = radio
                 exoPlayer.stop()
                 exoPlayer.clearMediaItems()
@@ -240,15 +243,17 @@ class RadioViewModel @Inject constructor(
                 exoPlayer.prepare()
                 exoPlayer.playWhenReady = true
                 _isPlaying.value = true
-                // Uložení ID posledního rádia
                 prefs.edit().putString("last_radio_id", radio.id).apply()
+                Log.d("RadioViewModel", "Playback started successfully")
             } catch (e: Exception) {
+                Log.e("RadioViewModel", "Error starting playback", e)
                 _isPlaying.value = false
             }
         }
     }
 
     fun stopPlayback() {
+        Log.d("RadioViewModel", "Stopping playback")
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         _currentRadio.value = null
@@ -257,6 +262,7 @@ class RadioViewModel @Inject constructor(
     }
 
     fun togglePlayPause() {
+        Log.d("RadioViewModel", "Toggling play/pause, current state: ${_isPlaying.value}")
         if (_isPlaying.value) {
             exoPlayer.pause()
             _isPlaying.value = false

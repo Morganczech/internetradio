@@ -2,7 +2,7 @@ package cz.internetradio.app.di;
 
 import android.content.Context;
 import androidx.media3.exoplayer.ExoPlayer;
-import cz.internetradio.app.audio.AudioSpectrumProcessor;
+import androidx.media3.exoplayer.audio.DefaultAudioSink;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;
@@ -27,26 +27,25 @@ import javax.inject.Provider;
 public final class AppModule_ProvideExoPlayerFactory implements Factory<ExoPlayer> {
   private final Provider<Context> contextProvider;
 
-  private final Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider;
+  private final Provider<DefaultAudioSink> defaultAudioSinkProvider;
 
   public AppModule_ProvideExoPlayerFactory(Provider<Context> contextProvider,
-      Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider) {
+      Provider<DefaultAudioSink> defaultAudioSinkProvider) {
     this.contextProvider = contextProvider;
-    this.audioSpectrumProcessorProvider = audioSpectrumProcessorProvider;
+    this.defaultAudioSinkProvider = defaultAudioSinkProvider;
   }
 
   @Override
   public ExoPlayer get() {
-    return provideExoPlayer(contextProvider.get(), audioSpectrumProcessorProvider.get());
+    return provideExoPlayer(contextProvider.get(), defaultAudioSinkProvider.get());
   }
 
   public static AppModule_ProvideExoPlayerFactory create(Provider<Context> contextProvider,
-      Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider) {
-    return new AppModule_ProvideExoPlayerFactory(contextProvider, audioSpectrumProcessorProvider);
+      Provider<DefaultAudioSink> defaultAudioSinkProvider) {
+    return new AppModule_ProvideExoPlayerFactory(contextProvider, defaultAudioSinkProvider);
   }
 
-  public static ExoPlayer provideExoPlayer(Context context,
-      AudioSpectrumProcessor audioSpectrumProcessor) {
-    return Preconditions.checkNotNullFromProvides(AppModule.INSTANCE.provideExoPlayer(context, audioSpectrumProcessor));
+  public static ExoPlayer provideExoPlayer(Context context, DefaultAudioSink defaultAudioSink) {
+    return Preconditions.checkNotNullFromProvides(AppModule.INSTANCE.provideExoPlayer(context, defaultAudioSink));
   }
 }

@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.audio.DefaultAudioSink;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import cz.internetradio.app.audio.AudioSpectrumProcessor;
@@ -16,6 +17,7 @@ import cz.internetradio.app.data.dao.RadioDao;
 import cz.internetradio.app.di.AppModule;
 import cz.internetradio.app.di.AppModule_ProvideAudioSpectrumProcessorFactory;
 import cz.internetradio.app.di.AppModule_ProvideDatabaseFactory;
+import cz.internetradio.app.di.AppModule_ProvideDefaultAudioSinkFactory;
 import cz.internetradio.app.di.AppModule_ProvideExoPlayerFactory;
 import cz.internetradio.app.di.AppModule_ProvideRadioDaoFactory;
 import cz.internetradio.app.repository.RadioRepository;
@@ -542,6 +544,8 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     private Provider<AudioSpectrumProcessor> provideAudioSpectrumProcessorProvider;
 
+    private Provider<DefaultAudioSink> provideDefaultAudioSinkProvider;
+
     private Provider<ExoPlayer> provideExoPlayerProvider;
 
     private Provider<EqualizerManager> equalizerManagerProvider;
@@ -560,9 +564,10 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<RadioDatabase>(singletonCImpl, 1));
       this.radioRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RadioRepository>(singletonCImpl, 0));
-      this.provideAudioSpectrumProcessorProvider = DoubleCheck.provider(new SwitchingProvider<AudioSpectrumProcessor>(singletonCImpl, 3));
+      this.provideAudioSpectrumProcessorProvider = DoubleCheck.provider(new SwitchingProvider<AudioSpectrumProcessor>(singletonCImpl, 4));
+      this.provideDefaultAudioSinkProvider = DoubleCheck.provider(new SwitchingProvider<DefaultAudioSink>(singletonCImpl, 3));
       this.provideExoPlayerProvider = DoubleCheck.provider(new SwitchingProvider<ExoPlayer>(singletonCImpl, 2));
-      this.equalizerManagerProvider = DoubleCheck.provider(new SwitchingProvider<EqualizerManager>(singletonCImpl, 4));
+      this.equalizerManagerProvider = DoubleCheck.provider(new SwitchingProvider<EqualizerManager>(singletonCImpl, 5));
     }
 
     @Override
@@ -605,12 +610,15 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
           return (T) AppModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           case 2: // androidx.media3.exoplayer.ExoPlayer 
-          return (T) AppModule_ProvideExoPlayerFactory.provideExoPlayer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideAudioSpectrumProcessorProvider.get());
+          return (T) AppModule_ProvideExoPlayerFactory.provideExoPlayer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideDefaultAudioSinkProvider.get());
 
-          case 3: // cz.internetradio.app.audio.AudioSpectrumProcessor 
+          case 3: // androidx.media3.exoplayer.audio.DefaultAudioSink 
+          return (T) AppModule_ProvideDefaultAudioSinkFactory.provideDefaultAudioSink(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideAudioSpectrumProcessorProvider.get());
+
+          case 4: // cz.internetradio.app.audio.AudioSpectrumProcessor 
           return (T) AppModule_ProvideAudioSpectrumProcessorFactory.provideAudioSpectrumProcessor();
 
-          case 4: // cz.internetradio.app.audio.EqualizerManager 
+          case 5: // cz.internetradio.app.audio.EqualizerManager 
           return (T) new EqualizerManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

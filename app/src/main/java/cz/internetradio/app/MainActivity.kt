@@ -46,6 +46,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.*
 import cz.internetradio.app.components.AudioVisualizer
 import androidx.compose.ui.draw.alpha
+import android.util.Log
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -219,6 +220,17 @@ fun PlayerControls(
     var isExpanded by remember { mutableStateOf(false) }
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
 
+    DisposableEffect(Unit) {
+        Log.d("PlayerControls", "PlayerControls composable initialized")
+        onDispose {
+            Log.d("PlayerControls", "PlayerControls composable disposed")
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        Log.d("PlayerControls", "Play state changed: $isPlaying")
+    }
+
     val timerOptions = (5..60 step 5).toList()
 
     Card(
@@ -239,9 +251,8 @@ fun PlayerControls(
                 modifier = Modifier
                     .matchParentSize()
                     .alpha(0.2f),
-                startColor = Color.White,
-                endColor = Color.White.copy(alpha = 0.5f),
-                spectrumData = viewModel.spectrumData,
+                baseColor1 = Color.White,
+                baseColor2 = Color.White.copy(alpha = 0.5f),
                 isPlaying = isPlaying
             )
 

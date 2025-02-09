@@ -6,6 +6,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.audio.AudioSink
 import cz.internetradio.app.data.RadioDatabase
 import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.audio.AudioSpectrumProcessor
@@ -15,6 +16,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import androidx.media3.common.C
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.util.EventLogger
+import androidx.media3.common.util.UnstableApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,20 +39,45 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideExoPlayer(
+    fun provideDefaultAudioSink(
         @ApplicationContext context: Context,
         audioSpectrumProcessor: AudioSpectrumProcessor
+    ): DefaultAudioSink {
+        return DefaultAudioSink.Builder(context)
+            .setAudioProcessors(arrayOf(audioSpectrumProcessor))
+            .setEnableFloatOutput(false)
+            .setEnableAudioTrackPlaybackParams(false)
+            .build()
+    }
+
+    @UnstableApi
+    @Provides
+    @Singleton
+    fun provideExoPlayer(
+        @ApplicationContext context: Context,
+        defaultAudioSink: DefaultAudioSink
     ): ExoPlayer {
-        val audioSink = DefaultAudioSink.Builder(context)
-            .setAudioProcessors(arrayOf<AudioProcessor>(audioSpectrumProcessor))
-            .build()
+        val renderersFactory = DefaultRenderersFactory(context).apply {
+            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
+            setEnableDecoderFallback(true)
+        }
 
-        val renderersFactory = DefaultRenderersFactory(context)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-            .setEnableDecoderFallback(true)
-
-        return ExoPlayer.Builder(context, renderersFactory)
-            .build()
+        return ExoPlayer.Builder(context)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(context))
+            .setRenderersFactory(renderersFactory)
+            .setHandleAudioBecomingNoisy(true)
+            .setWakeMode(C.WAKE_MODE_LOCAL)
+            .setDeviceVolumeControlEnabled(true)
+            .build().apply {
+                setAudioAttributes(
+                    androidx.media3.common.AudioAttributes.Builder()
+                        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                        .setUsage(C.USAGE_MEDIA)
+                        .build(),
+                    false
+                )
+                addAnalyticsListener(EventLogger("RadioPlayer"))
+            }
     }
 
     @Provides
