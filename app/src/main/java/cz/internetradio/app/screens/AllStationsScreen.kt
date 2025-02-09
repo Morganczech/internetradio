@@ -146,6 +146,7 @@ fun AllStationsScreen(
                     (selectedCategory == null || radio.category == selectedCategory) &&
                     (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
                 }
+                .sortedBy { it.name.lowercase() }
 
             if (filteredRadios.isEmpty()) {
                 item {
