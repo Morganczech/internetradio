@@ -23,12 +23,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.MediaMetadataCompat
 
 class RadioService : Service() {
 
     private lateinit var exoPlayer: ExoPlayer
     private lateinit var radioRepository: RadioRepository
     private lateinit var database: RadioDatabase
+    private lateinit var mediaSession: MediaSessionCompat
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -66,6 +70,28 @@ class RadioService : Service() {
         // Inicializace repository s RadioDao
         radioRepository = RadioRepository(database.radioDao())
         
+        // Inicializace MediaSession
+        mediaSession = MediaSessionCompat(this, "RadioService").apply {
+            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    _currentRadio.value?.let { playRadio(it) }
+                }
+
+                override fun onPause() {
+                    pausePlayback()
+                }
+
+                override fun onSkipToNext() {
+                    playNextRadio()
+                }
+
+                override fun onSkipToPrevious() {
+                    playPreviousRadio()
+                }
+            })
+        }
+        
         setupPlayer()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
@@ -75,6 +101,7 @@ class RadioService : Service() {
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
+                updatePlaybackState()
                 // Aktualizace widgetu
                 RadioWidgetProvider.updateWidgets(
                     applicationContext,
@@ -95,8 +122,43 @@ class RadioService : Service() {
                 }
                 
                 _currentMetadata.value = metadata
+                updateMediaMetadata(artist, title)
             }
         })
+    }
+
+    private fun updatePlaybackState() {
+        val state = if (_isPlaying.value) {
+            PlaybackStateCompat.STATE_PLAYING
+        } else {
+            PlaybackStateCompat.STATE_PAUSED
+        }
+
+        val playbackState = PlaybackStateCompat.Builder()
+            .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY or
+                PlaybackStateCompat.ACTION_PAUSE or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+            )
+            .build()
+
+        mediaSession.setPlaybackState(playbackState)
+    }
+
+    private fun updateMediaMetadata(artist: String?, title: String?) {
+        val radio = _currentRadio.value ?: return
+        
+        val metadataBuilder = MediaMetadataCompat.Builder()
+            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: radio.name)
+            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.description)
+            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
+            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, radio.name)
+            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: radio.name)
+            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: radio.description)
+
+        mediaSession.setMetadata(metadataBuilder.build())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -123,6 +185,8 @@ class RadioService : Service() {
         exoPlayer.prepare()
         exoPlayer.play()
         _isPlaying.value = true
+        mediaSession.isActive = true
+        updateMediaMetadata(null, radio.name)
         // Aktualizace widgetu
         RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
     }
@@ -130,6 +194,7 @@ class RadioService : Service() {
     private fun pausePlayback() {
         exoPlayer.pause()
         _isPlaying.value = false
+        updatePlaybackState()
         // Aktualizace widgetu
         RadioWidgetProvider.updateWidgets(
             applicationContext,
@@ -173,6 +238,8 @@ class RadioService : Service() {
         .setContentText("Přehrávání rádia")
         .setSmallIcon(R.drawable.ic_radio_default)
         .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+            .setMediaSession(mediaSession.sessionToken))
         .build()
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -180,6 +247,7 @@ class RadioService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         exoPlayer.release()
+        mediaSession.release()
         serviceJob.cancel()
     }
 } 

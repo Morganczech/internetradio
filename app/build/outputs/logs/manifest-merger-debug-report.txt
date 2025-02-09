@@ -13,7 +13,7 @@ MERGED from [androidx.media3:media3-decoder:1.2.1] /home/miroslav/.gradle/caches
 MERGED from [androidx.media3:media3-database:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/00ff6e41ba66540feb8f388dd0250fb9/transformed/jetified-media3-database-1.2.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.media3:media3-exoplayer:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/daccfcce4874f0522996d0e31613adde/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.media:media:1.6.0] /home/miroslav/.gradle/caches/8.10.2/transforms/59a26a281b0a9d285ff416d5b3ac5855/transformed/media-1.6.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.media:media:1.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/4b3965d49b03d7e224b5d0c965899d98/transformed/media-1.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a15c12ecb108c08837c74564453e7be8/transformed/recyclerview-1.3.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.hilt:hilt-navigation-compose:1.1.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e2bb2afcdd209482c221e446fcfcfb3c/transformed/jetified-hilt-navigation-compose-1.1.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.hilt:hilt-navigation:1.1.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a4cae26cd4ed0113b4648589d3258b24/transformed/jetified-hilt-navigation-1.1.0/AndroidManifest.xml:2:1-7:12
@@ -199,8 +199,8 @@ MERGED from [androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/
 MERGED from [androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-exoplayer:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/daccfcce4874f0522996d0e31613adde/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-exoplayer:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/daccfcce4874f0522996d0e31613adde/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:20:5-44
-MERGED from [androidx.media:media:1.6.0] /home/miroslav/.gradle/caches/8.10.2/transforms/59a26a281b0a9d285ff416d5b3ac5855/transformed/media-1.6.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.media:media:1.6.0] /home/miroslav/.gradle/caches/8.10.2/transforms/59a26a281b0a9d285ff416d5b3ac5855/transformed/media-1.6.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.media:media:1.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/4b3965d49b03d7e224b5d0c965899d98/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.media:media:1.7.0] /home/miroslav/.gradle/caches/8.10.2/transforms/4b3965d49b03d7e224b5d0c965899d98/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a15c12ecb108c08837c74564453e7be8/transformed/recyclerview-1.3.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a15c12ecb108c08837c74564453e7be8/transformed/recyclerview-1.3.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.hilt:hilt-navigation-compose:1.1.0] /home/miroslav/.gradle/caches/8.10.2/transforms/e2bb2afcdd209482c221e446fcfcfb3c/transformed/jetified-hilt-navigation-compose-1.1.0/AndroidManifest.xml:5:5-44
