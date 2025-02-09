@@ -211,9 +211,23 @@ fun PlayerControls(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Ikona stanice
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .padding(bottom = 8.dp)
+                ) {
+                    AsyncImage(
+                        model = radio.imageUrl,
+                        contentDescription = "Logo ${radio.name}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                
                 // Název stanice
                 Text(
-                    text = "Nyní hraje: ${radio.name}",
+                    text = radio.name,
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp),
