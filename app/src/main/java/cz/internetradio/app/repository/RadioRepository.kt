@@ -346,16 +346,6 @@ class RadioRepository @Inject constructor(
             category = RadioCategory.JAZZ
         ),
         Radio(
-            id = "smoothjazz247",
-            name = "SMOOTH JAZZ 24/7",
-            streamUrl = "https://streamingv2.shoutcast.com/247smoothjazz",
-            imageUrl = "http://www.smoothjazz247.com/favicon.ico",
-            description = "Non-stop Smooth Jazz",
-            startColor = Color(0xFF3E2723), // Tmavě hnědá
-            endColor = Color(0xFF4E342E),
-            category = RadioCategory.JAZZ
-        ),
-        Radio(
             id = "jazzloungebargreat",
             name = "100 GREATEST JAZZ LOUNGE BAR",
             streamUrl = "https://cast1.torontocast.com:4640/stream",
@@ -431,9 +421,109 @@ class RadioRepository @Inject constructor(
             streamUrl = "https://s35.derstream.net/100austria.mp3",
             imageUrl = "https://www.lounge.fm/wp-content/uploads/2014/06/loungefm_logo_colour2-300x300.jpg",
             description = "Lounge & Smooth Jazz z Vídně",
-            startColor = Color(0xFF00796B), // Tmavě tyrkysová
+            startColor = Color(0xFF00796B),
             endColor = Color(0xFF00695C),
             category = RadioCategory.JAZZ
+        ),
+        Radio(
+            id = "rdmixclassicrock",
+            name = "RdMix Classic Rock 70s 80s 90s",
+            streamUrl = "https://cast1.torontocast.com:4610/stream",
+            imageUrl = "https://static.wixstatic.com/media/f361b3_1bad7e5fb9a54196b2ac2c2fe71d6e4f~mv2.jpg",
+            description = "Classic Rock, Blues Rock, Hard Rock",
+            startColor = Color(0xFF8B0000), // Tmavě červená
+            endColor = Color(0xFF4B0082), // Indigová
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "rockantenne",
+            name = "Rock Antenne",
+            streamUrl = "http://mp3channels.webradio.rockantenne.de/rockantenne",
+            imageUrl = "http://www.rockantenne.de/logos/rock-antenne/apple-touch-icon.png",
+            description = "Německé rockové rádio",
+            startColor = Color(0xFF4A148C), // Tmavě fialová
+            endColor = Color(0xFF311B92), // Tmavě indigová
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "megarockradio",
+            name = "Megarock Radio 320k",
+            streamUrl = "https://stream3.megarockradio.net:80/",
+            imageUrl = "https://megarockradio.net/favicon.ico",
+            description = "Classic Rock, Hard Rock, Metal",
+            startColor = Color(0xFF1A237E),
+            endColor = Color(0xFF000051),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "90s90srock",
+            name = "90s90s Rock",
+            streamUrl = "https://streams.90s90s.de/rock/mp3-192/",
+            imageUrl = "https://www.radio.de/images/broadcasts/8d/ce/185038/1/c300.png",
+            description = "Alternative Rock & Hard Rock z 90. let",
+            startColor = Color(0xFF880E4F),
+            endColor = Color(0xFF560027),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "nostalgiepoprock80",
+            name = "Nostalgie Pop Rock 80",
+            streamUrl = "https://scdn.nrjaudio.fm/adwz1/fr/56718/aac_64.mp3",
+            imageUrl = "https://www.nostalgie.fr/uploads/assets/nostalgie/icons/apple-icon-120x120.png",
+            description = "Pop Rock 80s z Francie",
+            startColor = Color(0xFFD84315),
+            endColor = Color(0xFFBF360C),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "slowrock90",
+            name = "Slow Rock 90'",
+            streamUrl = "https://stream.zeno.fm/hiut6cwfoneuv",
+            imageUrl = "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+            description = "Slow Rock z 90. let",
+            startColor = Color(0xFF37474F),
+            endColor = Color(0xFF263238),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "radioparadiserock",
+            name = "Radio Paradise - Rock Mix",
+            streamUrl = "http://stream.radioparadise.com/rock-320",
+            imageUrl = "https://radioparadise.com/apple-touch-icon.png",
+            description = "Rock Mix z Radio Paradise",
+            startColor = Color(0xFF006064),
+            endColor = Color(0xFF00363A),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "nonstopoldies",
+            name = "Non-Stop Oldies",
+            streamUrl = "https://ais-sa2.cdnstream1.com/2383_128.mp3",
+            imageUrl = "https://static.wixstatic.com/media/00a61a_a29da417d9ce44d18dc83e35a30c2f43.png/v1/crop/x_24,y_30,w_555,h_544/fill/w_136,h_133,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/00a61a_a29da417d9ce44d18dc83e35a30c2f43.png",
+            description = "70's, Motown, Soul & Rock n' Roll",
+            startColor = Color(0xFFFF6F00),
+            endColor = Color(0xFFC43E00),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "monstersofrock",
+            name = "Monsters of Rock",
+            streamUrl = "http://ice55.securenetsystems.net/DASH14",
+            imageUrl = "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+            description = "Classic Rock, Hair Metal & Hard Rock",
+            startColor = Color(0xFF1A1A1A),
+            endColor = Color(0xFF000000),
+            category = RadioCategory.ROCK
+        ),
+        Radio(
+            id = "bluesrockradio",
+            name = "Blues & Rock Radio",
+            streamUrl = "http://stream.laut.fm/bluesrock",
+            imageUrl = "https://i.ibb.co/7pjwNCm/Blues-Rock.jpg",
+            description = "Blues Rock & Hard Rock z Ukrajiny",
+            startColor = Color(0xFF0D47A1), // Tmavě modrá pro blues
+            endColor = Color(0xFF1A237E), // Ještě tmavší modrá
+            category = RadioCategory.ROCK
         )
     )
 
