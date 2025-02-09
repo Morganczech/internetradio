@@ -44,6 +44,8 @@ import android.view.WindowManager
 import android.view.View
 import androidx.activity.viewModels
 import androidx.compose.animation.*
+import cz.internetradio.app.components.AudioVisualizer
+import androidx.compose.ui.draw.alpha
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -233,6 +235,16 @@ fun PlayerControls(
                     )
                 )
         ) {
+            // Přidání vizualizéru jako pozadí
+            AudioVisualizer(
+                modifier = Modifier
+                    .matchParentSize()
+                    .alpha(0.2f),  // Průhlednost pro lepší čitelnost obsahu
+                startColor = Color.White,
+                endColor = Color.White.copy(alpha = 0.5f),
+                isPlaying = isPlaying
+            )
+
             Column(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
