@@ -125,7 +125,8 @@ fun FavoritesScreen(
         AnimatedVisibility(
             visible = currentRadio != null,
             enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
+            exit = slideOutVertically(targetOffsetY = { it }),
+            modifier = Modifier.fillMaxWidth()
         ) {
             currentRadio?.let { radio ->
                 PlayerControls(

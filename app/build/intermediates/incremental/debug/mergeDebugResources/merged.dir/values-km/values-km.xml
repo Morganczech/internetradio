@@ -17,6 +17,7 @@
     <item quantity="one">ខា​ថយក្រោយ %d វិនាទី</item>
     <item quantity="other">ខា​ថយក្រោយ %d វិនាទី</item>
   </plurals>
+    <string name="authentication_required">តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"ឆ្លើយ"</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"វីដេអូ"</string>
     <string msgid="3229508546291798546" name="call_notification_decline_action">"បដិសេធ"</string>
@@ -27,6 +28,7 @@
     <string msgid="406453423630273620" name="close_drawer">"បិទម៉ឺនុយរុករក"</string>
     <string msgid="7573152094250666567" name="close_sheet">"បិទសន្លឹក"</string>
     <string msgid="8038256446254964252" name="default_error_message">"ការបញ្ចូល​មិនត្រឹមត្រូវ"</string>
+    <string name="default_notification_channel_name">កំពុងចាក់</string>
     <string msgid="6312721426453364202" name="default_popup_window_title">"វិនដូ​លោតឡើង"</string>
     <string msgid="1890207353314751437" name="dropdown_menu">"ម៉ឺនុយធ្លាក់ចុះ"</string>
     <string name="exo_controls_cc_disabled_description">បើកអក្សររត់</string>
@@ -82,6 +84,12 @@
     <string name="exo_track_unknown">មិនស្គាល់</string>
     <string msgid="6827826412747255547" name="in_progress">"កំពុងដំណើរការ"</string>
     <string msgid="7933458017204019916" name="indeterminate">"បានធីកខ្លះ"</string>
+    <string name="media3_controls_pause_description">ផ្អាក</string>
+    <string name="media3_controls_play_description">ចាក់</string>
+    <string name="media3_controls_seek_back_description">ថយក្រោយ</string>
+    <string name="media3_controls_seek_forward_description">រំលង​​ទៅ​មុខ</string>
+    <string name="media3_controls_seek_to_next_description">ទៅកាន់ធាតុបន្ទាប់</string>
+    <string name="media3_controls_seek_to_previous_description">ទៅកាន់ធាតុមុន</string>
     <string msgid="542007171693138492" name="navigation_menu">"ម៉ឺនុយរុករក"</string>
     <string msgid="6610465462668679431" name="not_selected">"មិនបាន​ជ្រើសរើស"</string>
     <string msgid="875452955155264703" name="off">"បិទ"</string>

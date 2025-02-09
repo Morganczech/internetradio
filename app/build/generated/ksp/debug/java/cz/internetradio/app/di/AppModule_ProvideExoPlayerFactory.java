@@ -1,7 +1,7 @@
 package cz.internetradio.app.di;
 
 import android.content.Context;
-import com.google.android.exoplayer2.ExoPlayer;
+import androidx.media3.exoplayer.ExoPlayer;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;

@@ -166,20 +166,20 @@
     <dimen name="notification_subtext_size">13sp</dimen>
     <dimen name="notification_top_pad">10dp</dimen>
     <dimen name="notification_top_pad_large_text">5dp</dimen>
-    <drawable name="exo_controls_fastforward">@drawable/exo_icon_fastforward</drawable>
-    <drawable name="exo_controls_fullscreen_enter">@drawable/exo_icon_fullscreen_enter</drawable>
-    <drawable name="exo_controls_fullscreen_exit">@drawable/exo_icon_fullscreen_exit</drawable>
-    <drawable name="exo_controls_next">@drawable/exo_icon_next</drawable>
-    <drawable name="exo_controls_pause">@drawable/exo_icon_pause</drawable>
-    <drawable name="exo_controls_play">@drawable/exo_icon_play</drawable>
-    <drawable name="exo_controls_previous">@drawable/exo_icon_previous</drawable>
-    <drawable name="exo_controls_repeat_all">@drawable/exo_icon_repeat_all</drawable>
-    <drawable name="exo_controls_repeat_off">@drawable/exo_icon_repeat_off</drawable>
-    <drawable name="exo_controls_repeat_one">@drawable/exo_icon_repeat_one</drawable>
-    <drawable name="exo_controls_rewind">@drawable/exo_icon_rewind</drawable>
-    <drawable name="exo_controls_shuffle_off">@drawable/exo_icon_shuffle_off</drawable>
-    <drawable name="exo_controls_shuffle_on">@drawable/exo_icon_shuffle_on</drawable>
-    <drawable name="exo_controls_vr">@drawable/exo_icon_vr</drawable>
+    <drawable name="exo_legacy_controls_fastforward">@drawable/exo_icon_fastforward</drawable>
+    <drawable name="exo_legacy_controls_fullscreen_enter">@drawable/exo_icon_fullscreen_enter</drawable>
+    <drawable name="exo_legacy_controls_fullscreen_exit">@drawable/exo_icon_fullscreen_exit</drawable>
+    <drawable name="exo_legacy_controls_next">@drawable/exo_icon_next</drawable>
+    <drawable name="exo_legacy_controls_pause">@drawable/exo_icon_pause</drawable>
+    <drawable name="exo_legacy_controls_play">@drawable/exo_icon_play</drawable>
+    <drawable name="exo_legacy_controls_previous">@drawable/exo_icon_previous</drawable>
+    <drawable name="exo_legacy_controls_repeat_all">@drawable/exo_icon_repeat_all</drawable>
+    <drawable name="exo_legacy_controls_repeat_off">@drawable/exo_icon_repeat_off</drawable>
+    <drawable name="exo_legacy_controls_repeat_one">@drawable/exo_icon_repeat_one</drawable>
+    <drawable name="exo_legacy_controls_rewind">@drawable/exo_icon_rewind</drawable>
+    <drawable name="exo_legacy_controls_shuffle_off">@drawable/exo_icon_shuffle_off</drawable>
+    <drawable name="exo_legacy_controls_shuffle_on">@drawable/exo_icon_shuffle_on</drawable>
+    <drawable name="exo_legacy_controls_vr">@drawable/exo_icon_vr</drawable>
     <drawable name="exo_notification_fastforward">@drawable/exo_icon_fastforward</drawable>
     <drawable name="exo_notification_next">@drawable/exo_icon_next</drawable>
     <drawable name="exo_notification_pause">@drawable/exo_icon_pause</drawable>
@@ -210,6 +210,13 @@
     <drawable name="exo_styled_controls_subtitle_off">@drawable/exo_ic_subtitle_off</drawable>
     <drawable name="exo_styled_controls_subtitle_on">@drawable/exo_ic_subtitle_on</drawable>
     <drawable name="exo_styled_controls_vr">@drawable/exo_icon_vr</drawable>
+    <drawable name="media3_notification_pause">@android:drawable/ic_media_pause</drawable>
+    <drawable name="media3_notification_play">@android:drawable/ic_media_play</drawable>
+    <drawable name="media3_notification_seek_back">@android:drawable/ic_media_rew</drawable>
+    <drawable name="media3_notification_seek_forward">@android:drawable/ic_media_ff</drawable>
+    <drawable name="media3_notification_seek_to_next">@android:drawable/ic_media_next</drawable>
+    <drawable name="media3_notification_seek_to_previous">@android:drawable/ic_media_previous</drawable>
+    <drawable name="media3_notification_small_icon">@drawable/media3_icon_circular_play</drawable>
     <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
     <item name="accessibility_action_clickable_span" type="id"/>
@@ -339,6 +346,7 @@
   </plurals>
     <string name="androidx_startup" translatable="false">androidx.startup</string>
     <string name="app_name">Internet Radio</string>
+    <string name="authentication_required">Authentication required</string>
     <string name="call_notification_answer_action">Answer</string>
     <string name="call_notification_answer_video_action">Video</string>
     <string name="call_notification_decline_action">Decline</string>
@@ -349,6 +357,7 @@
     <string name="close_drawer">"Close navigation menu"</string>
     <string name="close_sheet">"Close sheet"</string>
     <string name="default_error_message">"Invalid input"</string>
+    <string name="default_notification_channel_name">Now playing</string>
     <string name="default_popup_window_title" ns2:ignore="ExtraTranslation">"Pop-Up Window"</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
     <string name="exo_controls_cc_disabled_description">Enable subtitles</string>
@@ -406,6 +415,12 @@
     <string name="exo_track_unknown">Unknown</string>
     <string name="in_progress">In progress</string>
     <string name="indeterminate">Partially checked</string>
+    <string name="media3_controls_pause_description">Pause</string>
+    <string name="media3_controls_play_description">Play</string>
+    <string name="media3_controls_seek_back_description">Seek back</string>
+    <string name="media3_controls_seek_forward_description">Seek forward</string>
+    <string name="media3_controls_seek_to_next_description">Seek to next item</string>
+    <string name="media3_controls_seek_to_previous_description">Seek to previous item</string>
     <string name="navigation_menu">"Navigation menu"</string>
     <string name="not_selected">Not selected</string>
     <string name="off">Off</string>
@@ -426,31 +441,31 @@
     <item name="android:layout_height">@dimen/exo_media_button_height</item>
   </style>
     <style name="ExoMediaButton.FastForward">
-    <item name="android:src">@drawable/exo_controls_fastforward</item>
+    <item name="android:src">@drawable/exo_legacy_controls_fastforward</item>
     <item name="android:contentDescription">@string/exo_controls_fastforward_description</item>
   </style>
     <style name="ExoMediaButton.Next">
-    <item name="android:src">@drawable/exo_controls_next</item>
+    <item name="android:src">@drawable/exo_legacy_controls_next</item>
     <item name="android:contentDescription">@string/exo_controls_next_description</item>
   </style>
     <style name="ExoMediaButton.Pause">
-    <item name="android:src">@drawable/exo_controls_pause</item>
+    <item name="android:src">@drawable/exo_legacy_controls_pause</item>
     <item name="android:contentDescription">@string/exo_controls_pause_description</item>
   </style>
     <style name="ExoMediaButton.Play">
-    <item name="android:src">@drawable/exo_controls_play</item>
+    <item name="android:src">@drawable/exo_legacy_controls_play</item>
     <item name="android:contentDescription">@string/exo_controls_play_description</item>
   </style>
     <style name="ExoMediaButton.Previous">
-    <item name="android:src">@drawable/exo_controls_previous</item>
+    <item name="android:src">@drawable/exo_legacy_controls_previous</item>
     <item name="android:contentDescription">@string/exo_controls_previous_description</item>
   </style>
     <style name="ExoMediaButton.Rewind">
-    <item name="android:src">@drawable/exo_controls_rewind</item>
+    <item name="android:src">@drawable/exo_legacy_controls_rewind</item>
     <item name="android:contentDescription">@string/exo_controls_rewind_description</item>
   </style>
     <style name="ExoMediaButton.VR">
-    <item name="android:src">@drawable/exo_controls_vr</item>
+    <item name="android:src">@drawable/exo_legacy_controls_vr</item>
     <item name="android:contentDescription">@string/exo_controls_vr_description</item>
   </style>
     <style name="ExoStyledControls"/>
@@ -518,6 +533,8 @@
     <style name="ExoStyledControls.Button.Center.FfwdWithAmount">
     <item name="android:foreground">@drawable/exo_styled_controls_fastforward</item>
     <item name="android:gravity">center|bottom</item>
+    <item name="android:paddingRight">0dp</item>
+    <item name="android:paddingLeft">0dp</item>
     <item name="android:paddingBottom">@dimen/exo_icon_padding_bottom</item>
     <item name="android:textStyle">bold</item>
     <item name="android:textSize">@dimen/exo_icon_text_size</item>
@@ -544,6 +561,8 @@
     <style name="ExoStyledControls.Button.Center.RewWithAmount">
     <item name="android:foreground">@drawable/exo_styled_controls_rewind</item>
     <item name="android:gravity">center|bottom</item>
+    <item name="android:paddingRight">0dp</item>
+    <item name="android:paddingLeft">0dp</item>
     <item name="android:paddingBottom">@dimen/exo_icon_padding_bottom</item>
     <item name="android:textStyle">bold</item>
     <item name="android:textSize">@dimen/exo_icon_text_size</item>
@@ -787,6 +806,32 @@
         
         <attr name="android:color"/>
     </declare-styleable>
+    <declare-styleable name="LegacyPlayerControlView">
+    <attr name="show_timeout"/>
+    <attr name="repeat_toggle_modes"/>
+    <attr name="show_rewind_button"/>
+    <attr name="show_fastforward_button"/>
+    <attr name="show_previous_button"/>
+    <attr name="show_next_button"/>
+    <attr name="show_shuffle_button"/>
+    <attr name="time_bar_min_update_interval"/>
+    <attr name="controller_layout_id"/>
+    
+    <attr name="bar_height"/>
+    <attr name="bar_gravity"/>
+    <attr name="touch_target_height"/>
+    <attr name="ad_marker_width"/>
+    <attr name="scrubber_enabled_size"/>
+    <attr name="scrubber_disabled_size"/>
+    <attr name="scrubber_dragged_size"/>
+    <attr name="scrubber_drawable"/>
+    <attr name="played_color"/>
+    <attr name="scrubber_color"/>
+    <attr name="buffered_color"/>
+    <attr name="unplayed_color"/>
+    <attr name="ad_marker_color"/>
+    <attr name="played_ad_marker_color"/>
+  </declare-styleable>
     <declare-styleable name="NavAction">
         <attr name="android:id"/>
         <attr format="reference" name="destination"/>
@@ -834,8 +879,11 @@
     <attr name="show_previous_button"/>
     <attr name="show_next_button"/>
     <attr name="show_shuffle_button"/>
+    <attr name="show_subtitle_button"/>
+    <attr name="show_vr_button"/>
     <attr name="time_bar_min_update_interval"/>
     <attr name="controller_layout_id"/>
+    <attr name="animation_enabled"/>
     
     <attr name="bar_height"/>
     <attr name="bar_gravity"/>
@@ -854,6 +902,7 @@
   </declare-styleable>
     <declare-styleable name="PlayerView">
     <attr name="use_artwork"/>
+    <attr name="artwork_display_mode"/>
     <attr name="shutter_background_color"/>
     <attr name="default_artwork"/>
     <attr name="use_controller"/>
@@ -870,10 +919,14 @@
     <attr name="show_timeout"/>
     <attr name="repeat_toggle_modes"/>
     <attr name="show_shuffle_button"/>
+    <attr name="show_subtitle_button"/>
+    <attr name="show_vr_button"/>
     <attr name="time_bar_min_update_interval"/>
     <attr name="controller_layout_id"/>
+    <attr name="animation_enabled"/>
     
     <attr name="bar_height"/>
+    <attr name="bar_gravity"/>
     <attr name="touch_target_height"/>
     <attr name="ad_marker_width"/>
     <attr name="scrubber_enabled_size"/>
@@ -928,73 +981,4 @@
         
         <attr name="android:drawable"/>
     </declare-styleable>
-    <declare-styleable name="StyledPlayerControlView">
-    <attr name="show_timeout"/>
-    <attr name="repeat_toggle_modes"/>
-    <attr name="show_rewind_button"/>
-    <attr name="show_fastforward_button"/>
-    <attr name="show_previous_button"/>
-    <attr name="show_next_button"/>
-    <attr name="show_shuffle_button"/>
-    <attr name="show_subtitle_button"/>
-    <attr name="show_vr_button"/>
-    <attr name="time_bar_min_update_interval"/>
-    <attr name="controller_layout_id"/>
-    <attr name="animation_enabled"/>
-    
-    <attr name="bar_height"/>
-    <attr name="bar_gravity"/>
-    <attr name="touch_target_height"/>
-    <attr name="ad_marker_width"/>
-    <attr name="scrubber_enabled_size"/>
-    <attr name="scrubber_disabled_size"/>
-    <attr name="scrubber_dragged_size"/>
-    <attr name="scrubber_drawable"/>
-    <attr name="played_color"/>
-    <attr name="scrubber_color"/>
-    <attr name="buffered_color"/>
-    <attr name="unplayed_color"/>
-    <attr name="ad_marker_color"/>
-    <attr name="played_ad_marker_color"/>
-  </declare-styleable>
-    <declare-styleable name="StyledPlayerView">
-    <attr name="use_artwork"/>
-    <attr name="artwork_display_mode"/>
-    <attr name="shutter_background_color"/>
-    <attr name="default_artwork"/>
-    <attr name="use_controller"/>
-    <attr name="hide_on_touch"/>
-    <attr name="hide_during_ads"/>
-    <attr name="auto_show"/>
-    <attr name="show_buffering"/>
-    <attr name="keep_content_on_player_reset"/>
-    <attr name="player_layout_id"/>
-    <attr name="surface_type"/>
-    
-    <attr name="resize_mode"/>
-    
-    <attr name="show_timeout"/>
-    <attr name="repeat_toggle_modes"/>
-    <attr name="show_shuffle_button"/>
-    <attr name="show_subtitle_button"/>
-    <attr name="show_vr_button"/>
-    <attr name="time_bar_min_update_interval"/>
-    <attr name="controller_layout_id"/>
-    <attr name="animation_enabled"/>
-    
-    <attr name="bar_height"/>
-    <attr name="bar_gravity"/>
-    <attr name="touch_target_height"/>
-    <attr name="ad_marker_width"/>
-    <attr name="scrubber_enabled_size"/>
-    <attr name="scrubber_disabled_size"/>
-    <attr name="scrubber_dragged_size"/>
-    <attr name="scrubber_drawable"/>
-    <attr name="played_color"/>
-    <attr name="scrubber_color"/>
-    <attr name="buffered_color"/>
-    <attr name="unplayed_color"/>
-    <attr name="ad_marker_color"/>
-    <attr name="played_ad_marker_color"/>
-  </declare-styleable>
 </resources>

@@ -17,6 +17,7 @@
     <item quantity="one">%d saniyə geri çəkin</item>
     <item quantity="other">%d saniyə geri çəkin</item>
   </plurals>
+    <string name="authentication_required">Doğrulanma tələb olunur</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"Cavab verin"</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"Video"</string>
     <string msgid="3229508546291798546" name="call_notification_decline_action">"İmtina edin"</string>
@@ -27,6 +28,7 @@
     <string msgid="406453423630273620" name="close_drawer">"Naviqasiya menyusunu bağlayın"</string>
     <string msgid="7573152094250666567" name="close_sheet">"Səhifəni bağlayın"</string>
     <string msgid="8038256446254964252" name="default_error_message">"Yanlış daxiletmə"</string>
+    <string name="default_notification_channel_name">İndi oxudulur</string>
     <string msgid="6312721426453364202" name="default_popup_window_title">"Popap Pəncərəsi"</string>
     <string msgid="1890207353314751437" name="dropdown_menu">"Aşağı açılan menyu"</string>
     <string name="exo_controls_cc_disabled_description">Subtitrləri aktiv edin</string>
@@ -82,6 +84,12 @@
     <string name="exo_track_unknown">Naməlum</string>
     <string msgid="6827826412747255547" name="in_progress">"Davam edir"</string>
     <string msgid="7933458017204019916" name="indeterminate">"Qismən yoxlanıb"</string>
+    <string name="media3_controls_pause_description">Durdurun</string>
+    <string name="media3_controls_play_description">Oxudun</string>
+    <string name="media3_controls_seek_back_description">Geri keçin</string>
+    <string name="media3_controls_seek_forward_description">İrəli keçin</string>
+    <string name="media3_controls_seek_to_next_description">Növbəti elementə keçin</string>
+    <string name="media3_controls_seek_to_previous_description">Əvvəlki elementə keçin</string>
     <string msgid="542007171693138492" name="navigation_menu">"Naviqasiya menyusu"</string>
     <string msgid="6610465462668679431" name="not_selected">"Seçilməyib"</string>
     <string msgid="875452955155264703" name="off">"Deaktiv"</string>

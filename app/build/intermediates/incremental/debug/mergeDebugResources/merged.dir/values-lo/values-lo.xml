@@ -17,6 +17,7 @@
     <item quantity="one">ຖອຍຫຼັງ %d ວິນາທີ</item>
     <item quantity="other">ຖອຍຫຼັງ %d ວິນາທີ</item>
   </plurals>
+    <string name="authentication_required">ຕ້ອງມີການພິສູດຢືນຢັນ</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"ຮັບສາຍ"</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"ວິດີໂອ"</string>
     <string msgid="3229508546291798546" name="call_notification_decline_action">"ປະຕິເສດ"</string>
@@ -27,6 +28,7 @@
     <string msgid="406453423630273620" name="close_drawer">"ປິດ​ເມ​ນູການ​ນຳ​ທາງ"</string>
     <string msgid="7573152094250666567" name="close_sheet">"ປິດຊີດ"</string>
     <string msgid="8038256446254964252" name="default_error_message">"ຂໍ້ມູນທີ່ປ້ອນເຂົ້າບໍ່ຖືກຕ້ອງ"</string>
+    <string name="default_notification_channel_name">ກຳລັງຫຼິ້ນຕອນນີ້</string>
     <string msgid="6312721426453364202" name="default_popup_window_title">"ໜ້າຈໍປັອບອັບ"</string>
     <string msgid="1890207353314751437" name="dropdown_menu">"ເມນູແບບເລື່ອນລົງ"</string>
     <string name="exo_controls_cc_disabled_description">ເປີດການນຳໃຊ້ຄຳແປ</string>
@@ -82,6 +84,12 @@
     <string name="exo_track_unknown">ບໍ່ຮູ້ຈັກ</string>
     <string msgid="6827826412747255547" name="in_progress">"ກຳ​ລັງ​ດຳ​ເນີນ​ການ"</string>
     <string msgid="7933458017204019916" name="indeterminate">"ກວດສອບບາງສ່ວນແລ້ວ"</string>
+    <string name="media3_controls_pause_description">ຢຸດຊົ່ວຄາວ</string>
+    <string name="media3_controls_play_description">ຫຼິ້ນ</string>
+    <string name="media3_controls_seek_back_description">ເລື່ອນກັບຫຼັງ</string>
+    <string name="media3_controls_seek_forward_description">ເລື່ອນໄປໜ້າ</string>
+    <string name="media3_controls_seek_to_next_description">ເລື່ອນໄປຫາລາຍການຕໍ່ໄປ</string>
+    <string name="media3_controls_seek_to_previous_description">ເລື່ອນໄປຫາລາຍການກ່ອນໜ້າ</string>
     <string msgid="542007171693138492" name="navigation_menu">"ເມນູການນຳທາງ"</string>
     <string msgid="6610465462668679431" name="not_selected">"ບໍ່ໄດ້ເລືອກ"</string>
     <string msgid="875452955155264703" name="off">"ປິດ"</string>

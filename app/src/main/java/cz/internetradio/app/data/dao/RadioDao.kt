@@ -12,6 +12,9 @@ interface RadioDao {
     @Query("SELECT * FROM radio_stations WHERE isFavorite = 1")
     fun getFavoriteRadios(): Flow<List<RadioEntity>>
 
+    @Query("SELECT * FROM radio_stations WHERE id = :radioId LIMIT 1")
+    suspend fun getRadioById(radioId: String): RadioEntity?
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRadio(radio: RadioEntity)
 
@@ -26,4 +29,7 @@ interface RadioDao {
 
     @Delete
     suspend fun deleteRadio(radio: RadioEntity)
+
+    @Query("DELETE FROM radio_stations")
+    suspend fun deleteAllRadios()
 } 

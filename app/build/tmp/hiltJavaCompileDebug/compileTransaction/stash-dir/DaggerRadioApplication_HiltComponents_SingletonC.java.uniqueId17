@@ -6,7 +6,7 @@ import android.view.View;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
-import com.google.android.exoplayer2.ExoPlayer;
+import androidx.media3.exoplayer.ExoPlayer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import cz.internetradio.app.data.RadioDatabase;
@@ -452,7 +452,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       public T get() {
         switch (id) {
           case 0: // cz.internetradio.app.viewmodel.RadioViewModel 
-          return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get());
+          return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);
         }
@@ -595,7 +595,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
           case 1: // cz.internetradio.app.data.RadioDatabase 
           return (T) AppModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 2: // com.google.android.exoplayer2.ExoPlayer 
+          case 2: // androidx.media3.exoplayer.ExoPlayer 
           return (T) AppModule_ProvideExoPlayerFactory.provideExoPlayer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

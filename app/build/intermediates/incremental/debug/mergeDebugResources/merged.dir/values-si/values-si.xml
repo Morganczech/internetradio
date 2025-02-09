@@ -17,6 +17,7 @@
     <item quantity="one">තත්පර %dක් ආපස්සට</item>
     <item quantity="other">තත්පර %dක් ආපස්සට</item>
   </plurals>
+    <string name="authentication_required">සත්‍යාපනය අවශ්‍යයි</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"පිළිතුරු දෙ."</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"වීඩියෝ"</string>
     <string msgid="3229508546291798546" name="call_notification_decline_action">"ප්‍රතික්ෂේප ක"</string>
@@ -27,6 +28,7 @@
     <string msgid="406453423630273620" name="close_drawer">"සංචාලන මෙනුව වසන්න"</string>
     <string msgid="7573152094250666567" name="close_sheet">"පත්‍රය වසන්න"</string>
     <string msgid="8038256446254964252" name="default_error_message">"වලංගු නොවන ආදානයකි"</string>
+    <string name="default_notification_channel_name">Now playing</string>
     <string msgid="6312721426453364202" name="default_popup_window_title">"උත්පතන කවුළුව"</string>
     <string msgid="1890207353314751437" name="dropdown_menu">"පතන මෙනුව"</string>
     <string name="exo_controls_cc_disabled_description">උපසිරැසි සබල කරන්න</string>
@@ -82,6 +84,12 @@
     <string name="exo_track_unknown">නොදනී</string>
     <string msgid="6827826412747255547" name="in_progress">"ප්‍රගතියේ පවතී"</string>
     <string msgid="7933458017204019916" name="indeterminate">"අඩ වශයෙන් ලකුණු කළ"</string>
+    <string name="media3_controls_pause_description">විරාම ගන්වන්න</string>
+    <string name="media3_controls_play_description">වාදනය කරන්න</string>
+    <string name="media3_controls_seek_back_description">ආපස්සට අන්වේෂණය</string>
+    <string name="media3_controls_seek_forward_description">ඉදිරියට අන්වේෂණය</string>
+    <string name="media3_controls_seek_to_next_description">ඊළඟ අයිතමය වෙත අන්වේෂණය</string>
+    <string name="media3_controls_seek_to_previous_description">පෙර අයිතමය වෙත අන්වේෂණය</string>
     <string msgid="542007171693138492" name="navigation_menu">"සංචාලන මෙනුව"</string>
     <string msgid="6610465462668679431" name="not_selected">"තෝරා නැත"</string>
     <string msgid="875452955155264703" name="off">"ක්‍රියාවිරහිතයි"</string>

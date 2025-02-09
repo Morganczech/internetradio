@@ -20,8 +20,9 @@ class RadioRepository @Inject constructor(
             streamUrl = "https://ice.actve.net/fm-evropa2-128",
             imageUrl = "https://m.actve.net/e2/favicon/apple-touch-icon.png",
             description = "MaXXimum muziky",
-            startColor = Color(0xFF0066CC),
-            endColor = Color(0xFF003366)
+            // Modrá podle loga Evropa 2
+            startColor = Color(0xFF00B7FF), // Světle modrá
+            endColor = Color(0xFF0066CC)    // Tmavě modrá
         ),
         Radio(
             id = "frekvence1",
@@ -29,8 +30,9 @@ class RadioRepository @Inject constructor(
             streamUrl = "https://playerservices.streamtheworld.com/api/livestream-redirect/FREKVENCE1.mp3",
             imageUrl = "https://www.frekvence1.cz/img/favicons/apple-touch-icon.png?v138",
             description = "Rádio pro celou rodinu",
-            startColor = Color(0xFF009933),
-            endColor = Color(0xFF006622)
+            // Zelená podle loga Frekvence 1
+            startColor = Color(0xFF00D100), // Světle zelená
+            endColor = Color(0xFF008800)    // Tmavě zelená
         ),
         Radio(
             id = "impuls",
@@ -38,8 +40,9 @@ class RadioRepository @Inject constructor(
             streamUrl = "http://icecast5.play.cz/impuls128.mp3",
             imageUrl = "https://1gr.cz/u/favicon/apple-touch-icon/impuls.png",
             description = "Největší česká rádiová stanice",
-            startColor = Color(0xFFFF6600),
-            endColor = Color(0xFFCC5200)
+            // Oranžová podle loga Impulsu
+            startColor = Color(0xFFFF8C00), // Světle oranžová
+            endColor = Color(0xFFFF4500)    // Tmavě oranžová
         ),
         Radio(
             id = "kiss",
@@ -47,8 +50,9 @@ class RadioRepository @Inject constructor(
             streamUrl = "http://icecast4.play.cz/kiss128.mp3",
             imageUrl = "https://www.kiss.cz/assets/favicon/apple-touch-icon.png",
             description = "Dance & Nineties",
-            startColor = Color(0xFFFF1493),
-            endColor = Color(0xFFCC1177)
+            // Růžová podle loga Kiss Rádia
+            startColor = Color(0xFFFF69B4), // Světle růžová
+            endColor = Color(0xFFFF1493)    // Tmavě růžová
         ),
         Radio(
             id = "rockradio",
@@ -56,8 +60,9 @@ class RadioRepository @Inject constructor(
             streamUrl = "https://playerservices.streamtheworld.com/api/livestream-redirect/ROCK_RADIO_128.mp3",
             imageUrl = "https://www.radiohouse.cz/wp-content/uploads/2022/06/Rock-radio.png",
             description = "Rockové rádio",
-            startColor = Color(0xFF8B0000),
-            endColor = Color(0xFF660000)
+            // Červená podle loga Rock Rádia
+            startColor = Color(0xFFDC143C), // Jasně červená
+            endColor = Color(0xFF8B0000)    // Tmavě červená
         ),
         Radio(
             id = "beat",
@@ -65,8 +70,9 @@ class RadioRepository @Inject constructor(
             streamUrl = "https://icecast2.play.cz/beat128aac",
             imageUrl = "https://www.radiobeat.cz/img/logo@2x.png",
             description = "Classic rock",
-            startColor = Color(0xFF4B0082),
-            endColor = Color(0xFF2E0051)
+            // Barvy podle loga Rádia Beat
+            startColor = Color(0xFFD6032C), // Červená z loga
+            endColor = Color(0xFF000000)    // Černá z loga
         )
     )
 
@@ -96,5 +102,14 @@ class RadioRepository @Inject constructor(
 
     suspend fun removeFavorite(radioId: String) {
         radioDao.updateFavoriteStatus(radioId, false)
+    }
+
+    suspend fun getRadioById(radioId: String): Radio? {
+        return radioDao.getRadioById(radioId)?.toRadio()
+    }
+
+    suspend fun resetDatabase() {
+        radioDao.deleteAllRadios()
+        initializeDefaultRadios()
     }
 } 

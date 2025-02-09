@@ -15,8 +15,8 @@
 12-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:6:5-77
 12-->/home/miroslav/Dokumenty/android/app/src/main/AndroidManifest.xml:6:22-74
 13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-13-->[com.google.android.exoplayer:exoplayer-core:2.19.1] /home/miroslav/.gradle/caches/8.10.2/transforms/3d4fb1297c9aeef7032091665a201536/transformed/jetified-exoplayer-core-2.19.1/AndroidManifest.xml:24:5-79
-13-->[com.google.android.exoplayer:exoplayer-core:2.19.1] /home/miroslav/.gradle/caches/8.10.2/transforms/3d4fb1297c9aeef7032091665a201536/transformed/jetified-exoplayer-core-2.19.1/AndroidManifest.xml:24:22-76
+13-->[androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
+13-->[androidx.media3:media3-common:1.2.1] /home/miroslav/.gradle/caches/8.10.2/transforms/81eaff93b908371789346d36e8709007/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:22-76
 14
 15    <permission
 15-->[androidx.core:core:1.12.0] /home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47

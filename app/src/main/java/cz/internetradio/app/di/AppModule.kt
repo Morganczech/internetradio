@@ -2,7 +2,7 @@ package cz.internetradio.app.di
 
 import android.content.Context
 import androidx.room.Room
-import com.google.android.exoplayer2.ExoPlayer
+import androidx.media3.exoplayer.ExoPlayer
 import cz.internetradio.app.data.RadioDatabase
 import cz.internetradio.app.data.dao.RadioDao
 import dagger.Module
