@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "cz.internetradio.app-mergeDebugResources-56:/values/values.xml",
+            "outputFile": "cz.internetradio.app-mergeDebugResources-60:/values/values.xml",
             "map": [
                 {
                     "source": "/home/miroslav/.gradle/caches/8.10.2/transforms/a9ce428d3ee5e1e369b497b22fbcd432/transformed/jetified-customview-poolingcontainer-1.0.0/res/values/values.xml",

@@ -10,11 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.VolumeDown
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,20 +20,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
+import cz.internetradio.app.navigation.Screen
+import cz.internetradio.app.screens.AllStationsScreen
+import cz.internetradio.app.screens.FavoritesScreen
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
 import android.view.View
+import androidx.activity.viewModels
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val viewModel: RadioViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -63,49 +67,31 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colors.background
                     ) {
-                        MainScreen()
+                        val navController = rememberNavController()
+                        
+                        NavHost(
+                            navController = navController,
+                            startDestination = Screen.Favorites.route
+                        ) {
+                            composable(Screen.Favorites.route) {
+                                FavoritesScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToAllStations = {
+                                        navController.navigate(Screen.AllStations.route)
+                                    }
+                                )
+                            }
+                            composable(Screen.AllStations.route) {
+                                AllStationsScreen(
+                                    viewModel = viewModel,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun MainScreen(viewModel: RadioViewModel = hiltViewModel()) {
-    val currentRadio by viewModel.currentRadio.collectAsState()
-    val isPlaying by viewModel.isPlaying.collectAsState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-    ) {
-        Text(
-            text = "Internetové Rádio",
-            style = MaterialTheme.typography.h5,
-            modifier = Modifier.padding(16.dp)
-        )
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            items(viewModel.radioStations) { radio ->
-                RadioItem(
-                    radio = radio,
-                    isSelected = radio.id == currentRadio?.id,
-                    onRadioClick = { viewModel.playRadio(radio) }
-                )
-            }
-        }
-
-        currentRadio?.let { radio ->
-            PlayerControls(
-                radio = radio,
-                isPlaying = isPlaying,
-                onPlayPauseClick = { viewModel.togglePlayPause() }
             )
         }
     }
@@ -115,7 +101,8 @@ fun MainScreen(viewModel: RadioViewModel = hiltViewModel()) {
 fun RadioItem(
     radio: Radio,
     isSelected: Boolean,
-    onRadioClick: () -> Unit
+    onRadioClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -134,36 +121,52 @@ fun RadioItem(
                 )
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .padding(end = 16.dp)
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AsyncImage(
-                        model = radio.imageUrl,
-                        contentDescription = "Logo ${radio.name}",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
-                    )
-                }
-                Column {
-                    Text(
-                        text = radio.name,
-                        style = MaterialTheme.typography.h6,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = Color.White
-                    )
-                    radio.description?.let { description ->
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.body2,
-                            modifier = Modifier.padding(top = 4.dp),
-                            color = Color.White.copy(alpha = 0.7f)
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(end = 16.dp)
+                    ) {
+                        AsyncImage(
+                            model = radio.imageUrl,
+                            contentDescription = "Logo ${radio.name}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
                         )
                     }
+                    Column {
+                        Text(
+                            text = radio.name,
+                            style = MaterialTheme.typography.h6,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = Color.White
+                        )
+                        radio.description?.let { description ->
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.body2,
+                                modifier = Modifier.padding(top = 4.dp),
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                }
+                
+                IconButton(onClick = onFavoriteClick) {
+                    Icon(
+                        imageVector = if (radio.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (radio.isFavorite) "Odebrat z oblíbených" else "Přidat do oblíbených",
+                        tint = Color.White
+                    )
                 }
             }
         }
@@ -175,7 +178,7 @@ fun PlayerControls(
     radio: Radio,
     isPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
-    viewModel: RadioViewModel = hiltViewModel()
+    viewModel: RadioViewModel
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
@@ -184,7 +187,7 @@ fun PlayerControls(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 32.dp),
+            .padding(16.dp),
         elevation = 8.dp
     ) {
         Column(
@@ -197,17 +200,15 @@ fun PlayerControls(
                 fontWeight = FontWeight.Bold
             )
             
-            // Zobrazení aktuální skladby
             currentMetadata?.let { metadata ->
                 Text(
-                    text = "Nyní hraje: $metadata",
+                    text = metadata,
                     style = MaterialTheme.typography.body2,
                     modifier = Modifier.padding(vertical = 4.dp),
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
             
-            // Ovládání hlasitosti
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -238,7 +239,6 @@ fun PlayerControls(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Tlačítko přehrát/pozastavit
                 IconButton(onClick = onPlayPauseClick) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -246,7 +246,6 @@ fun PlayerControls(
                     )
                 }
                 
-                // Časovač vypnutí
                 IconButton(
                     onClick = {
                         when (sleepTimer) {
@@ -264,7 +263,6 @@ fun PlayerControls(
                 }
             }
             
-            // Zobrazení časovače
             sleepTimer?.let { minutes ->
                 Text(
                     text = "Vypnutí za: $minutes min",

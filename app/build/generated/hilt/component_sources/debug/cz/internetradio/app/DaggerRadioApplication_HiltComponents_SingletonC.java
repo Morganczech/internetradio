@@ -9,8 +9,12 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import cz.internetradio.app.data.RadioDatabase;
+import cz.internetradio.app.data.dao.RadioDao;
 import cz.internetradio.app.di.AppModule;
+import cz.internetradio.app.di.AppModule_ProvideDatabaseFactory;
 import cz.internetradio.app.di.AppModule_ProvideExoPlayerFactory;
+import cz.internetradio.app.di.AppModule_ProvideRadioDaoFactory;
 import cz.internetradio.app.repository.RadioRepository;
 import cz.internetradio.app.viewmodel.RadioViewModel;
 import cz.internetradio.app.viewmodel.RadioViewModel_HiltModules_KeyModule_ProvideFactory;
@@ -367,7 +371,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
     }
 
     @Override
-    public void injectMainActivity(MainActivity arg0) {
+    public void injectMainActivity(MainActivity mainActivity) {
     }
 
     @Override
@@ -529,6 +533,8 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     private final SingletonCImpl singletonCImpl = this;
 
+    private Provider<RadioDatabase> provideDatabaseProvider;
+
     private Provider<RadioRepository> radioRepositoryProvider;
 
     private Provider<ExoPlayer> provideExoPlayerProvider;
@@ -539,10 +545,15 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     }
 
+    private RadioDao radioDao() {
+      return AppModule_ProvideRadioDaoFactory.provideRadioDao(provideDatabaseProvider.get());
+    }
+
     @SuppressWarnings("unchecked")
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
+      this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<RadioDatabase>(singletonCImpl, 1));
       this.radioRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RadioRepository>(singletonCImpl, 0));
-      this.provideExoPlayerProvider = DoubleCheck.provider(new SwitchingProvider<ExoPlayer>(singletonCImpl, 1));
+      this.provideExoPlayerProvider = DoubleCheck.provider(new SwitchingProvider<ExoPlayer>(singletonCImpl, 2));
     }
 
     @Override
@@ -579,9 +590,12 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       public T get() {
         switch (id) {
           case 0: // cz.internetradio.app.repository.RadioRepository 
-          return (T) new RadioRepository();
+          return (T) new RadioRepository(singletonCImpl.radioDao());
 
-          case 1: // com.google.android.exoplayer2.ExoPlayer 
+          case 1: // cz.internetradio.app.data.RadioDatabase 
+          return (T) AppModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 2: // com.google.android.exoplayer2.ExoPlayer 
           return (T) AppModule_ProvideExoPlayerFactory.provideExoPlayer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

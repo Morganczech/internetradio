@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "cz.internetradio.app-mergeDebugResources-56:/values-or/values-or.xml",
+            "outputFile": "cz.internetradio.app-mergeDebugResources-60:/values-or/values-or.xml",
             "map": [
                 {
                     "source": "/home/miroslav/.gradle/caches/8.10.2/transforms/a9fd6c1d6eaf31c65847552c936abca3/transformed/core-1.12.0/res/values-or/values-or.xml",

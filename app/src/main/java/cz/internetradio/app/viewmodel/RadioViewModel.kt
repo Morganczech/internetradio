@@ -10,8 +10,7 @@ import cz.internetradio.app.model.Radio
 import cz.internetradio.app.repository.RadioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,18 +35,43 @@ class RadioViewModel @Inject constructor(
     private val _sleepTimerMinutes = MutableStateFlow<Int?>(null)
     val sleepTimerMinutes: StateFlow<Int?> = _sleepTimerMinutes
 
-    val radioStations = radioRepository.getRadioStations()
+    private val _showOnlyFavorites = MutableStateFlow(false)
+    val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
+
+    val radioStations: StateFlow<List<Radio>> = if (_showOnlyFavorites.value) {
+        radioRepository.getFavoriteRadios().stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            emptyList()
+        )
+    } else {
+        radioRepository.getAllRadios().stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            emptyList()
+        )
+    }
 
     init {
         setupPlayerListener()
+        initializeDatabase()
+    }
+
+    private fun initializeDatabase() {
+        viewModelScope.launch {
+            radioRepository.initializeDefaultRadios()
+        }
     }
 
     private fun setupPlayerListener() {
         exoPlayer.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                _isPlaying.value = state == Player.STATE_READY && exoPlayer.playWhenReady
+            }
+
             override fun onMetadata(metadata: Metadata) {
                 if (metadata.length() > 0) {
                     val rawMetadata = metadata.get(0)?.toString() ?: return
-                    // Extrahujeme jen název skladby z metadat
                     val cleanMetadata = when {
                         rawMetadata.contains("title=") -> {
                             rawMetadata.substringAfter("title=\"")
@@ -64,20 +88,55 @@ class RadioViewModel @Inject constructor(
                     _currentMetadata.value = cleanMetadata
                 }
             }
+
+            override fun onPlayerError(error: com.google.android.exoplayer2.PlaybackException) {
+                _isPlaying.value = false
+            }
         })
     }
 
+    fun getAllRadios(): Flow<List<Radio>> = radioRepository.getAllRadios()
+
+    fun getFavoriteRadios(): Flow<List<Radio>> = radioRepository.getFavoriteRadios()
+
+    fun toggleFavorite(radio: Radio) {
+        viewModelScope.launch {
+            if (radio.isFavorite) {
+                radioRepository.removeFavorite(radio.id)
+            } else {
+                radioRepository.toggleFavorite(radio.id)
+            }
+        }
+    }
+
     fun playRadio(radio: Radio) {
-        _currentRadio.value = radio
-        val mediaItem = MediaItem.fromUri(radio.streamUrl)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
-        _isPlaying.value = true
+        viewModelScope.launch {
+            try {
+                _currentRadio.value = radio
+                exoPlayer.stop()
+                exoPlayer.clearMediaItems()
+                val mediaItem = MediaItem.fromUri(radio.streamUrl)
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = true
+                _isPlaying.value = true
+            } catch (e: Exception) {
+                // Handle error
+                _isPlaying.value = false
+            }
+        }
+    }
+
+    fun stopPlayback() {
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
+        _currentRadio.value = null
+        _isPlaying.value = false
+        _currentMetadata.value = null
     }
 
     fun togglePlayPause() {
-        if (exoPlayer.isPlaying) {
+        if (_isPlaying.value) {
             exoPlayer.pause()
             _isPlaying.value = false
         } else {
@@ -95,13 +154,11 @@ class RadioViewModel @Inject constructor(
     fun setSleepTimer(minutes: Int?) {
         _sleepTimerMinutes.value = minutes
         
-        if (minutes != null) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            if (minutes != null) {
                 delay(minutes * 60 * 1000L)
                 if (_sleepTimerMinutes.value == minutes) {
-                    exoPlayer.pause()
-                    _isPlaying.value = false
-                    _sleepTimerMinutes.value = null
+                    stopPlayback()
                 }
             }
         }

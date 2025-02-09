@@ -9,5 +9,6 @@ data class Radio(
     val imageUrl: String,
     val description: String? = null,
     val startColor: Color = Color(0xFF1A1A1A),
-    val endColor: Color = Color(0xFF2D2D2D)
+    val endColor: Color = Color(0xFF2D2D2D),
+    val isFavorite: Boolean = false
 ) 

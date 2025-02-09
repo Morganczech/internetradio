@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "cz.internetradio.app-mergeDebugResources-56:/values-te/values-te.xml",
+            "outputFile": "cz.internetradio.app-mergeDebugResources-60:/values-te/values-te.xml",
             "map": [
                 {
                     "source": "/home/miroslav/.gradle/caches/8.10.2/transforms/3d4fb1297c9aeef7032091665a201536/transformed/jetified-exoplayer-core-2.19.1/res/values-te/values-te.xml",

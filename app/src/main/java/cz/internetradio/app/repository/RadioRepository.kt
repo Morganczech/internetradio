@@ -4,11 +4,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import cz.internetradio.app.model.Radio
 import androidx.compose.ui.graphics.Color
+import cz.internetradio.app.data.dao.RadioDao
+import cz.internetradio.app.data.entity.RadioEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Singleton
-class RadioRepository @Inject constructor() {
-    
-    fun getRadioStations(): List<Radio> = listOf(
+class RadioRepository @Inject constructor(
+    private val radioDao: RadioDao
+) {
+    private val defaultRadioStations = listOf(
         Radio(
             id = "evropa2",
             name = "Evropa 2",
@@ -64,4 +69,30 @@ class RadioRepository @Inject constructor() {
             endColor = Color(0xFF2E0051)
         )
     )
+
+    suspend fun initializeDefaultRadios() {
+        defaultRadioStations.forEach { radio ->
+            radioDao.insertRadio(RadioEntity.fromRadio(radio))
+        }
+    }
+
+    fun getAllRadios(): Flow<List<Radio>> {
+        return radioDao.getAllRadios().map { entities ->
+            entities.map { it.toRadio() }
+        }
+    }
+
+    fun getFavoriteRadios(): Flow<List<Radio>> {
+        return radioDao.getFavoriteRadios().map { entities ->
+            entities.map { it.toRadio() }
+        }
+    }
+
+    suspend fun toggleFavorite(radioId: String) {
+        radioDao.updateFavoriteStatus(radioId, true)
+    }
+
+    suspend fun removeFavorite(radioId: String) {
+        radioDao.updateFavoriteStatus(radioId, false)
+    }
 } 
