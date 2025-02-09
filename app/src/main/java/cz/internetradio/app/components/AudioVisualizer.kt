@@ -11,11 +11,8 @@ import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.cos
-import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.ui.graphics.drawscope.scale
-
-private const val TAG = "AudioVisualizer"
 
 @Composable
 fun AudioVisualizer(
@@ -50,23 +47,14 @@ fun AudioVisualizer(
         label = "rotation"
     )
     
-    DisposableEffect(Unit) {
-        Log.d(TAG, "AudioVisualizer composable initialized")
-        onDispose {
-            Log.d(TAG, "AudioVisualizer composable disposed")
-        }
-    }
-    
     // Animace fáze
     LaunchedEffect(isPlaying) {
-        Log.d(TAG, "LaunchedEffect started, isPlaying: $isPlaying")
         try {
             while (isPlaying) {
                 phase = (phase + 2f) % 360f
                 delay(16) // ~60fps
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error in animation loop", e)
             errorState = e.message
         }
     }

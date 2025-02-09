@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.util.UnstableApi
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.repository.RadioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,15 @@ import cz.internetradio.app.audio.EqualizerManager
 import androidx.media3.common.C
 import cz.internetradio.app.audio.AudioSpectrumProcessor
 import android.util.Log
+import com.google.android.gms.wearable.*
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 
+@OptIn(UnstableApi::class)
 @HiltViewModel
 class RadioViewModel @Inject constructor(
     private val radioRepository: RadioRepository,
@@ -28,7 +37,7 @@ class RadioViewModel @Inject constructor(
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
     @ApplicationContext private val context: Context
-) : ViewModel() {
+) : ViewModel(), DataClient.OnDataChangedListener {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("radio_prefs", Context.MODE_PRIVATE)
 
@@ -96,6 +105,7 @@ class RadioViewModel @Inject constructor(
         _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
         _bandValues.value = _currentPreset.value.bands
         loadEqualizerState()
+        setupWearableListener()
         
         // Nastavení equalizeru pro ExoPlayer
         equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
@@ -111,12 +121,10 @@ class RadioViewModel @Inject constructor(
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 _isPlaying.value = playbackState == Player.STATE_READY && exoPlayer.playWhenReady
-                Log.d("RadioViewModel", "Playback state changed: $playbackState, isPlaying: ${_isPlaying.value}")
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
-                Log.d("RadioViewModel", "Is playing changed: $isPlaying")
             }
 
             override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
@@ -172,7 +180,6 @@ class RadioViewModel @Inject constructor(
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                 _isPlaying.value = false
-                Log.e("RadioViewModel", "Player error", error)
             }
         })
     }
@@ -234,7 +241,6 @@ class RadioViewModel @Inject constructor(
     fun playRadio(radio: Radio) {
         viewModelScope.launch {
             try {
-                Log.d("RadioViewModel", "Starting playback of radio: ${radio.name}")
                 _currentRadio.value = radio
                 exoPlayer.stop()
                 exoPlayer.clearMediaItems()
@@ -244,16 +250,15 @@ class RadioViewModel @Inject constructor(
                 exoPlayer.playWhenReady = true
                 _isPlaying.value = true
                 prefs.edit().putString("last_radio_id", radio.id).apply()
-                Log.d("RadioViewModel", "Playback started successfully")
+                updateWearableState()
             } catch (e: Exception) {
-                Log.e("RadioViewModel", "Error starting playback", e)
                 _isPlaying.value = false
+                updateWearableState()
             }
         }
     }
 
     fun stopPlayback() {
-        Log.d("RadioViewModel", "Stopping playback")
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         _currentRadio.value = null
@@ -262,7 +267,6 @@ class RadioViewModel @Inject constructor(
     }
 
     fun togglePlayPause() {
-        Log.d("RadioViewModel", "Toggling play/pause, current state: ${_isPlaying.value}")
         if (_isPlaying.value) {
             exoPlayer.pause()
             _isPlaying.value = false
@@ -270,6 +274,7 @@ class RadioViewModel @Inject constructor(
             exoPlayer.play()
             _isPlaying.value = true
         }
+        updateWearableState()
     }
 
     fun setVolume(newVolume: Float) {
@@ -347,9 +352,64 @@ class RadioViewModel @Inject constructor(
         }
     }
 
+    private fun setupWearableListener() {
+        Wearable.getDataClient(context).addListener(this)
+    }
+
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
+        dataEvents.forEach { event ->
+            if (event.type == DataEvent.TYPE_CHANGED) {
+                val dataItem = event.dataItem
+                when (dataItem.uri.path) {
+                    "/command" -> {
+                        DataMapItem.fromDataItem(dataItem).dataMap.apply {
+                            when (getString("action")) {
+                                "play_pause" -> togglePlayPause()
+                                "next" -> playNextFavorite()
+                                "previous" -> playPreviousFavorite()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateWearableState() {
+        viewModelScope.launch {
+            val request = PutDataMapRequest.create("/radio_state").apply {
+                dataMap.putString("radio_name", _currentRadio.value?.name ?: "")
+                dataMap.putBoolean("is_playing", _isPlaying.value)
+            }.asPutDataRequest()
+            
+            Wearable.getDataClient(context).putDataItem(request)
+        }
+    }
+
+    fun playNextFavorite() {
+        viewModelScope.launch {
+            val favoriteRadios = getFavoriteRadios().first()
+            val currentIndex = favoriteRadios.indexOfFirst { it.id == _currentRadio.value?.id }
+            if (currentIndex < favoriteRadios.size - 1) {
+                playRadio(favoriteRadios[currentIndex + 1])
+            }
+        }
+    }
+
+    fun playPreviousFavorite() {
+        viewModelScope.launch {
+            val favoriteRadios = getFavoriteRadios().first()
+            val currentIndex = favoriteRadios.indexOfFirst { it.id == _currentRadio.value?.id }
+            if (currentIndex > 0) {
+                playRadio(favoriteRadios[currentIndex - 1])
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         equalizerManager.release()
         exoPlayer.release()
+        Wearable.getDataClient(context).removeListener(this)
     }
 } 

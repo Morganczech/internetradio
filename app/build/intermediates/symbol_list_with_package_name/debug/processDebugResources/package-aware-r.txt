@@ -19,6 +19,9 @@ attr backgroundTint
 attr bar_gravity
 attr bar_height
 attr buffered_color
+attr buttonSize
+attr circleCrop
+attr colorScheme
 attr controller_layout_id
 attr data
 attr dataPattern
@@ -45,6 +48,8 @@ attr fontWeight
 attr graph
 attr hide_during_ads
 attr hide_on_touch
+attr imageAspectRatio
+attr imageAspectRatioAdjust
 attr keep_content_on_player_reset
 attr lStar
 attr launchSingleTop
@@ -68,6 +73,7 @@ attr resize_mode
 attr restoreState
 attr reverseLayout
 attr route
+attr scopeUris
 attr scrubber_color
 attr scrubber_disabled_size
 attr scrubber_dragged_size
@@ -101,6 +107,17 @@ color androidx_core_secondary_text_default_material_light
 color black
 color call_notification_answer_color
 color call_notification_decline_color
+color common_google_signin_btn_text_dark
+color common_google_signin_btn_text_dark_default
+color common_google_signin_btn_text_dark_disabled
+color common_google_signin_btn_text_dark_focused
+color common_google_signin_btn_text_dark_pressed
+color common_google_signin_btn_text_light
+color common_google_signin_btn_text_light_default
+color common_google_signin_btn_text_light_disabled
+color common_google_signin_btn_text_light_focused
+color common_google_signin_btn_text_light_pressed
+color common_google_signin_btn_tint
 color exo_black_opacity_60
 color exo_black_opacity_70
 color exo_bottom_bar_background
@@ -187,6 +204,25 @@ dimen notification_subtext_size
 dimen notification_top_pad
 dimen notification_top_pad_large_text
 drawable abc_vector_test
+drawable common_full_open_on_phone
+drawable common_google_signin_btn_icon_dark
+drawable common_google_signin_btn_icon_dark_focused
+drawable common_google_signin_btn_icon_dark_normal
+drawable common_google_signin_btn_icon_dark_normal_background
+drawable common_google_signin_btn_icon_disabled
+drawable common_google_signin_btn_icon_light
+drawable common_google_signin_btn_icon_light_focused
+drawable common_google_signin_btn_icon_light_normal
+drawable common_google_signin_btn_icon_light_normal_background
+drawable common_google_signin_btn_text_dark
+drawable common_google_signin_btn_text_dark_focused
+drawable common_google_signin_btn_text_dark_normal
+drawable common_google_signin_btn_text_dark_normal_background
+drawable common_google_signin_btn_text_disabled
+drawable common_google_signin_btn_text_light
+drawable common_google_signin_btn_text_light_focused
+drawable common_google_signin_btn_text_light_normal
+drawable common_google_signin_btn_text_light_normal_background
 drawable exo_edit_mode_logo
 drawable exo_ic_audiotrack
 drawable exo_ic_check
@@ -266,6 +302,8 @@ drawable exo_styled_controls_speed
 drawable exo_styled_controls_subtitle_off
 drawable exo_styled_controls_subtitle_on
 drawable exo_styled_controls_vr
+drawable googleg_disabled_color_18
+drawable googleg_standard_color_18
 drawable ic_call_answer
 drawable ic_call_answer_low
 drawable ic_call_answer_video
@@ -347,10 +385,13 @@ id action_divider
 id action_image
 id action_text
 id actions
+id adjust_height
+id adjust_width
 id all
 id always
 id androidx_compose_ui_view_composition_context
 id async
+id auto
 id blocking
 id bottom
 id cancel_action
@@ -359,6 +400,7 @@ id chronometer
 id coil_request_manager
 id compose_view_saveable_id_tag
 id consume_window_insets_tag
+id dark
 id dialog_button
 id edit_text_id
 id end_padder
@@ -421,11 +463,13 @@ id hide_ime_id
 id hide_in_inspector_tag
 id icon
 id icon_group
+id icon_only
 id info
 id inspection_slot_table_set
 id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
+id light
 id line1
 id line3
 id media_actions
@@ -445,6 +489,7 @@ id right_icon
 id right_side
 id special_effects_controller_view_tag
 id spherical_gl_surface_view
+id standard
 id status_bar_latest_event_content
 id surface_view
 id tag_accessibility_actions
@@ -472,6 +517,7 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible_removing_fragment_view_tag
 id when_playing
+id wide
 id widget_metadata
 id widget_next
 id widget_play_pause
@@ -483,6 +529,7 @@ id zoom
 integer cancel_button_image_alpha
 integer exo_media_button_opacity_percentage_disabled
 integer exo_media_button_opacity_percentage_enabled
+integer google_play_services_version
 integer status_bar_notification_info_maxnum
 layout custom_dialog
 layout exo_legacy_player_control_view
@@ -529,6 +576,24 @@ string call_notification_ongoing_text
 string call_notification_screening_text
 string close_drawer
 string close_sheet
+string common_google_play_services_enable_button
+string common_google_play_services_enable_text
+string common_google_play_services_enable_title
+string common_google_play_services_install_button
+string common_google_play_services_install_text
+string common_google_play_services_install_title
+string common_google_play_services_notification_channel_name
+string common_google_play_services_notification_ticker
+string common_google_play_services_unknown_issue
+string common_google_play_services_unsupported_text
+string common_google_play_services_update_button
+string common_google_play_services_update_text
+string common_google_play_services_update_title
+string common_google_play_services_updating_text
+string common_google_play_services_wear_update_text
+string common_open_on_phone
+string common_signin_button_text
+string common_signin_button_text_long
 string default_error_message
 string default_notification_channel_name
 string default_popup_window_title
@@ -668,6 +733,7 @@ styleable FragmentContainerView android_name android_tag
 styleable GradientColor android_startColor android_endColor android_type android_centerX android_centerY android_gradientRadius android_tileMode android_centerColor android_startX android_startY android_endX android_endY
 styleable GradientColorItem android_color android_offset
 styleable LegacyPlayerControlView ad_marker_color ad_marker_width bar_gravity bar_height buffered_color controller_layout_id played_ad_marker_color played_color repeat_toggle_modes scrubber_color scrubber_disabled_size scrubber_dragged_size scrubber_drawable scrubber_enabled_size show_fastforward_button show_next_button show_previous_button show_rewind_button show_shuffle_button show_timeout time_bar_min_update_interval touch_target_height unplayed_color
+styleable LoadingImageView circleCrop imageAspectRatio imageAspectRatioAdjust
 styleable NavAction android_id destination enterAnim exitAnim launchSingleTop popEnterAnim popExitAnim popUpTo popUpToInclusive popUpToSaveState restoreState
 styleable NavArgument android_name android_defaultValue argType nullable
 styleable NavDeepLink android_autoVerify action mimeType uri
@@ -678,6 +744,7 @@ styleable Navigator android_label android_id route
 styleable PlayerControlView ad_marker_color ad_marker_width animation_enabled bar_gravity bar_height buffered_color controller_layout_id played_ad_marker_color played_color repeat_toggle_modes scrubber_color scrubber_disabled_size scrubber_dragged_size scrubber_drawable scrubber_enabled_size show_fastforward_button show_next_button show_previous_button show_rewind_button show_shuffle_button show_subtitle_button show_timeout show_vr_button time_bar_min_update_interval touch_target_height unplayed_color
 styleable PlayerView ad_marker_color ad_marker_width animation_enabled artwork_display_mode auto_show bar_gravity bar_height buffered_color controller_layout_id default_artwork hide_during_ads hide_on_touch keep_content_on_player_reset played_ad_marker_color played_color player_layout_id repeat_toggle_modes resize_mode scrubber_color scrubber_disabled_size scrubber_dragged_size scrubber_drawable scrubber_enabled_size show_buffering show_shuffle_button show_subtitle_button show_timeout show_vr_button shutter_background_color surface_type time_bar_min_update_interval touch_target_height unplayed_color use_artwork use_controller
 styleable RecyclerView android_orientation android_clipToPadding android_descendantFocusability fastScrollEnabled fastScrollHorizontalThumbDrawable fastScrollHorizontalTrackDrawable fastScrollVerticalThumbDrawable fastScrollVerticalTrackDrawable layoutManager reverseLayout spanCount stackFromEnd
+styleable SignInButton buttonSize colorScheme scopeUris
 styleable StateListDrawable android_dither android_visible android_variablePadding android_constantSize android_enterFadeDuration android_exitFadeDuration
 styleable StateListDrawableItem android_drawable
 xml radio_widget_info

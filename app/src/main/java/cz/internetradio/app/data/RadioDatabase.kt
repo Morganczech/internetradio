@@ -8,7 +8,11 @@ import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.data.entity.RadioEntity
 import cz.internetradio.app.model.RadioCategory
 
-@Database(entities = [RadioEntity::class], version = 2)
+@Database(
+    entities = [RadioEntity::class], 
+    version = 2,
+    exportSchema = false
+)
 abstract class RadioDatabase : RoomDatabase() {
     abstract fun radioDao(): RadioDao
 

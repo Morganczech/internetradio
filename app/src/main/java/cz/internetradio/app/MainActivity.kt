@@ -1,6 +1,11 @@
 package cz.internetradio.app
 
 import android.os.Bundle
+import android.content.IntentFilter
+import android.content.Intent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.os.BatteryManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -51,9 +56,39 @@ import android.util.Log
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: RadioViewModel by viewModels()
+    
+    private val powerConnectionReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_POWER_CONNECTED -> {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+                Intent.ACTION_POWER_DISCONNECTED -> {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Kontrola, zda je zařízení již připojeno k nabíječce
+        val batteryStatus = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val status = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || 
+                        status == BatteryManager.BATTERY_STATUS_FULL
+
+        if (isCharging) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        
+        // Registrace přijímače pro sledování stavu nabíjení
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+        }
+        registerReceiver(powerConnectionReceiver, filter)
         
         // Nastavení tmavé systémové lišty
         window.statusBarColor = Color.Black.toArgb()
@@ -126,6 +161,11 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(powerConnectionReceiver)
     }
 }
 
@@ -220,23 +260,11 @@ fun PlayerControls(
     var isExpanded by remember { mutableStateOf(false) }
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
 
-    DisposableEffect(Unit) {
-        Log.d("PlayerControls", "PlayerControls composable initialized")
-        onDispose {
-            Log.d("PlayerControls", "PlayerControls composable disposed")
-        }
-    }
-
-    LaunchedEffect(isPlaying) {
-        Log.d("PlayerControls", "Play state changed: $isPlaying")
-    }
-
-    val timerOptions = (5..60 step 5).toList()
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable { isExpanded = !isExpanded },
         elevation = 8.dp
     ) {
         Box(
@@ -260,18 +288,6 @@ fun PlayerControls(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Šipka pro rozbalení/sbalení
-                IconButton(
-                    onClick = { isExpanded = !isExpanded },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
-                        tint = Color.White
-                    )
-                }
-
                 // Minimální verze
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -310,22 +326,25 @@ fun PlayerControls(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!isExpanded) {  // Zobrazit tlačítko pouze když není rozbalené
-                            IconButton(
-                                onClick = onPlayPauseClick
-                            ) {
-                                Icon(
-                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
-                                    tint = Color.White
-                                )
-                            }
+                        IconButton(onClick = onPlayPauseClick) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
+                                tint = Color.White
+                            )
+                        }
+                        IconButton(onClick = { isExpanded = !isExpanded }) {
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
+                                tint = Color.White
+                            )
                         }
                     }
                 }
 
                 // Rozšířená verze
-                AnimatedVisibility(visible = isExpanded) {
+                if (isExpanded) {
                     Column(
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
@@ -339,7 +358,6 @@ fun PlayerControls(
                             Icon(
                                 imageVector = Icons.Default.VolumeDown,
                                 contentDescription = "Snížit hlasitost",
-                                modifier = Modifier.size(24.dp),
                                 tint = Color.White
                             )
                             
@@ -360,7 +378,6 @@ fun PlayerControls(
                             Icon(
                                 imageVector = Icons.Default.VolumeUp,
                                 contentDescription = "Zvýšit hlasitost",
-                                modifier = Modifier.size(24.dp),
                                 tint = Color.White
                             )
                         }
@@ -374,13 +391,7 @@ fun PlayerControls(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
-                                onClick = {
-                                    val currentIndex = favoriteRadios.indexOfFirst { it.id == radio.id }
-                                    if (currentIndex > 0) {
-                                        viewModel.playRadio(favoriteRadios[currentIndex - 1])
-                                    }
-                                },
-                                enabled = favoriteRadios.indexOfFirst { it.id == radio.id } > 0
+                                onClick = { viewModel.playPreviousFavorite() }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SkipPrevious,
@@ -390,33 +401,22 @@ fun PlayerControls(
                             }
 
                             IconButton(
-                                onClick = onPlayPauseClick,
-                                modifier = Modifier.size(56.dp)
+                                onClick = onPlayPauseClick
                             ) {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
-                                    modifier = Modifier.size(32.dp),
                                     tint = Color.White
                                 )
                             }
 
                             IconButton(
-                                onClick = {
-                                    val currentIndex = favoriteRadios.indexOfFirst { it.id == radio.id }
-                                    if (currentIndex < favoriteRadios.size - 1) {
-                                        viewModel.playRadio(favoriteRadios[currentIndex + 1])
-                                    }
-                                },
-                                enabled = favoriteRadios.indexOfFirst { it.id == radio.id } < favoriteRadios.size - 1
+                                onClick = { viewModel.playNextFavorite() }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SkipNext,
                                     contentDescription = "Další stanice",
-                                    tint = if (favoriteRadios.indexOfFirst { it.id == radio.id } < favoriteRadios.size - 1) 
-                                        Color.White 
-                                    else 
-                                        Color.White.copy(alpha = 0.3f)
+                                    tint = Color.White
                                 )
                             }
                         }
@@ -448,7 +448,7 @@ fun PlayerControls(
                                 }) {
                                     Text("Vypnout časovač")
                                 }
-                                timerOptions.forEach { minutes ->
+                                (5..60 step 5).forEach { minutes ->
                                     DropdownMenuItem(onClick = {
                                         viewModel.setSleepTimer(minutes)
                                         showTimerDropdown = false

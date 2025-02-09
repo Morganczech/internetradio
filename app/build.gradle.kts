@@ -97,12 +97,15 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.50")
+    ksp("com.google.dagger:hilt-android-compiler:2.50")
 
     // JTransforms pro FFT
     implementation("com.github.wendykierp:JTransforms:3.1")
     implementation("org.apache.commons:commons-math3:3.6.1")
+
+    // Wearable
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
