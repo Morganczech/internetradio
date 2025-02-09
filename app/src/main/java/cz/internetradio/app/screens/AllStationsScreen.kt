@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +24,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import cz.internetradio.app.model.RadioCategory
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
@@ -34,6 +40,8 @@ fun AllStationsScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier
@@ -55,6 +63,47 @@ fun AllStationsScreen(
             },
             backgroundColor = MaterialTheme.colors.surface,
             elevation = 4.dp
+        )
+
+        // Vyhledávací pole
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            placeholder = { Text("Vyhledat rádio...") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Vyhledat",
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Vymazat",
+                            tint = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = Color.White,
+                cursorColor = Color.White,
+                placeholderColor = Color.White.copy(alpha = 0.7f),
+                focusedBorderColor = MaterialTheme.colors.primary,
+                unfocusedBorderColor = Color.White.copy(alpha = 0.3f)
+            ),
+            shape = RoundedCornerShape(8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = { keyboardController?.hide() }
+            )
         )
 
         // Kategorie
@@ -92,11 +141,11 @@ fun AllStationsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val filteredRadios = if (selectedCategory == null) {
-                allRadios
-            } else {
-                allRadios.filter { it.category == selectedCategory }
-            }
+            val filteredRadios = allRadios
+                .filter { radio ->
+                    (selectedCategory == null || radio.category == selectedCategory) &&
+                    (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
+                }
 
             if (filteredRadios.isEmpty()) {
                 item {
@@ -117,7 +166,10 @@ fun AllStationsScreen(
                                 modifier = Modifier.size(48.dp)
                             )
                             Text(
-                                text = "Žádné stanice v této kategorii",
+                                text = if (searchQuery.isEmpty()) 
+                                    "Žádné stanice v této kategorii" 
+                                else 
+                                    "Žádné stanice nenalezeny",
                                 style = MaterialTheme.typography.body1,
                                 color = Color.White.copy(alpha = 0.6f)
                             )
