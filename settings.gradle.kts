@@ -16,8 +16,10 @@ dependencyResolutionManagement {
         maven { url = uri("https://dl.google.com/dl/android/maven2/") }
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "InternetRadio"
-include(":app") 
+include(":app")
+include(":wear") 

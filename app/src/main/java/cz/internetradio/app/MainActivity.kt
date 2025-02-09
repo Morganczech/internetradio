@@ -288,50 +288,38 @@ fun PlayerControls(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Minimální verze
+                // Základní informace
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Logo a název
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AsyncImage(
-                            model = radio.imageUrl,
-                            contentDescription = "Logo ${radio.name}",
-                            modifier = Modifier.size(48.dp),
-                            contentScale = ContentScale.Fit
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = radio.name,
+                            style = MaterialTheme.typography.h6,
+                            color = Color.White
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+                        currentMetadata?.let { metadata ->
                             Text(
-                                text = radio.name,
-                                style = MaterialTheme.typography.subtitle2,
-                                color = Color.White
+                                text = metadata,
+                                style = MaterialTheme.typography.body2,
+                                color = Color.White.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(top = 4.dp)
                             )
-                            currentMetadata?.let { metadata ->
-                                Text(
-                                    text = metadata,
-                                    style = MaterialTheme.typography.caption,
-                                    color = Color.White.copy(alpha = 0.7f)
-                                )
-                            }
                         }
                     }
-
-                    // Ovládací tlačítka v minimální verzi
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = onPlayPauseClick) {
-                            Icon(
-                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
-                                tint = Color.White
-                            )
+                        if (!isExpanded) {
+                            IconButton(onClick = onPlayPauseClick) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
+                                    tint = Color.White
+                                )
+                            }
                         }
                         IconButton(onClick = { isExpanded = !isExpanded }) {
                             Icon(
