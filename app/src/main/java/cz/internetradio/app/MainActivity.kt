@@ -235,13 +235,13 @@ fun PlayerControls(
                     )
                 )
         ) {
-            // Přidání vizualizéru jako pozadí
             AudioVisualizer(
                 modifier = Modifier
                     .matchParentSize()
-                    .alpha(0.2f),  // Průhlednost pro lepší čitelnost obsahu
+                    .alpha(0.2f),
                 startColor = Color.White,
                 endColor = Color.White.copy(alpha = 0.5f),
+                spectrumData = viewModel.spectrumData,
                 isPlaying = isPlaying
             )
 

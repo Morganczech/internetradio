@@ -2,6 +2,7 @@ package cz.internetradio.app.di;
 
 import android.content.Context;
 import androidx.media3.exoplayer.ExoPlayer;
+import cz.internetradio.app.audio.AudioSpectrumProcessor;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;
@@ -26,20 +27,26 @@ import javax.inject.Provider;
 public final class AppModule_ProvideExoPlayerFactory implements Factory<ExoPlayer> {
   private final Provider<Context> contextProvider;
 
-  public AppModule_ProvideExoPlayerFactory(Provider<Context> contextProvider) {
+  private final Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider;
+
+  public AppModule_ProvideExoPlayerFactory(Provider<Context> contextProvider,
+      Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider) {
     this.contextProvider = contextProvider;
+    this.audioSpectrumProcessorProvider = audioSpectrumProcessorProvider;
   }
 
   @Override
   public ExoPlayer get() {
-    return provideExoPlayer(contextProvider.get());
+    return provideExoPlayer(contextProvider.get(), audioSpectrumProcessorProvider.get());
   }
 
-  public static AppModule_ProvideExoPlayerFactory create(Provider<Context> contextProvider) {
-    return new AppModule_ProvideExoPlayerFactory(contextProvider);
+  public static AppModule_ProvideExoPlayerFactory create(Provider<Context> contextProvider,
+      Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider) {
+    return new AppModule_ProvideExoPlayerFactory(contextProvider, audioSpectrumProcessorProvider);
   }
 
-  public static ExoPlayer provideExoPlayer(Context context) {
-    return Preconditions.checkNotNullFromProvides(AppModule.INSTANCE.provideExoPlayer(context));
+  public static ExoPlayer provideExoPlayer(Context context,
+      AudioSpectrumProcessor audioSpectrumProcessor) {
+    return Preconditions.checkNotNullFromProvides(AppModule.INSTANCE.provideExoPlayer(context, audioSpectrumProcessor));
   }
 }

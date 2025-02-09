@@ -18,12 +18,14 @@ import javax.inject.Inject
 import cz.internetradio.app.model.EqualizerPreset
 import cz.internetradio.app.audio.EqualizerManager
 import androidx.media3.common.C
+import cz.internetradio.app.audio.AudioSpectrumProcessor
 
 @HiltViewModel
 class RadioViewModel @Inject constructor(
     private val radioRepository: RadioRepository,
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
+    private val audioSpectrumProcessor: AudioSpectrumProcessor,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -66,6 +68,8 @@ class RadioViewModel @Inject constructor(
     val bandValues: StateFlow<List<Float>> = _bandValues
 
     private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
+
+    val spectrumData: StateFlow<FloatArray> = audioSpectrumProcessor.spectrumData
 
     companion object {
         const val DEFAULT_MAX_FAVORITES = 8

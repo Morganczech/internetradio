@@ -2,6 +2,7 @@ package cz.internetradio.app.viewmodel;
 
 import android.content.Context;
 import androidx.media3.exoplayer.ExoPlayer;
+import cz.internetradio.app.audio.AudioSpectrumProcessor;
 import cz.internetradio.app.audio.EqualizerManager;
 import cz.internetradio.app.repository.RadioRepository;
 import dagger.internal.DaggerGenerated;
@@ -31,30 +32,36 @@ public final class RadioViewModel_Factory implements Factory<RadioViewModel> {
 
   private final Provider<EqualizerManager> equalizerManagerProvider;
 
+  private final Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider;
+
   private final Provider<Context> contextProvider;
 
   public RadioViewModel_Factory(Provider<RadioRepository> radioRepositoryProvider,
       Provider<ExoPlayer> exoPlayerProvider, Provider<EqualizerManager> equalizerManagerProvider,
+      Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider,
       Provider<Context> contextProvider) {
     this.radioRepositoryProvider = radioRepositoryProvider;
     this.exoPlayerProvider = exoPlayerProvider;
     this.equalizerManagerProvider = equalizerManagerProvider;
+    this.audioSpectrumProcessorProvider = audioSpectrumProcessorProvider;
     this.contextProvider = contextProvider;
   }
 
   @Override
   public RadioViewModel get() {
-    return newInstance(radioRepositoryProvider.get(), exoPlayerProvider.get(), equalizerManagerProvider.get(), contextProvider.get());
+    return newInstance(radioRepositoryProvider.get(), exoPlayerProvider.get(), equalizerManagerProvider.get(), audioSpectrumProcessorProvider.get(), contextProvider.get());
   }
 
   public static RadioViewModel_Factory create(Provider<RadioRepository> radioRepositoryProvider,
       Provider<ExoPlayer> exoPlayerProvider, Provider<EqualizerManager> equalizerManagerProvider,
+      Provider<AudioSpectrumProcessor> audioSpectrumProcessorProvider,
       Provider<Context> contextProvider) {
-    return new RadioViewModel_Factory(radioRepositoryProvider, exoPlayerProvider, equalizerManagerProvider, contextProvider);
+    return new RadioViewModel_Factory(radioRepositoryProvider, exoPlayerProvider, equalizerManagerProvider, audioSpectrumProcessorProvider, contextProvider);
   }
 
   public static RadioViewModel newInstance(RadioRepository radioRepository, ExoPlayer exoPlayer,
-      EqualizerManager equalizerManager, Context context) {
-    return new RadioViewModel(radioRepository, exoPlayer, equalizerManager, context);
+      EqualizerManager equalizerManager, AudioSpectrumProcessor audioSpectrumProcessor,
+      Context context) {
+    return new RadioViewModel(radioRepository, exoPlayer, equalizerManager, audioSpectrumProcessor, context);
   }
 }
