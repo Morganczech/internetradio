@@ -1,15 +1,21 @@
 package cz.internetradio.app.service
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import androidx.core.app.NotificationCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
+import cz.internetradio.app.R
 import cz.internetradio.app.data.RadioDatabase
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.repository.RadioRepository
+import cz.internetradio.app.widget.RadioWidgetProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,6 +48,8 @@ class RadioService : Service() {
         const val ACTION_NEXT = "cz.internetradio.app.action.NEXT"
         const val ACTION_PREVIOUS = "cz.internetradio.app.action.PREVIOUS"
         const val EXTRA_RADIO_ID = "radio_id"
+        private const val NOTIFICATION_CHANNEL_ID = "radio_channel"
+        private const val NOTIFICATION_ID = 1
     }
 
     override fun onCreate() {
@@ -59,12 +67,20 @@ class RadioService : Service() {
         radioRepository = RadioRepository(database.radioDao())
         
         setupPlayer()
+        createNotificationChannel()
+        startForeground(NOTIFICATION_ID, createNotification())
     }
 
     private fun setupPlayer() {
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
+                // Aktualizace widgetu
+                RadioWidgetProvider.updateWidgets(
+                    applicationContext,
+                    isPlaying,
+                    _currentRadio.value?.id
+                )
             }
 
             override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
@@ -107,11 +123,19 @@ class RadioService : Service() {
         exoPlayer.prepare()
         exoPlayer.play()
         _isPlaying.value = true
+        // Aktualizace widgetu
+        RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
     }
 
     private fun pausePlayback() {
         exoPlayer.pause()
         _isPlaying.value = false
+        // Aktualizace widgetu
+        RadioWidgetProvider.updateWidgets(
+            applicationContext,
+            false,
+            _currentRadio.value?.id
+        )
     }
 
     private fun playNextRadio() {
@@ -133,6 +157,23 @@ class RadioService : Service() {
             }
         }
     }
+
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            "Radio Playback",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun createNotification() = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        .setContentTitle("Internet Radio")
+        .setContentText("Přehrávání rádia")
+        .setSmallIcon(R.drawable.ic_radio_default)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        .build()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
