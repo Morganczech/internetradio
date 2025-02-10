@@ -20,6 +20,7 @@ import androidx.media3.common.C
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -62,9 +63,19 @@ object AppModule {
             setEnableDecoderFallback(true)
         }
 
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * 2,
+                DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * 2,
+                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS * 2,
+                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * 2
+            )
+            .build()
+
         return ExoPlayer.Builder(context)
             .setMediaSourceFactory(DefaultMediaSourceFactory(context))
             .setRenderersFactory(renderersFactory)
+            .setLoadControl(loadControl)
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .setDeviceVolumeControlEnabled(true)
