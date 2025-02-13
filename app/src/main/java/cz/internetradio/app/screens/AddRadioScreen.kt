@@ -11,6 +11,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.Alignment
 import cz.internetradio.app.model.RadioCategory
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun AddRadioScreen(
@@ -23,6 +27,40 @@ fun AddRadioScreen(
     var description by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(RadioCategory.VLASTNI) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
+    
+    // Validační stavy
+    var nameError by remember { mutableStateOf(false) }
+    var streamUrlError by remember { mutableStateOf(false) }
+
+    val validationError by viewModel.validationError.collectAsState()
+    
+    when (validationError) {
+        is AddRadioViewModel.ValidationError.DuplicateStreamUrl -> {
+            Text(
+                text = "Stanice s touto URL již existuje",
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            )
+        }
+        is AddRadioViewModel.ValidationError.DuplicateName -> {
+            Text(
+                text = "Stanice s tímto názvem již existuje",
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            )
+        }
+        is AddRadioViewModel.ValidationError.StreamError -> {
+            Text(
+                text = (validationError as AddRadioViewModel.ValidationError.StreamError).message,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            )
+        }
+        null -> { /* Bez chyby */ }
+    }
 
     Column(
         modifier = Modifier
@@ -48,44 +86,97 @@ fun AddRadioScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Název rádia") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { 
+                        name = it
+                        nameError = it.isBlank()
+                        viewModel.clearValidationError()
+                    },
+                    label = { Text("Název rádia") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = nameError,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = MaterialTheme.colors.primary,
+                        unfocusedBorderColor = Color.Gray,
+                        errorBorderColor = Color.Red,
+                        textColor = Color.White,
+                        focusedLabelColor = MaterialTheme.colors.primary,
+                        unfocusedLabelColor = Color.Gray
+                    )
+                )
+                if (nameError) {
+                    Text(
+                        text = "Název je povinný",
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = streamUrl,
-                onValueChange = { streamUrl = it },
-                label = { Text("Stream URL") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = streamUrl,
+                    onValueChange = { 
+                        streamUrl = it
+                        streamUrlError = !it.startsWith("http://") && !it.startsWith("https://")
+                        viewModel.clearValidationError()
+                    },
+                    label = { Text("Stream URL") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = streamUrlError,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = MaterialTheme.colors.primary,
+                        unfocusedBorderColor = Color.Gray,
+                        errorBorderColor = Color.Red,
+                        textColor = Color.White,
+                        focusedLabelColor = MaterialTheme.colors.primary,
+                        unfocusedLabelColor = Color.Gray
+                    )
+                )
+                Text(
+                    text = if (streamUrlError) "URL musí začínat http:// nebo https://"
+                          else "Např. https://ice.actve.net/fm-evropa2-128",
+                    color = if (streamUrlError) MaterialTheme.colors.error else Color.Gray,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
             OutlinedTextField(
                 value = imageUrl,
                 onValueChange = { imageUrl = it },
                 label = { Text("URL ikony (volitelné)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    unfocusedBorderColor = Color.Gray,
+                    textColor = Color.White,
+                    focusedLabelColor = MaterialTheme.colors.primary,
+                    unfocusedLabelColor = Color.Gray
+                )
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text("Popis (volitelný)") },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3
+                minLines = 3,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    unfocusedBorderColor = Color.Gray,
+                    textColor = Color.White,
+                    focusedLabelColor = MaterialTheme.colors.primary,
+                    unfocusedLabelColor = Color.Gray
+                )
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Výběr kategorie
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -98,11 +189,19 @@ fun AddRadioScreen(
                         IconButton(onClick = { isDropdownExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Vybrat kategorii"
+                                contentDescription = "Vybrat kategorii",
+                                tint = Color.White
                             )
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = MaterialTheme.colors.primary,
+                        unfocusedBorderColor = Color.Gray,
+                        textColor = Color.White,
+                        focusedLabelColor = MaterialTheme.colors.primary,
+                        unfocusedLabelColor = Color.Gray
+                    )
                 )
 
                 DropdownMenu(
@@ -110,7 +209,6 @@ fun AddRadioScreen(
                     onDismissRequest = { isDropdownExpanded = false },
                     modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
-                    // Seřadíme kategorie tak, aby VLASTNI byla první a OSTATNI poslední
                     RadioCategory.values()
                         .sortedWith(compareBy { 
                             when(it) {
@@ -132,24 +230,39 @@ fun AddRadioScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = {
-                    if (name.isNotBlank() && streamUrl.isNotBlank()) {
+                    nameError = name.isBlank()
+                    streamUrlError = !streamUrl.startsWith("http://") && !streamUrl.startsWith("https://")
+                    
+                    if (!nameError && !streamUrlError) {
                         viewModel.addRadio(
                             name = name,
                             streamUrl = streamUrl,
                             imageUrl = imageUrl.takeIf { it.isNotBlank() },
                             description = description.takeIf { it.isNotBlank() },
-                            category = selectedCategory
+                            category = selectedCategory,
+                            onSuccess = { onNavigateBack() }
                         )
-                        onNavigateBack()
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    contentColor = Color.White
+                ),
+                enabled = name.isNotBlank() && streamUrl.isNotBlank()
             ) {
-                Text("Uložit")
+                Text(
+                    "Uložit",
+                    style = MaterialTheme.typography.button.copy(
+                        fontSize = 16.sp
+                    )
+                )
             }
         }
     }

@@ -1,3 +1,0 @@
-cz.internetradio.app.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
