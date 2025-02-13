@@ -563,4 +563,8 @@ class RadioRepository @Inject constructor(
         radioDao.deleteAllRadios()
         initializeDefaultRadios()
     }
+
+    suspend fun insertRadio(radio: Radio) = radioDao.insertRadio(radio)
+
+    suspend fun deleteRadio(radio: Radio) = radioDao.deleteRadio(radio)
 } 
