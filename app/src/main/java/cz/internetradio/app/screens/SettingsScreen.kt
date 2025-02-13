@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +19,8 @@ import cz.internetradio.app.viewmodel.RadioViewModel
 fun SettingsScreen(
     viewModel: RadioViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToEqualizer: () -> Unit
+    onNavigateToEqualizer: () -> Unit,
+    onNavigateToAddRadio: () -> Unit
 ) {
     val maxFavorites by viewModel.maxFavorites.collectAsState()
     
@@ -50,6 +52,42 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Přidat stanici
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onNavigateToAddRadio)
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Přidat stanici",
+                        style = MaterialTheme.typography.subtitle1,
+                        color = Color.White
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Přejít na přidání stanice",
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "Maximální počet oblíbených stanic",
                 style = MaterialTheme.typography.subtitle1,

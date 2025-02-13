@@ -43,6 +43,7 @@ import cz.internetradio.app.screens.AllStationsScreen
 import cz.internetradio.app.screens.FavoritesScreen
 import cz.internetradio.app.screens.SettingsScreen
 import cz.internetradio.app.screens.EqualizerScreen
+import cz.internetradio.app.ui.AddRadioScreen
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
@@ -121,12 +122,9 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.Favorites.route) {
                                 FavoritesScreen(
                                     viewModel = viewModel,
-                                    onNavigateToAllStations = {
-                                        navController.navigate(Screen.AllStations.route)
-                                    },
-                                    onNavigateToSettings = {
-                                        navController.navigate(Screen.Settings.route)
-                                    }
+                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) },
+                                    onNavigateToAllStations = { navController.navigate(Screen.AllStations.route) },
+                                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
                                 )
                             }
                             composable(Screen.AllStations.route) {
@@ -140,17 +138,21 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.Settings.route) {
                                 SettingsScreen(
                                     viewModel = viewModel,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
-                                    },
-                                    onNavigateToEqualizer = {
-                                        navController.navigate(Screen.Equalizer.route)
-                                    }
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToEqualizer = { navController.navigate(Screen.Equalizer.route) },
+                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) }
                                 )
                             }
                             composable(Screen.Equalizer.route) {
                                 EqualizerScreen(
                                     viewModel = viewModel,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable(Screen.AddRadio.route) {
+                                AddRadioScreen(
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }

@@ -20,6 +20,8 @@ import cz.internetradio.app.di.AppModule_ProvideDefaultAudioSinkFactory;
 import cz.internetradio.app.di.AppModule_ProvideExoPlayerFactory;
 import cz.internetradio.app.di.AppModule_ProvideRadioDaoFactory;
 import cz.internetradio.app.repository.RadioRepository;
+import cz.internetradio.app.screens.AddRadioViewModel;
+import cz.internetradio.app.screens.AddRadioViewModel_HiltModules_KeyModule_ProvideFactory;
 import cz.internetradio.app.viewmodel.RadioViewModel;
 import cz.internetradio.app.viewmodel.RadioViewModel_HiltModules_KeyModule_ProvideFactory;
 import dagger.hilt.android.ActivityRetainedLifecycle;
@@ -376,7 +378,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     @Override
     public Set<String> getViewModelKeys() {
-      return ImmutableSet.<String>of(RadioViewModel_HiltModules_KeyModule_ProvideFactory.provide());
+      return ImmutableSet.<String>of(AddRadioViewModel_HiltModules_KeyModule_ProvideFactory.provide(), cz.internetradio.app.ui.AddRadioViewModel_HiltModules_KeyModule_ProvideFactory.provide(), RadioViewModel_HiltModules_KeyModule_ProvideFactory.provide());
     }
 
     @Override
@@ -402,6 +404,10 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     private final ViewModelCImpl viewModelCImpl = this;
 
+    private Provider<AddRadioViewModel> addRadioViewModelProvider;
+
+    private Provider<cz.internetradio.app.ui.AddRadioViewModel> addRadioViewModelProvider2;
+
     private Provider<RadioViewModel> radioViewModelProvider;
 
     private ViewModelCImpl(SingletonCImpl singletonCImpl,
@@ -417,12 +423,14 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
     @SuppressWarnings("unchecked")
     private void initialize(final SavedStateHandle savedStateHandleParam,
         final ViewModelLifecycle viewModelLifecycleParam) {
-      this.radioViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
+      this.addRadioViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
+      this.addRadioViewModelProvider2 = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
+      this.radioViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
     }
 
     @Override
     public Map<String, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return ImmutableMap.<String, javax.inject.Provider<ViewModel>>of("cz.internetradio.app.viewmodel.RadioViewModel", ((Provider) radioViewModelProvider));
+      return ImmutableMap.<String, javax.inject.Provider<ViewModel>>of("cz.internetradio.app.screens.AddRadioViewModel", ((Provider) addRadioViewModelProvider), "cz.internetradio.app.ui.AddRadioViewModel", ((Provider) addRadioViewModelProvider2), "cz.internetradio.app.viewmodel.RadioViewModel", ((Provider) radioViewModelProvider));
     }
 
     @Override
@@ -451,7 +459,13 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       @Override
       public T get() {
         switch (id) {
-          case 0: // cz.internetradio.app.viewmodel.RadioViewModel 
+          case 0: // cz.internetradio.app.screens.AddRadioViewModel 
+          return (T) new AddRadioViewModel(singletonCImpl.radioRepositoryProvider.get());
+
+          case 1: // cz.internetradio.app.ui.AddRadioViewModel 
+          return (T) new cz.internetradio.app.ui.AddRadioViewModel(singletonCImpl.radioRepositoryProvider.get());
+
+          case 2: // cz.internetradio.app.viewmodel.RadioViewModel 
           return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), singletonCImpl.equalizerManagerProvider.get(), singletonCImpl.provideAudioSpectrumProcessorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

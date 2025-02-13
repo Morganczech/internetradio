@@ -27,7 +27,8 @@ import androidx.compose.animation.slideOutVertically
 fun FavoritesScreen(
     viewModel: RadioViewModel,
     onNavigateToAllStations: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToAddRadio: () -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -40,48 +41,23 @@ fun FavoritesScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        // Hlavička
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Oblíbené stanice",
-                style = MaterialTheme.typography.h5,
-                color = Color.White
-            )
-            
-            Row {
-                IconButton(
-                    onClick = onNavigateToSettings,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(8.dp)
-                ) {
+        TopAppBar(
+            title = { Text("Oblíbené") },
+            actions = {
+                IconButton(onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Nastavení",
-                        tint = Color.White
+                        contentDescription = "Nastavení"
                     )
                 }
-                
-                IconButton(
-                    onClick = onNavigateToAllStations,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(8.dp)
-                ) {
+                IconButton(onClick = onNavigateToAllStations) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Přidat stanice",
-                        tint = Color.White
+                        contentDescription = "Přejít na všechny stanice"
                     )
                 }
             }
-        }
+        )
 
         if (favoriteRadios.isEmpty()) {
             Box(
