@@ -8,7 +8,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import cz.internetradio.app.ui.AddRadioViewModel
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.ui.Alignment
+import cz.internetradio.app.model.RadioCategory
 
 @Composable
 fun AddRadioScreen(
@@ -19,6 +21,8 @@ fun AddRadioScreen(
     var streamUrl by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf(RadioCategory.VLASTNI) }
+    var isDropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -81,6 +85,53 @@ fun AddRadioScreen(
                 minLines = 3
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Výběr kategorie
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = selectedCategory.title,
+                    onValueChange = { },
+                    label = { Text("Kategorie") },
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { isDropdownExpanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Vybrat kategorii"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DropdownMenu(
+                    expanded = isDropdownExpanded,
+                    onDismissRequest = { isDropdownExpanded = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    // Seřadíme kategorie tak, aby VLASTNI byla první a OSTATNI poslední
+                    RadioCategory.values()
+                        .sortedWith(compareBy { 
+                            when(it) {
+                                RadioCategory.VLASTNI -> -1
+                                RadioCategory.OSTATNI -> RadioCategory.values().size
+                                else -> it.ordinal
+                            }
+                        })
+                        .forEach { category ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedCategory = category
+                                    isDropdownExpanded = false
+                                }
+                            ) {
+                                Text(category.title)
+                            }
+                        }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -90,7 +141,8 @@ fun AddRadioScreen(
                             name = name,
                             streamUrl = streamUrl,
                             imageUrl = imageUrl.takeIf { it.isNotBlank() },
-                            description = description.takeIf { it.isNotBlank() }
+                            description = description.takeIf { it.isNotBlank() },
+                            category = selectedCategory
                         )
                         onNavigateBack()
                     }

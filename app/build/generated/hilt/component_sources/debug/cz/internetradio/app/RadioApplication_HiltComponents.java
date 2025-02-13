@@ -155,7 +155,6 @@ public final class RadioApplication_HiltComponents {
   @Subcomponent(
       modules = {
           AddRadioViewModel_HiltModules.KeyModule.class,
-          cz.internetradio.app.ui.AddRadioViewModel_HiltModules.KeyModule.class,
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
           ActivityCBuilderModule.class,
@@ -197,7 +196,6 @@ public final class RadioApplication_HiltComponents {
   @Subcomponent(
       modules = {
           AddRadioViewModel_HiltModules.BindsModule.class,
-          cz.internetradio.app.ui.AddRadioViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
           RadioViewModel_HiltModules.BindsModule.class
       }

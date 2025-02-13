@@ -22,8 +22,6 @@ import hilt_aggregated_deps._cz_internetradio_app_RadioApplication_GeneratedInje
 import hilt_aggregated_deps._cz_internetradio_app_di_AppModule;
 import hilt_aggregated_deps._cz_internetradio_app_screens_AddRadioViewModel_HiltModules_BindsModule;
 import hilt_aggregated_deps._cz_internetradio_app_screens_AddRadioViewModel_HiltModules_KeyModule;
-import hilt_aggregated_deps._cz_internetradio_app_ui_AddRadioViewModel_HiltModules_BindsModule;
-import hilt_aggregated_deps._cz_internetradio_app_ui_AddRadioViewModel_HiltModules_KeyModule;
 import hilt_aggregated_deps._cz_internetradio_app_viewmodel_RadioViewModel_HiltModules_BindsModule;
 import hilt_aggregated_deps._cz_internetradio_app_viewmodel_RadioViewModel_HiltModules_KeyModule;
 import hilt_aggregated_deps._dagger_hilt_android_flags_FragmentGetContextFix_FragmentGetContextFixEntryPoint;
@@ -71,8 +69,6 @@ import hilt_aggregated_deps._dagger_hilt_android_internal_modules_HiltWrapper_Ac
         _cz_internetradio_app_di_AppModule.class,
         _cz_internetradio_app_screens_AddRadioViewModel_HiltModules_BindsModule.class,
         _cz_internetradio_app_screens_AddRadioViewModel_HiltModules_KeyModule.class,
-        _cz_internetradio_app_ui_AddRadioViewModel_HiltModules_BindsModule.class,
-        _cz_internetradio_app_ui_AddRadioViewModel_HiltModules_KeyModule.class,
         _cz_internetradio_app_viewmodel_RadioViewModel_HiltModules_BindsModule.class,
         _cz_internetradio_app_viewmodel_RadioViewModel_HiltModules_KeyModule.class,
         _dagger_hilt_android_flags_FragmentGetContextFix_FragmentGetContextFixEntryPoint.class,

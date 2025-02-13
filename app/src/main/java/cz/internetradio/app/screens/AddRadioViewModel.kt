@@ -17,7 +17,13 @@ class AddRadioViewModel @Inject constructor(
     private val repository: RadioRepository
 ) : ViewModel() {
 
-    fun addRadio(name: String, streamUrl: String, imageUrl: String?, description: String?) {
+    fun addRadio(
+        name: String,
+        streamUrl: String,
+        imageUrl: String?,
+        description: String?,
+        category: RadioCategory = RadioCategory.VLASTNI
+    ) {
         if (name.isBlank() || streamUrl.isBlank()) return
 
         val radio = Radio(
@@ -28,7 +34,7 @@ class AddRadioViewModel @Inject constructor(
             description = description,
             startColor = Color(0xFF1A1A1A),
             endColor = Color(0xFF2D2D2D),
-            category = RadioCategory.OSTATNI
+            category = category
         )
 
         viewModelScope.launch {

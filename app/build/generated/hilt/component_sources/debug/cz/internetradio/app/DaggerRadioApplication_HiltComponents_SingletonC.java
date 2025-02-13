@@ -378,7 +378,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     @Override
     public Set<String> getViewModelKeys() {
-      return ImmutableSet.<String>of(AddRadioViewModel_HiltModules_KeyModule_ProvideFactory.provide(), cz.internetradio.app.ui.AddRadioViewModel_HiltModules_KeyModule_ProvideFactory.provide(), RadioViewModel_HiltModules_KeyModule_ProvideFactory.provide());
+      return ImmutableSet.<String>of(AddRadioViewModel_HiltModules_KeyModule_ProvideFactory.provide(), RadioViewModel_HiltModules_KeyModule_ProvideFactory.provide());
     }
 
     @Override
@@ -406,8 +406,6 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     private Provider<AddRadioViewModel> addRadioViewModelProvider;
 
-    private Provider<cz.internetradio.app.ui.AddRadioViewModel> addRadioViewModelProvider2;
-
     private Provider<RadioViewModel> radioViewModelProvider;
 
     private ViewModelCImpl(SingletonCImpl singletonCImpl,
@@ -424,13 +422,12 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
     private void initialize(final SavedStateHandle savedStateHandleParam,
         final ViewModelLifecycle viewModelLifecycleParam) {
       this.addRadioViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
-      this.addRadioViewModelProvider2 = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
-      this.radioViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
+      this.radioViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
     }
 
     @Override
     public Map<String, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return ImmutableMap.<String, javax.inject.Provider<ViewModel>>of("cz.internetradio.app.screens.AddRadioViewModel", ((Provider) addRadioViewModelProvider), "cz.internetradio.app.ui.AddRadioViewModel", ((Provider) addRadioViewModelProvider2), "cz.internetradio.app.viewmodel.RadioViewModel", ((Provider) radioViewModelProvider));
+      return ImmutableMap.<String, javax.inject.Provider<ViewModel>>of("cz.internetradio.app.screens.AddRadioViewModel", ((Provider) addRadioViewModelProvider), "cz.internetradio.app.viewmodel.RadioViewModel", ((Provider) radioViewModelProvider));
     }
 
     @Override
@@ -462,10 +459,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
           case 0: // cz.internetradio.app.screens.AddRadioViewModel 
           return (T) new AddRadioViewModel(singletonCImpl.radioRepositoryProvider.get());
 
-          case 1: // cz.internetradio.app.ui.AddRadioViewModel 
-          return (T) new cz.internetradio.app.ui.AddRadioViewModel(singletonCImpl.radioRepositoryProvider.get());
-
-          case 2: // cz.internetradio.app.viewmodel.RadioViewModel 
+          case 1: // cz.internetradio.app.viewmodel.RadioViewModel 
           return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), singletonCImpl.equalizerManagerProvider.get(), singletonCImpl.provideAudioSpectrumProcessorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

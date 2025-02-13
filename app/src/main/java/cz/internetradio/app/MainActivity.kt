@@ -43,7 +43,7 @@ import cz.internetradio.app.screens.AllStationsScreen
 import cz.internetradio.app.screens.FavoritesScreen
 import cz.internetradio.app.screens.SettingsScreen
 import cz.internetradio.app.screens.EqualizerScreen
-import cz.internetradio.app.ui.AddRadioScreen
+import cz.internetradio.app.screens.AddRadioScreen
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager

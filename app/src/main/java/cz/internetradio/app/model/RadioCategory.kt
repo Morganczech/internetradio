@@ -7,5 +7,6 @@ enum class RadioCategory(val title: String) {
     JAZZ("Jazz"),
     DANCE("Dance"),
     ZPRAVODAJSKE("Zpravodajské"),
+    VLASTNI("Moje stanice"),
     OSTATNI("Ostatní")
 } 
