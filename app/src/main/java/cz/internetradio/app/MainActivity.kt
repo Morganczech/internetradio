@@ -53,6 +53,8 @@ import androidx.compose.animation.*
 import cz.internetradio.app.components.AudioVisualizer
 import androidx.compose.ui.draw.alpha
 import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -214,7 +216,9 @@ fun RadioItem(
                             model = radio.imageUrl,
                             contentDescription = "Logo ${radio.name}",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
+                            contentScale = ContentScale.Fit,
+                            fallback = painterResource(id = R.drawable.ic_radio_default),
+                            error = painterResource(id = R.drawable.ic_radio_default)
                         )
                     }
                     Column {
