@@ -1,9 +1,5 @@
 [
     {
-        "merged": "/home/miroslav/.gradle/daemon/8.10.2/cz.internetradio.app.wear-debug-57:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "/home/miroslav/.gradle/daemon/8.10.2/cz.internetradio.app.wear-main-59:/drawable/ic_launcher_foreground.xml"
-    },
-    {
         "merged": "cz.internetradio.app.wear-debug-57:/drawable_ic_play_arrow.xml.flat",
         "source": "cz.internetradio.app.wear-main-59:/drawable/ic_play_arrow.xml"
     },
@@ -12,8 +8,8 @@
         "source": "cz.internetradio.app.wear-main-59:/drawable/ic_skip_next.xml"
     },
     {
-        "merged": "/home/miroslav/.gradle/daemon/8.10.2/cz.internetradio.app.wear-debug-57:/mipmap-xxxhdpi_ic_launcher.xml.flat",
-        "source": "/home/miroslav/.gradle/daemon/8.10.2/cz.internetradio.app.wear-main-59:/mipmap-xxxhdpi/ic_launcher.xml"
+        "merged": "cz.internetradio.app.wear-debug-57:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "cz.internetradio.app.wear-main-59:/drawable/ic_launcher_foreground.xml"
     },
     {
         "merged": "cz.internetradio.app.wear-debug-57:/drawable_ic_radio_default.xml.flat",
@@ -28,7 +24,11 @@
         "source": "cz.internetradio.app.wear-main-59:/drawable/ic_skip_previous.xml"
     },
     {
-        "merged": "/home/miroslav/.gradle/daemon/8.10.2/cz.internetradio.app.wear-debug-57:/mipmap-xxxhdpi_ic_launcher_round.xml.flat",
-        "source": "/home/miroslav/.gradle/daemon/8.10.2/cz.internetradio.app.wear-main-59:/mipmap-xxxhdpi/ic_launcher_round.xml"
+        "merged": "cz.internetradio.app.wear-debug-57:/mipmap-xxxhdpi_ic_launcher.xml.flat",
+        "source": "cz.internetradio.app.wear-main-59:/mipmap-xxxhdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "cz.internetradio.app.wear-debug-57:/mipmap-xxxhdpi_ic_launcher_round.xml.flat",
+        "source": "cz.internetradio.app.wear-main-59:/mipmap-xxxhdpi/ic_launcher_round.xml"
     }
 ]

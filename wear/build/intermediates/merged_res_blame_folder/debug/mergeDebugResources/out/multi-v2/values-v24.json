@@ -4,7 +4,7 @@
             "outputFile": "cz.internetradio.app.wear-mergeDebugResources-55:/values-v24/values-v24.xml",
             "map": [
                 {
-                    "source": "/home/miroslav/.gradle/caches/8.10.2/transforms/21cff4f9c9171fb88ac4f73acd95c724/transformed/wear-1.3.0/res/values-v24/values-v24.xml",
+                    "source": "/Users/miroslavhazik/.gradle/caches/8.10.2/transforms/d5054e6c099c69fe4b6d0f04c9e3ea21/transformed/wear-1.3.0/res/values-v24/values-v24.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

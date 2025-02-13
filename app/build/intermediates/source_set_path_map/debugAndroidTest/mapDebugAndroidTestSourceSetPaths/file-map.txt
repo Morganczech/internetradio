@@ -1,0 +1,6 @@
+cz.internetradio.app.test.app-jetified-core-1.5.0-0 /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/0e3adb12ca9be12fa20e923a98acede9/transformed/jetified-core-1.5.0/res
+cz.internetradio.app.test.app-jetified-annotation-experimental-1.3.1-1 /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/e7344c31eb8b717bd899baf7b96136bb/transformed/jetified-annotation-experimental-1.3.1/res
+cz.internetradio.app.test.app-androidTest-2 /Users/miroslavhazik/Workspaces/android-app/internetradio/app/build/generated/res/resValues/androidTest/debug
+cz.internetradio.app.test.app-mergeDebugAndroidTestResources-3 /Users/miroslavhazik/Workspaces/android-app/internetradio/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+cz.internetradio.app.test.app-mergeDebugAndroidTestResources-4 /Users/miroslavhazik/Workspaces/android-app/internetradio/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+cz.internetradio.app.test.app-debugAndroidTest-5 /Users/miroslavhazik/Workspaces/android-app/internetradio/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
