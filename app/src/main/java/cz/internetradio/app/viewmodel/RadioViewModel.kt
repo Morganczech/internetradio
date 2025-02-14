@@ -31,6 +31,7 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import cz.internetradio.app.api.LastFmManager
+import cz.internetradio.app.api.YouTubeMusicManager
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -41,6 +42,7 @@ class RadioViewModel @Inject constructor(
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
     private val lastFmManager: LastFmManager,
+    private val youTubeMusicManager: YouTubeMusicManager,
     @ApplicationContext private val context: Context
 ) : ViewModel(), DataClient.OnDataChangedListener {
 
@@ -478,15 +480,22 @@ class RadioViewModel @Inject constructor(
 
     fun exportToYouTubeMusic(songs: List<FavoriteSong>) {
         viewModelScope.launch {
-            // TODO: Implementace exportu do YouTube Music
-            _showSongSavedMessage.value = "Export do YouTube Music zatím není implementován"
+            val success = youTubeMusicManager.exportToPlaylist(songs)
+            _showSongSavedMessage.value = if (success) {
+                "Skladby byly exportovány do YouTube Music"
+            } else {
+                "Nepodařilo se exportovat skladby do YouTube Music"
+            }
         }
     }
 
     fun playOnYouTube(song: FavoriteSong) {
         viewModelScope.launch {
-            // TODO: Implementace přehrání na YouTube
-            _showSongSavedMessage.value = "Přehrání na YouTube zatím není implementováno"
+            try {
+                youTubeMusicManager.playOnYouTube(song, context)
+            } catch (e: Exception) {
+                _showSongSavedMessage.value = "Nepodařilo se přehrát skladbu na YouTube"
+            }
         }
     }
 
