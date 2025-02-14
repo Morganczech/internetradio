@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import cz.internetradio.app.model.RadioCategory
+import cz.internetradio.app.model.Radio
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -34,7 +35,8 @@ import androidx.compose.ui.text.input.ImeAction
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: (String) -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -44,6 +46,7 @@ fun AllStationsScreen(
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var showDeleteDialog: Radio? by remember { mutableStateOf<Radio?>(null) }
 
     if (showMaxFavoritesError) {
         AlertDialog(
@@ -53,6 +56,30 @@ fun AllStationsScreen(
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissMaxFavoritesError() }) {
                     Text("OK")
+                }
+            }
+        )
+    }
+
+    // Dialog pro potvrzení smazání
+    showDeleteDialog?.let { radio ->
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = null },
+            title = { Text("Smazat stanici") },
+            text = { Text("Opravdu chcete smazat stanici ${radio.name}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteRadio(radio)
+                        showDeleteDialog = null
+                    }
+                ) {
+                    Text("Smazat", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = null }) {
+                    Text("Zrušit")
                 }
             }
         )
@@ -198,7 +225,9 @@ fun AllStationsScreen(
                         radio = radio,
                         isSelected = radio.id == currentRadio?.id,
                         onRadioClick = { viewModel.playRadio(radio) },
-                        onFavoriteClick = { viewModel.toggleFavorite(radio) }
+                        onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                        onEditClick = { onNavigateToEdit(radio.id) },
+                        onDeleteClick = { showDeleteDialog = radio }
                     )
                 }
             }
