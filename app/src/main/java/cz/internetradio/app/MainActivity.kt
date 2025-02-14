@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +44,7 @@ import cz.internetradio.app.screens.AllStationsScreen
 import cz.internetradio.app.screens.FavoritesScreen
 import cz.internetradio.app.screens.SettingsScreen
 import cz.internetradio.app.screens.EqualizerScreen
+import cz.internetradio.app.screens.FavoriteSongsScreen
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
@@ -52,6 +54,10 @@ import androidx.compose.animation.*
 import cz.internetradio.app.components.AudioVisualizer
 import androidx.compose.ui.draw.alpha
 import android.util.Log
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -126,6 +132,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToSettings = {
                                         navController.navigate(Screen.Settings.route)
+                                    },
+                                    onNavigateToFavoriteSongs = {
+                                        navController.navigate(Screen.FavoriteSongs.route)
                                     }
                                 )
                             }
@@ -150,6 +159,14 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Screen.Equalizer.route) {
                                 EqualizerScreen(
+                                    viewModel = viewModel,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable(Screen.FavoriteSongs.route) {
+                                FavoriteSongsScreen(
                                     viewModel = viewModel,
                                     onNavigateBack = {
                                         navController.popBackStack()
@@ -250,7 +267,8 @@ fun PlayerControls(
     radio: Radio,
     isPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
-    viewModel: RadioViewModel
+    viewModel: RadioViewModel,
+    onNavigateToFavoriteSongs: () -> Unit = {}
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
@@ -406,6 +424,49 @@ fun PlayerControls(
                                     contentDescription = "Další stanice",
                                     tint = Color.White
                                 )
+                            }
+
+                            // Tlačítko pro uložení aktuální skladby
+                            if (currentMetadata != null) {
+                                IconButton(
+                                    onClick = { viewModel.saveSongToFavorites() }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlaylistAdd,
+                                        contentDescription = "Uložit skladbu",
+                                        tint = Color.White
+                                    )
+                                }
+                                IconButton(
+                                    onClick = onNavigateToFavoriteSongs
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.QueueMusic,
+                                        contentDescription = "Zobrazit oblíbené skladby",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                        }
+
+                        // Zobrazení zprávy o uložení skladby
+                        val songSavedMessage by viewModel.showSongSavedMessage.collectAsState()
+                        val scope = rememberCoroutineScope()
+                        
+                        songSavedMessage?.let { message ->
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.caption,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                            LaunchedEffect(message) {
+                                scope.launch {
+                                    delay(2000)
+                                    viewModel.dismissSongSavedMessage()
+                                }
                             }
                         }
 

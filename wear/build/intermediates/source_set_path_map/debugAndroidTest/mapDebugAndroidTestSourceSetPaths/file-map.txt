@@ -1,4 +1,0 @@
-cz.internetradio.app.wear.test.wear-androidTest-0 /Users/miroslavhazik/Workspaces/android-app/internetradio/wear/build/generated/res/resValues/androidTest/debug
-cz.internetradio.app.wear.test.wear-mergeDebugAndroidTestResources-1 /Users/miroslavhazik/Workspaces/android-app/internetradio/wear/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
-cz.internetradio.app.wear.test.wear-mergeDebugAndroidTestResources-2 /Users/miroslavhazik/Workspaces/android-app/internetradio/wear/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
-cz.internetradio.app.wear.test.wear-debugAndroidTest-3 /Users/miroslavhazik/Workspaces/android-app/internetradio/wear/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources

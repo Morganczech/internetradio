@@ -27,7 +27,8 @@ import androidx.compose.animation.slideOutVertically
 fun FavoritesScreen(
     viewModel: RadioViewModel,
     onNavigateToAllStations: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToFavoriteSongs: () -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -151,7 +152,8 @@ fun FavoritesScreen(
                     radio = radio,
                     isPlaying = isPlaying,
                     onPlayPauseClick = { viewModel.togglePlayPause() },
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
                 )
             }
         }
