@@ -10,82 +10,115 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.util.Log
 
 @Singleton
 class RadioBrowserApi @Inject constructor() {
-    private val baseUrl = "https://api.radio-browser.info/json"
+    private val baseUrl = "https://de1.api.radio-browser.info/json"
     private val client = OkHttpClient()
     private val gson = Gson()
 
     suspend fun searchStationsByName(name: String): List<RadioStation>? {
-        return try {
-            val request = Request.Builder()
-                .url("$baseUrl/stations/byname/$name")
-                .build()
+        return withContext(Dispatchers.IO) {
+            try {
+                val encodedName = java.net.URLEncoder.encode(name, "UTF-8")
+                val url = "$baseUrl/stations/byname/$encodedName"
+                Log.d("RadioBrowserApi", "Volám API: $url")
+                
+                val request = Request.Builder()
+                    .url(url)
+                    .addHeader("User-Agent", "InternetRadio/1.0")
+                    .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.newCall(request).execute()
+                val response = client.newCall(request).execute()
+
+                if (!response.isSuccessful) {
+                    Log.e("RadioBrowserApi", "API vrátilo chybu: ${response.code}")
+                    return@withContext null
+                }
+
+                val responseBody = response.body?.string()
+                Log.d("RadioBrowserApi", "Odpověď API: ${responseBody?.take(200)}...")
+                
+                val type = object : TypeToken<List<RadioStation>>() {}.type
+                val stations = gson.fromJson<List<RadioStation>>(responseBody, type)
+                Log.d("RadioBrowserApi", "Počet nalezených stanic: ${stations?.size ?: 0}")
+                stations
+            } catch (e: Exception) {
+                Log.e("RadioBrowserApi", "Chyba při vyhledávání stanic", e)
+                null
             }
-
-            val responseBody = response.body?.string()
-            val type = object : TypeToken<List<RadioStation>>() {}.type
-            gson.fromJson<List<RadioStation>>(responseBody, type)
-        } catch (e: Exception) {
-            null
         }
     }
 
     suspend fun getTags(): List<Tag>? {
-        return try {
-            val request = Request.Builder()
-                .url("$baseUrl/tags")
-                .build()
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = Request.Builder()
+                    .url("$baseUrl/tags")
+                    .addHeader("User-Agent", "InternetRadio/1.0")
+                    .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.newCall(request).execute()
+                val response = client.newCall(request).execute()
+
+                if (!response.isSuccessful) {
+                    return@withContext null
+                }
+
+                val responseBody = response.body?.string()
+                val type = object : TypeToken<List<Tag>>() {}.type
+                gson.fromJson<List<Tag>>(responseBody, type)
+            } catch (e: Exception) {
+                null
             }
-
-            val responseBody = response.body?.string()
-            val type = object : TypeToken<List<Tag>>() {}.type
-            gson.fromJson<List<Tag>>(responseBody, type)
-        } catch (e: Exception) {
-            null
         }
     }
 
     suspend fun getStationsByTag(tag: String): List<RadioStation>? {
-        return try {
-            val request = Request.Builder()
-                .url("$baseUrl/stations/bytag/$tag")
-                .build()
+        return withContext(Dispatchers.IO) {
+            try {
+                val encodedTag = java.net.URLEncoder.encode(tag, "UTF-8")
+                val request = Request.Builder()
+                    .url("$baseUrl/stations/bytag/$encodedTag")
+                    .addHeader("User-Agent", "InternetRadio/1.0")
+                    .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.newCall(request).execute()
+                val response = client.newCall(request).execute()
+
+                if (!response.isSuccessful) {
+                    return@withContext null
+                }
+
+                val responseBody = response.body?.string()
+                val type = object : TypeToken<List<RadioStation>>() {}.type
+                gson.fromJson<List<RadioStation>>(responseBody, type)
+            } catch (e: Exception) {
+                null
             }
-
-            val responseBody = response.body?.string()
-            val type = object : TypeToken<List<RadioStation>>() {}.type
-            gson.fromJson<List<RadioStation>>(responseBody, type)
-        } catch (e: Exception) {
-            null
         }
     }
 
     suspend fun getStationsByCountry(country: String): List<RadioStation>? {
-        return try {
-            val request = Request.Builder()
-                .url("$baseUrl/stations/bycountry/$country")
-                .build()
+        return withContext(Dispatchers.IO) {
+            try {
+                val encodedCountry = java.net.URLEncoder.encode(country, "UTF-8")
+                val request = Request.Builder()
+                    .url("$baseUrl/stations/bycountry/$encodedCountry")
+                    .addHeader("User-Agent", "InternetRadio/1.0")
+                    .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.newCall(request).execute()
+                val response = client.newCall(request).execute()
+
+                if (!response.isSuccessful) {
+                    return@withContext null
+                }
+
+                val responseBody = response.body?.string()
+                val type = object : TypeToken<List<RadioStation>>() {}.type
+                gson.fromJson<List<RadioStation>>(responseBody, type)
+            } catch (e: Exception) {
+                null
             }
-
-            val responseBody = response.body?.string()
-            val type = object : TypeToken<List<RadioStation>>() {}.type
-            gson.fromJson<List<RadioStation>>(responseBody, type)
-        } catch (e: Exception) {
-            null
         }
     }
 } 
