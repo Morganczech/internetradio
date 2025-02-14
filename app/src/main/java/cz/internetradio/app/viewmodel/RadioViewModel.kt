@@ -30,6 +30,7 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import cz.internetradio.app.api.LastFmManager
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -39,6 +40,7 @@ class RadioViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
+    private val lastFmManager: LastFmManager,
     @ApplicationContext private val context: Context
 ) : ViewModel(), DataClient.OnDataChangedListener {
 
@@ -464,6 +466,50 @@ class RadioViewModel @Inject constructor(
     fun deleteFavoriteSong(song: FavoriteSong) {
         viewModelScope.launch {
             favoriteSongRepository.deleteSong(song)
+        }
+    }
+
+    fun exportToSpotify(songs: List<FavoriteSong>) {
+        viewModelScope.launch {
+            // TODO: Implementace exportu do Spotify
+            _showSongSavedMessage.value = "Export do Spotify zatím není implementován"
+        }
+    }
+
+    fun exportToYouTubeMusic(songs: List<FavoriteSong>) {
+        viewModelScope.launch {
+            // TODO: Implementace exportu do YouTube Music
+            _showSongSavedMessage.value = "Export do YouTube Music zatím není implementován"
+        }
+    }
+
+    fun playOnYouTube(song: FavoriteSong) {
+        viewModelScope.launch {
+            // TODO: Implementace přehrání na YouTube
+            _showSongSavedMessage.value = "Přehrání na YouTube zatím není implementováno"
+        }
+    }
+
+    fun searchLyrics(song: FavoriteSong) {
+        viewModelScope.launch {
+            // TODO: Implementace vyhledání textu
+            _showSongSavedMessage.value = "Vyhledání textu zatím není implementováno"
+        }
+    }
+
+    fun shareSong(song: FavoriteSong) {
+        viewModelScope.launch {
+            // TODO: Implementace sdílení
+            _showSongSavedMessage.value = "Sdílení zatím není implementováno"
+        }
+    }
+
+    suspend fun getAlbumArtUrl(artist: String?, track: String): String? {
+        if (artist == null) return null
+        return try {
+            lastFmManager.getAlbumArtUrl(artist, track)
+        } catch (e: Exception) {
+            null
         }
     }
 
