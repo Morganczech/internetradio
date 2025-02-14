@@ -50,7 +50,7 @@ class RadioRepository @Inject constructor(
         return radioDao.getRadioById(radioId)?.toRadio()
     }
 
-    suspend fun addRadioStationToFavorites(radioStation: RadioStation, category: String) {
+    suspend fun addRadioStationToFavorites(radioStation: RadioStation, category: RadioCategory) {
         val radio = Radio(
             id = radioStation.stationuuid ?: radioStation.url,
             name = radioStation.name,

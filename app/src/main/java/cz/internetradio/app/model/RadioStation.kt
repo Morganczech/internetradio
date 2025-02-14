@@ -31,5 +31,5 @@ data class RadioStation(
     val geo_long: Double? = null,
     val has_extended_info: Boolean? = null,
     val isFromRadioBrowser: Boolean = false,
-    var category: String? = null
+    var category: RadioCategory? = null
 ) 

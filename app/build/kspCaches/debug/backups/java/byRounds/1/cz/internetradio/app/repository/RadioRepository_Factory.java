@@ -1,5 +1,6 @@
 package cz.internetradio.app.repository;
 
+import cz.internetradio.app.api.RadioBrowserApi;
 import cz.internetradio.app.data.dao.RadioDao;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -24,20 +25,25 @@ import javax.inject.Provider;
 public final class RadioRepository_Factory implements Factory<RadioRepository> {
   private final Provider<RadioDao> radioDaoProvider;
 
-  public RadioRepository_Factory(Provider<RadioDao> radioDaoProvider) {
+  private final Provider<RadioBrowserApi> radioBrowserApiProvider;
+
+  public RadioRepository_Factory(Provider<RadioDao> radioDaoProvider,
+      Provider<RadioBrowserApi> radioBrowserApiProvider) {
     this.radioDaoProvider = radioDaoProvider;
+    this.radioBrowserApiProvider = radioBrowserApiProvider;
   }
 
   @Override
   public RadioRepository get() {
-    return newInstance(radioDaoProvider.get());
+    return newInstance(radioDaoProvider.get(), radioBrowserApiProvider.get());
   }
 
-  public static RadioRepository_Factory create(Provider<RadioDao> radioDaoProvider) {
-    return new RadioRepository_Factory(radioDaoProvider);
+  public static RadioRepository_Factory create(Provider<RadioDao> radioDaoProvider,
+      Provider<RadioBrowserApi> radioBrowserApiProvider) {
+    return new RadioRepository_Factory(radioDaoProvider, radioBrowserApiProvider);
   }
 
-  public static RadioRepository newInstance(RadioDao radioDao) {
-    return new RadioRepository(radioDao);
+  public static RadioRepository newInstance(RadioDao radioDao, RadioBrowserApi radioBrowserApi) {
+    return new RadioRepository(radioDao, radioBrowserApi);
   }
 }
