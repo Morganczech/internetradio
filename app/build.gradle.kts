@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    kotlin("kapt")
 }
 
 android {
@@ -20,11 +21,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        
+        manifestPlaceholders["redirectHostName"] = "callback"
+        manifestPlaceholders["redirectSchemeName"] = "cz.internetradio.app"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,6 +38,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -43,6 +48,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -51,6 +57,13 @@ android {
     }
 
     packaging {
+        resources {
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE*")
+            excludes.add("META-INF/NOTICE*")
+            excludes.add("META-INF/*.kotlin_module")
+        }
     }
 }
 
@@ -61,6 +74,8 @@ tasks.withType<JavaCompile>().configureEach {
 dependencies {
     val composeBomVersion = "2023.10.01"
     val roomVersion = "2.6.1"
+    
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.core:core-ktx:1.12.0")
@@ -92,20 +107,44 @@ dependencies {
     // Media Session
     implementation("androidx.media:media:1.7.0")
 
-    // Retrofit
+    // Retrofit a Moshi
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.moshi:moshi:1.15.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     ksp("com.google.dagger:hilt-android-compiler:2.50")
 
     // JTransforms pro FFT
-    implementation("com.github.wendykierp:JTransforms:3.1")
+    implementation("com.github.wendykierp:JTransforms:3.1") {
+        exclude(group = "junit", module = "junit")
+    }
     implementation("org.apache.commons:commons-math3:3.6.1")
 
     // Wearable
     implementation("com.google.android.gms:play-services-wearable:18.1.0")
+
+    // Spotify API
+    implementation("com.spotify.android:auth:2.1.1") {
+        exclude(group = "com.android.support", module = "support-compat")
+        exclude(group = "com.android.support", module = "customtabs")
+        exclude(group = "com.android.support", module = "appcompat-v7")
+        exclude(group = "androidx.core", module = "core")
+        exclude(group = "androidx.fragment", module = "fragment")
+        exclude(group = "androidx.appcompat", module = "appcompat")
+    }
+    implementation("com.adamratzman:spotify-api-kotlin-core:4.0.3") {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
+    }
+
+    // Last.fm API
+    implementation("de.u-mass:lastfm-java:0.1.2") {
+        exclude(group = "junit", module = "junit")
+    }
 
     // Testing
     testImplementation("junit:junit:4.13.2")

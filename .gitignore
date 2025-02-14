@@ -103,4 +103,12 @@ lint/tmp/
 .kotlin/
 
 # Room schemas
-app/schemas/ 
+app/schemas/
+
+# API Keys and Configs
+app/src/main/res/values/api_keys.xml
+spotify_config.properties
+app/src/main/java/cz/internetradio/app/config/ApiConfig.kt
+
+# Temporary files
+app/src/main/java/cz/internetradio/app/util/ 
