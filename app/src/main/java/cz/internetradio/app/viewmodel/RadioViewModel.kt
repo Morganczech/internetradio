@@ -10,6 +10,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.repository.RadioRepository
+import cz.internetradio.app.repository.FavoriteSongRepository
+import cz.internetradio.app.model.FavoriteSong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -33,6 +35,7 @@ import com.google.android.gms.wearable.Wearable
 @HiltViewModel
 class RadioViewModel @Inject constructor(
     private val radioRepository: RadioRepository,
+    private val favoriteSongRepository: FavoriteSongRepository,
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
@@ -70,6 +73,12 @@ class RadioViewModel @Inject constructor(
 
     private val _currentPreset = MutableStateFlow(EqualizerPreset.NORMAL)
     val currentPreset: StateFlow<EqualizerPreset> = _currentPreset
+
+    private val _currentSongSaved = MutableStateFlow(false)
+    val currentSongSaved: StateFlow<Boolean> = _currentSongSaved
+
+    private val _showSongSavedMessage = MutableStateFlow<String?>(null)
+    val showSongSavedMessage: StateFlow<String?> = _showSongSavedMessage
 
     private val _equalizerEnabled = MutableStateFlow(false)
     val equalizerEnabled: StateFlow<Boolean> = _equalizerEnabled
@@ -403,6 +412,58 @@ class RadioViewModel @Inject constructor(
             if (currentIndex > 0) {
                 playRadio(favoriteRadios[currentIndex - 1])
             }
+        }
+    }
+
+    fun saveSongToFavorites() {
+        viewModelScope.launch {
+            val currentRadio = _currentRadio.value ?: return@launch
+            val metadata = _currentMetadata.value ?: return@launch
+
+            // Rozdělení metadat na interpreta a název skladby
+            val (artist, title) = parseMetadata(metadata)
+
+            // Kontrola, zda skladba již existuje
+            if (favoriteSongRepository.songExists(title, artist, currentRadio.id)) {
+                _showSongSavedMessage.value = "Tato skladba je již v oblíbených"
+                return@launch
+            }
+
+            // Vytvoření nové oblíbené skladby
+            val favoriteSong = FavoriteSong(
+                title = title,
+                artist = artist,
+                radioName = currentRadio.name,
+                radioId = currentRadio.id
+            )
+
+            // Uložení skladby
+            favoriteSongRepository.addSong(favoriteSong)
+            _currentSongSaved.value = true
+            _showSongSavedMessage.value = "Skladba byla přidána do oblíbených"
+        }
+    }
+
+    private fun parseMetadata(metadata: String): Pair<String?, String> {
+        return if (metadata.contains(" - ")) {
+            val parts = metadata.split(" - ", limit = 2)
+            Pair(parts[0].trim(), parts[1].trim())
+        } else {
+            Pair(null, metadata.trim())
+        }
+    }
+
+    fun dismissSongSavedMessage() {
+        _showSongSavedMessage.value = null
+    }
+
+    fun getAllFavoriteSongs(): Flow<List<FavoriteSong>> {
+        return favoriteSongRepository.getAllSongs()
+    }
+
+    fun deleteFavoriteSong(song: FavoriteSong) {
+        viewModelScope.launch {
+            favoriteSongRepository.deleteSong(song)
         }
     }
 
