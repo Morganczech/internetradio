@@ -28,6 +28,8 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import android.content.Intent
+import cz.internetradio.app.service.RadioService
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -251,6 +253,13 @@ class RadioViewModel @Inject constructor(
                 _isPlaying.value = true
                 prefs.edit().putString("last_radio_id", radio.id).apply()
                 updateWearableState()
+                
+                // Spuštění služby
+                val intent = Intent(context, RadioService::class.java).apply {
+                    action = RadioService.ACTION_PLAY
+                    putExtra(RadioService.EXTRA_RADIO_ID, radio.id)
+                }
+                context.startForegroundService(intent)
             } catch (e: Exception) {
                 _isPlaying.value = false
                 updateWearableState()
@@ -264,15 +273,34 @@ class RadioViewModel @Inject constructor(
         _currentRadio.value = null
         _isPlaying.value = false
         _currentMetadata.value = null
+        
+        // Zastavení služby
+        val intent = Intent(context, RadioService::class.java)
+        context.stopService(intent)
     }
 
     fun togglePlayPause() {
         if (_isPlaying.value) {
             exoPlayer.pause()
             _isPlaying.value = false
+            
+            // Pozastavení přehrávání v službě
+            val intent = Intent(context, RadioService::class.java).apply {
+                action = RadioService.ACTION_PAUSE
+            }
+            context.startForegroundService(intent)
         } else {
             exoPlayer.play()
             _isPlaying.value = true
+            
+            // Obnovení přehrávání v službě
+            _currentRadio.value?.let { radio ->
+                val intent = Intent(context, RadioService::class.java).apply {
+                    action = RadioService.ACTION_PLAY
+                    putExtra(RadioService.EXTRA_RADIO_ID, radio.id)
+                }
+                context.startForegroundService(intent)
+            }
         }
         updateWearableState()
     }
