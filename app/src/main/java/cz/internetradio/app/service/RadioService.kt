@@ -34,8 +34,8 @@ import android.os.PowerManager
 import android.content.BroadcastReceiver
 import cz.internetradio.app.MainActivity
 import android.util.Log
+import coil.ImageLoader
 import coil.request.ImageRequest
-import coil.imageLoader
 
 class RadioService : Service() {
 
@@ -226,14 +226,19 @@ class RadioService : Service() {
                 val title = mediaMetadata.title?.toString()
                 val artist = mediaMetadata.artist?.toString()
                 
+                // Kontrola, zda metadata nejsou stejná jako název nebo popis rádia
+                val radio = _currentRadio.value
+                val isDefaultMetadata = title == radio?.name || title == radio?.description ||
+                                      artist == radio?.name || artist == radio?.description
+                
                 val metadata = when {
-                    !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
-                    !title.isNullOrBlank() -> title
-                    !artist.isNullOrBlank() -> artist
+                    !isDefaultMetadata && !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
+                    !isDefaultMetadata && !title.isNullOrBlank() -> title
+                    !isDefaultMetadata && !artist.isNullOrBlank() -> artist
                     else -> null
                 }
                 
-                Log.d("RadioService", "onMediaMetadataChanged: $metadata")
+                Log.d("RadioService", "onMediaMetadataChanged: $metadata (title: $title, artist: $artist)")
                 _currentMetadata.value = metadata
                 updateMediaMetadata(artist, title)
                 updateNotification()
@@ -289,16 +294,25 @@ class RadioService : Service() {
         try {
             val radio = _currentRadio.value ?: return
             
+            // Sestavení textu metadat pro notifikaci
+            val displayMetadata = when {
+                !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
+                !title.isNullOrBlank() -> title
+                !artist.isNullOrBlank() -> artist
+                else -> null
+            }
+            _currentMetadata.value = displayMetadata
+            
             // Vytvoření metadat pro MediaSession
             val metadataBuilder = MediaMetadataCompat.Builder()
                 // Základní metadata
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: radio.description)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, displayMetadata)
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
                 
                 // Metadata pro zobrazení
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: radio.description)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displayMetadata)
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
                 
                 // Metadata pro Bluetooth AVRCP
@@ -411,8 +425,8 @@ class RadioService : Service() {
 
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("Tento telefon") // První řádek - kam se přehrává zvuk
-            .setContentText(radio?.name ?: "Internet Radio") // Druhý řádek - název rádia
-            .setSubText(metadata ?: radio?.description ?: "Připraveno k přehrávání") // Třetí řádek - metadata nebo popis
+            .setContentText(radio?.name) // Druhý řádek - název rádia
+            .setSubText(metadata) // Třetí řádek - metadata (název písně)
             .setSmallIcon(R.drawable.ic_radio_default)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -434,7 +448,7 @@ class RadioService : Service() {
                         }
                     }
                     .build()
-                coil.imageLoader(this).enqueue(request)
+                ImageLoader(this).enqueue(request)
             } catch (e: Exception) {
                 Log.e("RadioService", "Chyba při načítání ikony rádia: ${e.message}")
             }
@@ -540,10 +554,6 @@ class RadioService : Service() {
             .setUri(radio.streamUrl)
             .setMediaMetadata(
                 androidx.media3.common.MediaMetadata.Builder()
-                    .setTitle(radio.name)
-                    .setArtist(radio.description)
-                    .setAlbumTitle(radio.name)
-                    .setDescription(radio.description)
                     .setIsBrowsable(false)
                     .setIsPlayable(true)
                     .build()
@@ -557,8 +567,7 @@ class RadioService : Service() {
         _isPlaying.value = true
         mediaSession.isActive = true
         
-        // Aktualizace metadat pro MediaSession a Bluetooth
-        updateMediaMetadata(null, radio.name)
+        // Aktualizace notifikace bez výchozích metadat
         updateNotification()
         broadcastPlaybackState()
         
