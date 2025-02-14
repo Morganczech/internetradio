@@ -80,6 +80,7 @@ dependencies {
 
     // Coil pro načítání obrázků
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil:2.5.0")
 
     // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")

@@ -34,6 +34,8 @@ import android.os.PowerManager
 import android.content.BroadcastReceiver
 import cz.internetradio.app.MainActivity
 import android.util.Log
+import coil.request.ImageRequest
+import coil.imageLoader
 
 class RadioService : Service() {
 
@@ -408,14 +410,35 @@ class RadioService : Service() {
         )
 
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle(radio?.name ?: "Internet Radio")
-            .setContentText(metadata ?: radio?.description ?: "Připraveno k přehrávání")
+            .setContentTitle("Tento telefon") // První řádek - kam se přehrává zvuk
+            .setContentText(radio?.name ?: "Internet Radio") // Druhý řádek - název rádia
+            .setSubText(metadata ?: radio?.description ?: "Připraveno k přehrávání") // Třetí řádek - metadata nebo popis
             .setSmallIcon(R.drawable.ic_radio_default)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+
+        // Načtení ikony rádia pomocí Coil
+        radio?.imageUrl?.let { imageUrl ->
+            try {
+                val request = ImageRequest.Builder(this)
+                    .data(imageUrl)
+                    .target { drawable ->
+                        val bitmap = (drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                        bitmap?.let {
+                            builder.setLargeIcon(it)
+                            // Aktualizace notifikace s ikonou
+                            notificationManager.notify(NOTIFICATION_ID, builder.build())
+                        }
+                    }
+                    .build()
+                coil.imageLoader(this).enqueue(request)
+            } catch (e: Exception) {
+                Log.e("RadioService", "Chyba při načítání ikony rádia: ${e.message}")
+            }
+        }
 
         // Přidáme ovládací tlačítka pouze pokud máme aktivní rádio
         if (radio != null) {
@@ -491,7 +514,7 @@ class RadioService : Service() {
                 
                 builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
             } catch (e: Exception) {
-                // Pokud se nepodaří vytvořit ovládací prvky, vrátíme základní notifikaci
+                Log.e("RadioService", "Chyba při vytváření ovládacích prvků notifikace: ${e.message}")
             }
         }
 
