@@ -287,17 +287,33 @@ class RadioService : Service() {
         try {
             val radio = _currentRadio.value ?: return
             
+            // Vytvoření metadat pro MediaSession
             val metadataBuilder = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.description)
+                // Základní metadata
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: radio.description)
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, radio.name)
+                
+                // Metadata pro zobrazení
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: radio.name)
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: radio.description)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
+                
+                // Metadata pro Bluetooth AVRCP
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1) // Stream nemá délku
+                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, radio.category.title)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
+                
+                // Metadata pro notifikaci a lock screen
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, radio.imageUrl)
 
+            // Nastavení metadat do MediaSession
             mediaSession.setMetadata(metadataBuilder.build())
+            
+            Log.d("RadioService", "Metadata aktualizována - title: ${title ?: radio.name}, artist: ${artist ?: radio.description}")
         } catch (e: Exception) {
-            // Ignorujeme chybu při aktualizaci metadat
+            Log.e("RadioService", "Chyba při aktualizaci metadat: ${e.message}")
         }
     }
 
@@ -495,11 +511,30 @@ class RadioService : Service() {
         initMediaSession()
         
         _currentRadio.value = radio
-        exoPlayer.setMediaItem(MediaItem.fromUri(radio.streamUrl))
+        
+        // Nastavení MediaItem s metadaty pro ExoPlayer
+        val mediaItem = MediaItem.Builder()
+            .setUri(radio.streamUrl)
+            .setMediaMetadata(
+                androidx.media3.common.MediaMetadata.Builder()
+                    .setTitle(radio.name)
+                    .setArtist(radio.description)
+                    .setAlbumTitle(radio.name)
+                    .setDescription(radio.description)
+                    .setIsBrowsable(false)
+                    .setIsPlayable(true)
+                    .build()
+            )
+            .build()
+            
+        exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.play()
+        
         _isPlaying.value = true
         mediaSession.isActive = true
+        
+        // Aktualizace metadat pro MediaSession a Bluetooth
         updateMediaMetadata(null, radio.name)
         updateNotification()
         broadcastPlaybackState()
