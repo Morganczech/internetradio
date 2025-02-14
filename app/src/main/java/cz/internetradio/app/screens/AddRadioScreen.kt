@@ -19,7 +19,8 @@ import androidx.compose.foundation.verticalScroll
 @Composable
 fun AddRadioScreen(
     viewModel: AddRadioViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    radioToEdit: String? = null
 ) {
     var name by remember { mutableStateOf("") }
     var streamUrl by remember { mutableStateOf("") }
@@ -28,6 +29,19 @@ fun AddRadioScreen(
     var selectedCategory by remember { mutableStateOf(RadioCategory.VLASTNI) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     
+    // Načtení existující stanice pro editaci
+    LaunchedEffect(radioToEdit) {
+        if (radioToEdit != null) {
+            viewModel.loadRadioForEdit(radioToEdit)?.let { radio ->
+                name = radio.name
+                streamUrl = radio.streamUrl
+                imageUrl = radio.imageUrl ?: ""
+                description = radio.description ?: ""
+                selectedCategory = radio.category
+            }
+        }
+    }
+
     // Validační stavy
     var nameError by remember { mutableStateOf(false) }
     var streamUrlError by remember { mutableStateOf(false) }
@@ -69,7 +83,7 @@ fun AddRadioScreen(
             .navigationBarsPadding()
     ) {
         TopAppBar(
-            title = { Text("Přidat stanici") },
+            title = { Text(if (radioToEdit != null) "Upravit stanici" else "Přidat stanici") },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
@@ -238,14 +252,26 @@ fun AddRadioScreen(
                     streamUrlError = !streamUrl.startsWith("http://") && !streamUrl.startsWith("https://")
                     
                     if (!nameError && !streamUrlError) {
-                        viewModel.addRadio(
-                            name = name,
-                            streamUrl = streamUrl,
-                            imageUrl = imageUrl.takeIf { it.isNotBlank() },
-                            description = description.takeIf { it.isNotBlank() },
-                            category = selectedCategory,
-                            onSuccess = { onNavigateBack() }
-                        )
+                        if (radioToEdit != null) {
+                            viewModel.updateRadio(
+                                radioId = radioToEdit,
+                                name = name,
+                                streamUrl = streamUrl,
+                                imageUrl = imageUrl.takeIf { it.isNotBlank() },
+                                description = description.takeIf { it.isNotBlank() },
+                                category = selectedCategory,
+                                onSuccess = { onNavigateBack() }
+                            )
+                        } else {
+                            viewModel.addRadio(
+                                name = name,
+                                streamUrl = streamUrl,
+                                imageUrl = imageUrl.takeIf { it.isNotBlank() },
+                                description = description.takeIf { it.isNotBlank() },
+                                category = selectedCategory,
+                                onSuccess = { onNavigateBack() }
+                            )
+                        }
                     }
                 },
                 modifier = Modifier

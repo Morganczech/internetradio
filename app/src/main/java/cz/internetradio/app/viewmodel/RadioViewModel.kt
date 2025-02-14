@@ -410,6 +410,16 @@ class RadioViewModel @Inject constructor(
         _showMaxFavoritesError.value = false
     }
 
+    fun deleteRadio(radio: Radio) {
+        viewModelScope.launch {
+            radioRepository.deleteRadio(radio)
+            // Pokud je smazané rádio právě přehrávané, zastav přehrávání
+            if (radio.id == currentRadio.value?.id) {
+                stopPlayback()
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         equalizerManager.release()

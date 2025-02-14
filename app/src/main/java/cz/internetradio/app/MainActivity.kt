@@ -36,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.navigation.Screen
@@ -55,6 +57,7 @@ import androidx.compose.ui.draw.alpha
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
+import cz.internetradio.app.model.RadioCategory
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -124,16 +127,20 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.Favorites.route) {
                                 FavoritesScreen(
                                     viewModel = viewModel,
-                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) },
                                     onNavigateToAllStations = { navController.navigate(Screen.AllStations.route) },
-                                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) },
+                                    onNavigateToEdit = { radioId ->
+                                        navController.navigate(Screen.EditRadio.createRoute(radioId))
+                                    }
                                 )
                             }
                             composable(Screen.AllStations.route) {
                                 AllStationsScreen(
                                     viewModel = viewModel,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToEdit = { radioId ->
+                                        navController.navigate(Screen.EditRadio.createRoute(radioId))
                                     }
                                 )
                             }
@@ -160,6 +167,17 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+                            composable(
+                                route = Screen.EditRadio.route,
+                                arguments = listOf(navArgument("radioId") { type = NavType.StringType })
+                            ) { backStackEntry ->
+                                val radioId = backStackEntry.arguments?.getString("radioId") ?: return@composable
+                                AddRadioScreen(
+                                    viewModel = hiltViewModel(),
+                                    onNavigateBack = { navController.popBackStack() },
+                                    radioToEdit = radioId
+                                )
+                            }
                         }
                     }
                 }
@@ -178,8 +196,13 @@ fun RadioItem(
     radio: Radio,
     isSelected: Boolean,
     onRadioClick: () -> Unit,
-    onFavoriteClick: () -> Unit
+    onFavoriteClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    isCustomStation: Boolean = radio.category === RadioCategory.VLASTNI
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -239,12 +262,60 @@ fun RadioItem(
                     }
                 }
                 
-                IconButton(onClick = onFavoriteClick) {
-                    Icon(
-                        imageVector = if (radio.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (radio.isFavorite) "Odebrat z oblíbených" else "Přidat do oblíbených",
-                        tint = Color.White
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            imageVector = if (radio.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (radio.isFavorite) "Odebrat z oblíbených" else "Přidat do oblíbených",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    if (isCustomStation) {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Více možností",
+                                tint = Color.White
+                            )
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    showMenu = false
+                                    onEditClick()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Upravit stanici")
+                            }
+                            DropdownMenuItem(
+                                onClick = {
+                                    showMenu = false
+                                    onDeleteClick()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Smazat stanici")
+                            }
+                        }
+                    }
                 }
             }
         }

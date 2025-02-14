@@ -91,4 +91,68 @@ class AddRadioViewModel @Inject constructor(
     fun clearValidationError() {
         _validationError.value = null
     }
+
+    suspend fun loadRadioForEdit(radioId: String): Radio? {
+        return repository.getRadioById(radioId)
+    }
+
+    fun updateRadio(
+        radioId: String,
+        name: String,
+        streamUrl: String,
+        imageUrl: String?,
+        description: String?,
+        category: RadioCategory = RadioCategory.VLASTNI,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            if (name.isBlank() || streamUrl.isBlank()) return@launch
+
+            // Parsování URL streamu
+            when (val result = StreamUrlParser.parseUrl(streamUrl)) {
+                is StreamUrlParser.Result.Success -> {
+                    val finalStreamUrl = result.streamUrl
+
+                    // Kontrola duplicit s finální URL (kromě aktuální stanice)
+                    if (repository.existsByStreamUrl(finalStreamUrl) && 
+                        repository.getRadioById(radioId)?.streamUrl != finalStreamUrl) {
+                        _validationError.value = ValidationError.DuplicateStreamUrl
+                        return@launch
+                    }
+
+                    if (repository.existsByName(name) && 
+                        repository.getRadioById(radioId)?.name != name) {
+                        _validationError.value = ValidationError.DuplicateName
+                        return@launch
+                    }
+
+                    // Získáme gradient podle kategorie
+                    val (startColor, endColor) = if (category == RadioCategory.VLASTNI) {
+                        // Pro vlastní stanice použijeme náhodný gradient
+                        Gradients.getRandomGradient()
+                    } else {
+                        // Pro ostatní kategorie použijeme předdefinovaný gradient
+                        Gradients.getGradientForCategory(category)
+                    }
+
+                    val radio = Radio(
+                        id = radioId,
+                        name = name,
+                        streamUrl = finalStreamUrl,
+                        imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                        description = description,
+                        startColor = startColor,
+                        endColor = endColor,
+                        category = category
+                    )
+
+                    repository.insertRadio(radio)
+                    onSuccess()
+                }
+                is StreamUrlParser.Result.Error -> {
+                    _validationError.value = ValidationError.StreamError(result.message)
+                }
+            }
+        }
+    }
 } 
