@@ -38,11 +38,25 @@ fun AllStationsScreen(
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
-    val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
+    val radioStations by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
+    val maxFavorites by viewModel.maxFavorites.collectAsState()
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    if (showMaxFavoritesError) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissMaxFavoritesError() },
+            title = { Text("Maximální počet oblíbených") },
+            text = { Text("Dosáhli jste maximálního počtu oblíbených stanic ($maxFavorites). Před přidáním nové stanice musíte některou odebrat.") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissMaxFavoritesError() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -142,7 +156,7 @@ fun AllStationsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val filteredRadios = allRadios
+            val filteredRadios = radioStations
                 .filter { radio ->
                     (selectedCategory == null || radio.category == selectedCategory) &&
                     (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
@@ -190,38 +204,20 @@ fun AllStationsScreen(
             }
         }
 
-        // Přehrávač
+        // Animovaný přechod pro přehrávač
         AnimatedVisibility(
             visible = currentRadio != null,
             enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
+            exit = slideOutVertically(targetOffsetY = { it }),
+            modifier = Modifier.fillMaxWidth()
         ) {
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = { viewModel.togglePlayPause() },
                     viewModel = viewModel
                 )
             }
         }
-    }
-
-    // Dialog s upozorněním na maximální počet oblíbených stanic
-    if (showMaxFavoritesError) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissMaxFavoritesError() },
-            title = { Text("Maximální počet oblíbených") },
-            text = { 
-                val maxFavorites by viewModel.maxFavorites.collectAsState()
-                Text("Můžete mít maximálně $maxFavorites oblíbených stanic. Prosím, odeberte některou stanici z oblíbených před přidáním nové, nebo zvyšte limit v nastavení aplikace.") 
-            },
-            confirmButton = {
-                TextButton(onClick = { viewModel.dismissMaxFavoritesError() }) {
-                    Text("OK")
-                }
-            }
-        )
     }
 }
 

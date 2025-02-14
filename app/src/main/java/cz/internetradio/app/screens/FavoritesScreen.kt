@@ -125,8 +125,6 @@ fun FavoritesScreen(
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = { viewModel.togglePlayPause() },
                     viewModel = viewModel
                 )
             }

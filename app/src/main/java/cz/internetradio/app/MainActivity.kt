@@ -254,17 +254,20 @@ fun RadioItem(
 @Composable
 fun PlayerControls(
     radio: Radio,
-    isPlaying: Boolean,
-    onPlayPauseClick: () -> Unit,
     viewModel: RadioViewModel
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
     val remainingTime by viewModel.remainingTimeMinutes.collectAsState()
     val currentMetadata by viewModel.currentMetadata.collectAsState()
+    val currentRadio by viewModel.currentRadio.collectAsState()
+    val isPlaying by viewModel.isPlaying.collectAsState()
     var showTimerDropdown by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
+
+    // Použijeme aktuální rádio ze stavu místo parametru
+    val displayedRadio = currentRadio ?: radio
 
     Card(
         modifier = Modifier
@@ -277,7 +280,7 @@ fun PlayerControls(
             modifier = Modifier
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(radio.startColor, radio.endColor)
+                        colors = listOf(displayedRadio.startColor, displayedRadio.endColor)
                     )
                 )
         ) {
@@ -302,7 +305,7 @@ fun PlayerControls(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = radio.name,
+                            text = displayedRadio.name,
                             style = MaterialTheme.typography.h6,
                             color = Color.White
                         )
@@ -319,7 +322,7 @@ fun PlayerControls(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (!isExpanded) {
-                            IconButton(onClick = onPlayPauseClick) {
+                            IconButton(onClick = { viewModel.togglePlayPause() }) {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
@@ -395,7 +398,7 @@ fun PlayerControls(
                             }
 
                             IconButton(
-                                onClick = onPlayPauseClick
+                                onClick = { viewModel.togglePlayPause() }
                             ) {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
