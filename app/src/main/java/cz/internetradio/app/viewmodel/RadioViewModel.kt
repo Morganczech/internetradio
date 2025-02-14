@@ -30,12 +30,13 @@ import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import android.content.Intent
 import cz.internetradio.app.service.RadioService
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
 class RadioViewModel @Inject constructor(
     private val radioRepository: RadioRepository,
-    private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
     @ApplicationContext private val context: Context
@@ -81,6 +82,56 @@ class RadioViewModel @Inject constructor(
 
     private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
 
+    private val serviceReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            Log.d("RadioViewModel", "Přijat broadcast: ${intent.action}")
+            when (intent.action) {
+                RadioService.ACTION_PLAYBACK_STATE_CHANGED -> {
+                    val isPlaying = intent.getBooleanExtra(RadioService.EXTRA_IS_PLAYING, false)
+                    val metadata = intent.getStringExtra(RadioService.EXTRA_METADATA)
+                    val radioId = intent.getStringExtra(RadioService.EXTRA_CURRENT_RADIO)
+                    
+                    Log.d("RadioViewModel", "Přijat stav: playing=$isPlaying, metadata=$metadata, radioId=$radioId")
+                    
+                    viewModelScope.launch {
+                        try {
+                            // Aktualizace rádia
+                            if (radioId != null) {
+                                val radio = radioRepository.getRadioById(radioId)
+                                if (radio != null) {
+                                    Log.d("RadioViewModel", "Aktualizuji rádio na: ${radio.name}")
+                                    _currentRadio.value = radio
+                                } else {
+                                    Log.e("RadioViewModel", "Rádio s ID $radioId nebylo nalezeno")
+                                }
+                            } else {
+                                Log.d("RadioViewModel", "Resetuji aktuální rádio (radioId je null)")
+                                _currentRadio.value = null
+                            }
+
+                            // Aktualizace stavu přehrávání
+                            if (_isPlaying.value != isPlaying) {
+                                Log.d("RadioViewModel", "Aktualizuji stav přehrávání na: $isPlaying")
+                                _isPlaying.value = isPlaying
+                            }
+
+                            // Aktualizace metadat
+                            if (_currentMetadata.value != metadata) {
+                                Log.d("RadioViewModel", "Aktualizuji metadata na: $metadata")
+                                _currentMetadata.value = metadata
+                            }
+
+                            // Aktualizace stavu pro wearable
+                            updateWearableState()
+                        } catch (e: Exception) {
+                            Log.e("RadioViewModel", "Chyba při zpracování broadcastu: ${e.message}")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     companion object {
         const val DEFAULT_MAX_FAVORITES = 8
         const val PREFS_MAX_FAVORITES = "max_favorites"
@@ -101,7 +152,6 @@ class RadioViewModel @Inject constructor(
     }
 
     init {
-        setupPlayerListener()
         initializeDatabase()
         loadSavedState()
         _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
@@ -109,81 +159,24 @@ class RadioViewModel @Inject constructor(
         loadEqualizerState()
         setupWearableListener()
         
-        // Nastavení equalizeru pro ExoPlayer
-        equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
+        try {
+            // Registrace broadcast receiveru s explicitním povolením exportu
+            val filter = IntentFilter(RadioService.ACTION_PLAYBACK_STATE_CHANGED)
+            context.registerReceiver(
+                serviceReceiver,
+                filter,
+                Context.RECEIVER_EXPORTED
+            )
+            Log.d("RadioViewModel", "Broadcast receiver úspěšně zaregistrován")
+        } catch (e: Exception) {
+            Log.e("RadioViewModel", "Chyba při registraci receiveru: ${e.message}")
+        }
     }
 
     private fun initializeDatabase() {
         viewModelScope.launch {
             radioRepository.initializeDefaultRadios()
         }
-    }
-
-    private fun setupPlayerListener() {
-        exoPlayer.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                _isPlaying.value = playbackState == Player.STATE_READY && exoPlayer.playWhenReady
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                _isPlaying.value = isPlaying
-            }
-
-            override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
-                val title = mediaMetadata.title?.toString()?.let { decodeMetadata(it) }
-                val artist = mediaMetadata.artist?.toString()?.let { decodeMetadata(it) }
-                
-                val metadata = when {
-                    !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
-                    !title.isNullOrBlank() -> title
-                    !artist.isNullOrBlank() -> artist
-                    else -> null
-                }
-                
-                _currentMetadata.value = metadata?.let { decodeMetadata(it) }
-            }
-
-            private fun decodeMetadata(text: String): String {
-                return try {
-                    java.net.URLDecoder.decode(
-                        text
-                            .replace("&amp;", "&")
-                            .replace("&lt;", "<")
-                            .replace("&gt;", ">")
-                            .replace("&quot;", "\"")
-                            .replace("&#039;", "'")
-                            .replace("&#39;", "'")
-                            .replace("&#x27;", "'")
-                            .replace("&apos;", "'")
-                            .replace("+", " ")
-                            .replace("\\", "")
-                            .replace("%C3%A1", "á")
-                            .replace("%C3%A9", "é")
-                            .replace("%C3%AD", "í")
-                            .replace("%C3%BD", "ý")
-                            .replace("%C3%B3", "ó")
-                            .replace("%C3%BA", "ú")
-                            .replace("%C4%8D", "č")
-                            .replace("%C4%8F", "ď")
-                            .replace("%C4%9B", "ě")
-                            .replace("%C5%88", "ň")
-                            .replace("%C5%99", "ř")
-                            .replace("%C5%A1", "š")
-                            .replace("%C5%A5", "ť")
-                            .replace("%C5%AF", "ů")
-                            .replace("%C5%BE", "ž")
-                            .replace("%20", " "),
-                        "UTF-8"
-                    ).trim()
-                } catch (e: Exception) {
-                    text.trim()
-                }
-            }
-
-            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                _isPlaying.value = false
-            }
-        })
     }
 
     private fun loadSavedState() {
@@ -198,59 +191,16 @@ class RadioViewModel @Inject constructor(
                 val lastRadio = radioRepository.getRadioById(lastRadioId)
                 lastRadio?.let { radio ->
                     _currentRadio.value = radio
-                    preparePlayer(radio.streamUrl)
-                    exoPlayer.playWhenReady = false
-                    _isPlaying.value = false
                 }
             }
         }
-    }
-
-    private fun preparePlayer(url: String) {
-        val mediaItem = MediaItem.fromUri(url)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-    }
-
-    fun getAllRadios(): Flow<List<Radio>> = radioRepository.getAllRadios()
-
-    fun getFavoriteRadios(): Flow<List<Radio>> = radioRepository.getFavoriteRadios()
-
-    fun setMaxFavorites(value: Int) {
-        _maxFavorites.value = value
-        prefs.edit().putInt(PREFS_MAX_FAVORITES, value).apply()
-    }
-
-    fun toggleFavorite(radio: Radio) {
-        viewModelScope.launch {
-            if (radio.isFavorite) {
-                radioRepository.removeFavorite(radio.id)
-            } else {
-                val favoriteCount = radioRepository.getFavoriteRadios().first().size
-                if (favoriteCount >= maxFavorites.value) {
-                    _showMaxFavoritesError.value = true
-                    return@launch
-                }
-                radioRepository.toggleFavorite(radio.id)
-            }
-        }
-    }
-
-    fun dismissMaxFavoritesError() {
-        _showMaxFavoritesError.value = false
     }
 
     fun playRadio(radio: Radio) {
         viewModelScope.launch {
             try {
+                Log.d("RadioViewModel", "Spouštím rádio: ${radio.name}")
                 _currentRadio.value = radio
-                exoPlayer.stop()
-                exoPlayer.clearMediaItems()
-                val mediaItem = MediaItem.fromUri(radio.streamUrl)
-                exoPlayer.setMediaItem(mediaItem)
-                exoPlayer.prepare()
-                exoPlayer.playWhenReady = true
-                _isPlaying.value = true
                 prefs.edit().putString("last_radio_id", radio.id).apply()
                 updateWearableState()
                 
@@ -261,6 +211,7 @@ class RadioViewModel @Inject constructor(
                 }
                 context.startForegroundService(intent)
             } catch (e: Exception) {
+                Log.e("RadioViewModel", "Chyba při spouštění rádia: ${e.message}")
                 _isPlaying.value = false
                 updateWearableState()
             }
@@ -268,8 +219,6 @@ class RadioViewModel @Inject constructor(
     }
 
     fun stopPlayback() {
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
         _currentRadio.value = null
         _isPlaying.value = false
         _currentMetadata.value = null
@@ -281,18 +230,12 @@ class RadioViewModel @Inject constructor(
 
     fun togglePlayPause() {
         if (_isPlaying.value) {
-            exoPlayer.pause()
-            _isPlaying.value = false
-            
             // Pozastavení přehrávání v službě
             val intent = Intent(context, RadioService::class.java).apply {
                 action = RadioService.ACTION_PAUSE
             }
             context.startForegroundService(intent)
         } else {
-            exoPlayer.play()
-            _isPlaying.value = true
-            
             // Obnovení přehrávání v službě
             _currentRadio.value?.let { radio ->
                 val intent = Intent(context, RadioService::class.java).apply {
@@ -302,15 +245,20 @@ class RadioViewModel @Inject constructor(
                 context.startForegroundService(intent)
             }
         }
-        updateWearableState()
     }
 
     fun setVolume(newVolume: Float) {
         val clampedVolume = newVolume.coerceIn(0f, 1f)
-        exoPlayer.volume = clampedVolume
         _volume.value = clampedVolume
         // Uložení hlasitosti
         prefs.edit().putFloat("volume", clampedVolume).apply()
+        
+        // Odeslání změny hlasitosti do služby
+        val intent = Intent(context, RadioService::class.java).apply {
+            action = RadioService.ACTION_SET_VOLUME
+            putExtra(RadioService.EXTRA_VOLUME, clampedVolume)
+        }
+        context.startForegroundService(intent)
     }
 
     fun setSleepTimer(minutes: Int?) {
@@ -434,10 +382,38 @@ class RadioViewModel @Inject constructor(
         }
     }
 
+    fun getAllRadios(): Flow<List<Radio>> = radioRepository.getAllRadios()
+
+    fun getFavoriteRadios(): Flow<List<Radio>> = radioRepository.getFavoriteRadios()
+
+    fun setMaxFavorites(value: Int) {
+        _maxFavorites.value = value
+        prefs.edit().putInt(PREFS_MAX_FAVORITES, value).apply()
+    }
+
+    fun toggleFavorite(radio: Radio) {
+        viewModelScope.launch {
+            if (radio.isFavorite) {
+                radioRepository.removeFavorite(radio.id)
+            } else {
+                val favoriteCount = radioRepository.getFavoriteRadios().first().size
+                if (favoriteCount >= maxFavorites.value) {
+                    _showMaxFavoritesError.value = true
+                    return@launch
+                }
+                radioRepository.toggleFavorite(radio.id)
+            }
+        }
+    }
+
+    fun dismissMaxFavoritesError() {
+        _showMaxFavoritesError.value = false
+    }
+
     override fun onCleared() {
         super.onCleared()
         equalizerManager.release()
-        exoPlayer.release()
         Wearable.getDataClient(context).removeListener(this)
+        context.unregisterReceiver(serviceReceiver)
     }
 } 
