@@ -21,7 +21,8 @@ class RadioBrowserApi @Inject constructor() {
     suspend fun searchStationsByName(name: String): List<RadioStation>? {
         return withContext(Dispatchers.IO) {
             try {
-                val encodedName = java.net.URLEncoder.encode(name, "UTF-8")
+                val encodedName = java.net.URLEncoder.encode(name.trim(), "UTF-8")
+                    .replace("+", "%20")
                 val url = "$baseUrl/stations/byname/$encodedName"
                 Log.d("RadioBrowserApi", "Volám API: $url")
                 

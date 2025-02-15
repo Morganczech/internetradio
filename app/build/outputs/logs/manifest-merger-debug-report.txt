@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-41:12
-INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-41:12
-INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-41:12
-INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-41:12
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-43:12
+INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-43:12
+INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-43:12
+INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:2:1-43:12
 MERGED from [androidx.media3:media3-ui:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/ba44b7c8e3d1f835ae34cbbdd113cbae/transformed/jetified-media3-ui-1.2.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-session:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/df1674ba86127d867047893ce48f58a9/transformed/jetified-media3-session-1.2.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-extractor:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/2704ad5cf9eec5c7690f3201b126a398/transformed/jetified-media3-extractor-1.2.1/AndroidManifest.xml:17:1-22:12
@@ -20,9 +20,10 @@ MERGED from [androidx.hilt:hilt-navigation-compose:1.1.0] /Users/miroslavhazik/.
 MERGED from [androidx.hilt:hilt-navigation:1.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/10fa2f6592133899a74c21a38634e7ba/transformed/jetified-hilt-navigation-1.1.0/AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.dagger:hilt-android:2.50] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/e662b86462053748b6f7f4f2e80101e2/transformed/jetified-hilt-android-2.50/AndroidManifest.xml:16:1-19:12
 MERGED from [androidx.navigation:navigation-compose:2.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/269345b7fe7fd417ef371e53e32785d0/transformed/jetified-navigation-compose-2.5.1/AndroidManifest.xml:17:1-24:12
-MERGED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:16:1-24:12
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/30a65c70879565abf9ade4fb46db95a4/transformed/jetified-play-services-tasks-18.0.1/AndroidManifest.xml:2:1-6:12
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:16:1-26:12
+MERGED from [com.google.android.gms:play-services-location:21.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/73ca531570397480a127108a9c24c0d8/transformed/jetified-play-services-location-21.0.1/AndroidManifest.xml:2:1-9:12
+MERGED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:16:1-24:12
+MERGED from [com.google.android.gms:play-services-tasks:18.0.2] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/cedd0cd42150756c6e7901c594661abd/transformed/jetified-play-services-tasks-18.0.2/AndroidManifest.xml:2:1-6:12
+MERGED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:16:1-26:12
 MERGED from [androidx.fragment:fragment:1.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/b0dfc07a85293ee97b9f13cc9918deed/transformed/fragment-1.5.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.navigation:navigation-runtime-ktx:2.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c045a5df84829d20d3f0d3ceddc3716e/transformed/navigation-runtime-ktx-2.5.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.navigation:navigation-runtime:2.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5d6260997afb5f03e5fd6de7c98bbcfc/transformed/navigation-runtime-2.5.1/AndroidManifest.xml:17:1-24:12
@@ -102,29 +103,43 @@ uses-permission#android.permission.INTERNET
 ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:5:5-67
 	android:name
 		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:5:22-64
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:6:5-81
+	android:name
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:6:22-78
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:7:5-79
+MERGED from [androidx.media3:media3-common:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5773b9434f964bce8567b6c360582ad6/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-common:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5773b9434f964bce8567b6c360582ad6/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5b4a9e7efee5ccc4f72d1ecd47cf0bc0/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5b4a9e7efee5ccc4f72d1ecd47cf0bc0/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:22:5-79
+	android:name
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:7:22-76
 uses-permission#android.permission.FOREGROUND_SERVICE
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:6:5-77
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:8:5-77
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:6:22-74
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:8:22-74
 uses-permission#android.permission.MODIFY_AUDIO_SETTINGS
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:7:5-80
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:9:5-80
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:7:22-77
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:9:22-77
 uses-permission#android.permission.WAKE_LOCK
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:8:5-68
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:10:5-68
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:8:22-65
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:10:22-65
 application
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:10:5-40:19
-INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:10:5-40:19
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:12:5-42:19
+INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:12:5-42:19
 MERGED from [com.google.android.gms:play-services-wearable:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/fe505eb95c1f6198ec6e74f3de5c2c1a/transformed/jetified-play-services-wearable-18.1.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.gms:play-services-wearable:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/fe505eb95c1f6198ec6e74f3de5c2c1a/transformed/jetified-play-services-wearable-18.1.0/AndroidManifest.xml:22:5-20
-MERGED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:19:5-23:19
-MERGED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:19:5-23:19
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/30a65c70879565abf9ade4fb46db95a4/transformed/jetified-play-services-tasks-18.0.1/AndroidManifest.xml:5:5-20
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/30a65c70879565abf9ade4fb46db95a4/transformed/jetified-play-services-tasks-18.0.1/AndroidManifest.xml:5:5-20
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:20:5-24:19
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:20:5-24:19
+MERGED from [com.google.android.gms:play-services-location:21.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/73ca531570397480a127108a9c24c0d8/transformed/jetified-play-services-location-21.0.1/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-location:21.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/73ca531570397480a127108a9c24c0d8/transformed/jetified-play-services-location-21.0.1/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:19:5-23:19
+MERGED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:19:5-23:19
+MERGED from [com.google.android.gms:play-services-tasks:18.0.2] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/cedd0cd42150756c6e7901c594661abd/transformed/jetified-play-services-tasks-18.0.2/AndroidManifest.xml:5:5-20
+MERGED from [com.google.android.gms:play-services-tasks:18.0.2] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/cedd0cd42150756c6e7901c594661abd/transformed/jetified-play-services-tasks-18.0.2/AndroidManifest.xml:5:5-20
+MERGED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:20:5-24:19
+MERGED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:20:5-24:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/4625390a556dfeab177e882a52e925f4/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/4625390a556dfeab177e882a52e925f4/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/2e62b4ef05b5b62e8ff94152114d0916/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:23:5-33:19
@@ -144,59 +159,59 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/miroslavhazik/.gradl
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/0bb80d451ad1adfd6429dc7011fef053/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:16:9-35
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:18:9-35
 	android:label
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:14:9-41
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:16:9-41
 	android:roundIcon
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:15:9-54
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:17:9-54
 	android:icon
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:13:9-43
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:15:9-43
 	android:allowBackup
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:12:9-35
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:14:9-35
 	android:theme
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:18:9-51
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:20:9-51
 	android:usesCleartextTraffic
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:17:9-44
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:19:9-44
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:11:9-41
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:13:9-41
 activity#cz.internetradio.app.MainActivity
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:19:9-26:20
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:21:9-28:20
 	android:exported
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:21:13-36
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:23:13-36
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:20:13-41
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:22:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:22:13-25:29
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:24:13-27:29
 action#android.intent.action.MAIN
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:23:17-69
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:25:17-69
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:23:25-66
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:25:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:24:17-77
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:26:17-77
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:24:27-74
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:26:27-74
 receiver#cz.internetradio.app.widget.RadioWidgetProvider
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:29:9-39:20
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:31:9-41:20
 	android:exported
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:31:13-36
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:33:13-36
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:30:13-55
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:32:13-55
 intent-filter#action:name:android.appwidget.action.APPWIDGET_UPDATE+action:name:cz.internetradio.app.ACTION_PLAY_PAUSE
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:32:13-35:29
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:34:13-37:29
 action#android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:33:17-84
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:35:17-84
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:33:25-81
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:35:25-81
 action#cz.internetradio.app.ACTION_PLAY_PAUSE
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:34:17-81
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:36:17-81
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:34:25-78
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:36:25-78
 meta-data#android.appwidget.provider
-ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:36:13-38:61
+ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:38:13-40:61
 	android:resource
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:38:17-58
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:40:17-58
 	android:name
-		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:37:17-58
+		ADDED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml:39:17-58
 uses-sdk
 INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml
@@ -233,12 +248,14 @@ MERGED from [com.google.dagger:hilt-android:2.50] /Users/miroslavhazik/.gradle/c
 MERGED from [com.google.dagger:hilt-android:2.50] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/e662b86462053748b6f7f4f2e80101e2/transformed/jetified-hilt-android-2.50/AndroidManifest.xml:18:3-42
 MERGED from [androidx.navigation:navigation-compose:2.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/269345b7fe7fd417ef371e53e32785d0/transformed/jetified-navigation-compose-2.5.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.navigation:navigation-compose:2.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/269345b7fe7fd417ef371e53e32785d0/transformed/jetified-navigation-compose-2.5.1/AndroidManifest.xml:20:5-22:41
-MERGED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:18:5-43
-MERGED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:18:5-43
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/30a65c70879565abf9ade4fb46db95a4/transformed/jetified-play-services-tasks-18.0.1/AndroidManifest.xml:4:5-43
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/30a65c70879565abf9ade4fb46db95a4/transformed/jetified-play-services-tasks-18.0.1/AndroidManifest.xml:4:5-43
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:18:5-43
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-location:21.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/73ca531570397480a127108a9c24c0d8/transformed/jetified-play-services-location-21.0.1/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-location:21.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/73ca531570397480a127108a9c24c0d8/transformed/jetified-play-services-location-21.0.1/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-tasks:18.0.2] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/cedd0cd42150756c6e7901c594661abd/transformed/jetified-play-services-tasks-18.0.2/AndroidManifest.xml:4:5-43
+MERGED from [com.google.android.gms:play-services-tasks:18.0.2] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/cedd0cd42150756c6e7901c594661abd/transformed/jetified-play-services-tasks-18.0.2/AndroidManifest.xml:4:5-43
+MERGED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:18:5-43
 MERGED from [androidx.fragment:fragment:1.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/b0dfc07a85293ee97b9f13cc9918deed/transformed/fragment-1.5.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.fragment:fragment:1.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/b0dfc07a85293ee97b9f13cc9918deed/transformed/fragment-1.5.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.navigation:navigation-runtime-ktx:2.5.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c045a5df84829d20d3f0d3ceddc3716e/transformed/navigation-runtime-ktx-2.5.1/AndroidManifest.xml:20:5-22:41
@@ -375,26 +392,20 @@ MERGED from [com.google.dagger:dagger-lint-aar:2.50] /Users/miroslavhazik/.gradl
 		INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
 		INJECTED from /Users/miroslavhazik/Workspaces/android-app/internetradio/app/src/main/AndroidManifest.xml
-uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from [androidx.media3:media3-common:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5773b9434f964bce8567b6c360582ad6/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
-MERGED from [androidx.media3:media3-exoplayer:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5b4a9e7efee5ccc4f72d1ecd47cf0bc0/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:22:5-79
-MERGED from [androidx.media3:media3-exoplayer:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5b4a9e7efee5ccc4f72d1ecd47cf0bc0/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:22:5-79
-	android:name
-		ADDED from [androidx.media3:media3-common:1.2.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/5773b9434f964bce8567b6c360582ad6/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:22-76
 activity#com.google.android.gms.common.api.GoogleApiActivity
-ADDED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:9-22:45
+ADDED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:20:9-22:45
 	android:exported
-		ADDED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:22:19-43
+		ADDED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:22:19-43
 	android:theme
-		ADDED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:21:19-78
+		ADDED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:21:19-78
 	android:name
-		ADDED from [com.google.android.gms:play-services-base:18.0.1] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/889b6fdc286c00056e469338473b4eb2/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:19-85
+		ADDED from [com.google.android.gms:play-services-base:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/a4990d47c10101eb7d5be6bbe55ed215/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:20:19-85
 meta-data#com.google.android.gms.version
-ADDED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:21:9-23:69
+ADDED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:21:9-23:69
 	android:value
-		ADDED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:23:13-66
+		ADDED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:23:13-66
 	android:name
-		ADDED from [com.google.android.gms:play-services-basement:18.0.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/f29a6e87ef87c5a1254d6ffd7f280aaa/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:22:13-58
+		ADDED from [com.google.android.gms:play-services-basement:18.1.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/c9918c495ee13496159729ef20e700f5/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:22:13-58
 provider#androidx.startup.InitializationProvider
 ADDED from [androidx.emoji2:emoji2:1.4.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/4625390a556dfeab177e882a52e925f4/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
 MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/miroslavhazik/.gradle/caches/8.10.2/transforms/2e62b4ef05b5b62e8ff94152114d0916/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20

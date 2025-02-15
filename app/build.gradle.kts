@@ -95,6 +95,7 @@ dependencies {
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
@@ -106,6 +107,9 @@ dependencies {
 
     // Wearable
     implementation("com.google.android.gms:play-services-wearable:18.1.0")
+
+    // Location Services
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

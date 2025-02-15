@@ -17,7 +17,7 @@ data class RadioEntity(
     val startColorValue: Long,
     val endColorValue: Long,
     val isFavorite: Boolean = false,
-    val category: String = RadioCategory.CESKE.name
+    val category: String = RadioCategory.MISTNI.name
 ) {
     fun toRadio(): Radio = Radio(
         id = id,

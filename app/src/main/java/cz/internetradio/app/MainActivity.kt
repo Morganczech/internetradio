@@ -43,6 +43,7 @@ import cz.internetradio.app.screens.AllStationsScreen
 import cz.internetradio.app.screens.FavoritesScreen
 import cz.internetradio.app.screens.SettingsScreen
 import cz.internetradio.app.screens.EqualizerScreen
+import cz.internetradio.app.screens.BrowseStationsScreen
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
@@ -126,11 +127,22 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToSettings = {
                                         navController.navigate(Screen.Settings.route)
+                                    },
+                                    onNavigateToBrowseStations = {
+                                        navController.navigate(Screen.BrowseStations.route)
                                     }
                                 )
                             }
                             composable(Screen.AllStations.route) {
                                 AllStationsScreen(
+                                    viewModel = viewModel,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable(Screen.BrowseStations.route) {
+                                BrowseStationsScreen(
                                     viewModel = viewModel,
                                     onNavigateBack = {
                                         navController.popBackStack()

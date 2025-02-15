@@ -30,6 +30,6 @@ data class RadioStation(
     val geo_lat: Double? = null,
     val geo_long: Double? = null,
     val has_extended_info: Boolean? = null,
-    val isFromRadioBrowser: Boolean = false,
+    var isFromRadioBrowser: Boolean = false,
     var category: RadioCategory? = null
 ) 

@@ -1,7 +1,9 @@
 package cz.internetradio.app;
 
 import cz.internetradio.app.di.AppModule;
+import cz.internetradio.app.service.RadioService_GeneratedInjector;
 import cz.internetradio.app.viewmodel.RadioViewModel_HiltModules;
+import cz.internetradio.app.widget.RadioWidgetProvider;
 import dagger.Binds;
 import dagger.Component;
 import dagger.Module;
@@ -135,6 +137,7 @@ public final class RadioApplication_HiltComponents {
   )
   @Singleton
   public abstract static class SingletonC implements RadioApplication_GeneratedInjector,
+      RadioWidgetProvider.RadioWidgetEntryPoint,
       FragmentGetContextFix.FragmentGetContextFixEntryPoint,
       HiltWrapper_ActivityRetainedComponentManager_ActivityRetainedComponentBuilderEntryPoint,
       ServiceComponentManager.ServiceComponentBuilderEntryPoint,
@@ -144,7 +147,8 @@ public final class RadioApplication_HiltComponents {
 
   @Subcomponent
   @ServiceScoped
-  public abstract static class ServiceC implements ServiceComponent,
+  public abstract static class ServiceC implements RadioService_GeneratedInjector,
+      ServiceComponent,
       GeneratedComponent {
     @Subcomponent.Builder
     abstract interface Builder extends ServiceComponentBuilder {

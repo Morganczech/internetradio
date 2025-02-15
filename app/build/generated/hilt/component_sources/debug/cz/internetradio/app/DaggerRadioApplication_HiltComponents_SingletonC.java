@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.audio.DefaultAudioSink;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import cz.internetradio.app.api.RadioBrowserApi;
 import cz.internetradio.app.audio.AudioSpectrumProcessor;
 import cz.internetradio.app.audio.EqualizerManager;
 import cz.internetradio.app.data.RadioDatabase;
@@ -18,8 +19,12 @@ import cz.internetradio.app.di.AppModule_ProvideAudioSpectrumProcessorFactory;
 import cz.internetradio.app.di.AppModule_ProvideDatabaseFactory;
 import cz.internetradio.app.di.AppModule_ProvideDefaultAudioSinkFactory;
 import cz.internetradio.app.di.AppModule_ProvideExoPlayerFactory;
+import cz.internetradio.app.di.AppModule_ProvideRadioBrowserApiFactory;
 import cz.internetradio.app.di.AppModule_ProvideRadioDaoFactory;
+import cz.internetradio.app.location.LocationService;
 import cz.internetradio.app.repository.RadioRepository;
+import cz.internetradio.app.service.RadioService;
+import cz.internetradio.app.service.RadioService_MembersInjector;
 import cz.internetradio.app.viewmodel.RadioViewModel;
 import cz.internetradio.app.viewmodel.RadioViewModel_HiltModules_KeyModule_ProvideFactory;
 import dagger.hilt.android.ActivityRetainedLifecycle;
@@ -452,7 +457,7 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       public T get() {
         switch (id) {
           case 0: // cz.internetradio.app.viewmodel.RadioViewModel 
-          return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), singletonCImpl.equalizerManagerProvider.get(), singletonCImpl.provideAudioSpectrumProcessorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+          return (T) new RadioViewModel(singletonCImpl.radioRepositoryProvider.get(), singletonCImpl.provideExoPlayerProvider.get(), singletonCImpl.equalizerManagerProvider.get(), singletonCImpl.provideAudioSpectrumProcessorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.locationServiceProvider.get());
 
           default: throw new AssertionError(id);
         }
@@ -527,12 +532,26 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
 
     }
+
+    @Override
+    public void injectRadioService(RadioService radioService) {
+      injectRadioService2(radioService);
+    }
+
+    private RadioService injectRadioService2(RadioService instance) {
+      RadioService_MembersInjector.injectExoPlayer(instance, singletonCImpl.provideExoPlayerProvider.get());
+      RadioService_MembersInjector.injectDatabase(instance, singletonCImpl.provideDatabaseProvider.get());
+      RadioService_MembersInjector.injectRadioBrowserApi(instance, singletonCImpl.provideRadioBrowserApiProvider.get());
+      return instance;
+    }
   }
 
   private static final class SingletonCImpl extends RadioApplication_HiltComponents.SingletonC {
     private final ApplicationContextModule applicationContextModule;
 
     private final SingletonCImpl singletonCImpl = this;
+
+    private Provider<RadioBrowserApi> provideRadioBrowserApiProvider;
 
     private Provider<RadioDatabase> provideDatabaseProvider;
 
@@ -546,6 +565,8 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     private Provider<EqualizerManager> equalizerManagerProvider;
 
+    private Provider<LocationService> locationServiceProvider;
+
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
       initialize(applicationContextModuleParam);
@@ -558,16 +579,23 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
 
     @SuppressWarnings("unchecked")
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
-      this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<RadioDatabase>(singletonCImpl, 1));
-      this.radioRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RadioRepository>(singletonCImpl, 0));
-      this.provideAudioSpectrumProcessorProvider = DoubleCheck.provider(new SwitchingProvider<AudioSpectrumProcessor>(singletonCImpl, 4));
-      this.provideDefaultAudioSinkProvider = DoubleCheck.provider(new SwitchingProvider<DefaultAudioSink>(singletonCImpl, 3));
-      this.provideExoPlayerProvider = DoubleCheck.provider(new SwitchingProvider<ExoPlayer>(singletonCImpl, 2));
-      this.equalizerManagerProvider = DoubleCheck.provider(new SwitchingProvider<EqualizerManager>(singletonCImpl, 5));
+      this.provideRadioBrowserApiProvider = DoubleCheck.provider(new SwitchingProvider<RadioBrowserApi>(singletonCImpl, 0));
+      this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<RadioDatabase>(singletonCImpl, 2));
+      this.radioRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RadioRepository>(singletonCImpl, 1));
+      this.provideAudioSpectrumProcessorProvider = DoubleCheck.provider(new SwitchingProvider<AudioSpectrumProcessor>(singletonCImpl, 5));
+      this.provideDefaultAudioSinkProvider = DoubleCheck.provider(new SwitchingProvider<DefaultAudioSink>(singletonCImpl, 4));
+      this.provideExoPlayerProvider = DoubleCheck.provider(new SwitchingProvider<ExoPlayer>(singletonCImpl, 3));
+      this.equalizerManagerProvider = DoubleCheck.provider(new SwitchingProvider<EqualizerManager>(singletonCImpl, 6));
+      this.locationServiceProvider = DoubleCheck.provider(new SwitchingProvider<LocationService>(singletonCImpl, 7));
     }
 
     @Override
     public void injectRadioApplication(RadioApplication radioApplication) {
+    }
+
+    @Override
+    public RadioBrowserApi getRadioBrowserApi() {
+      return provideRadioBrowserApiProvider.get();
     }
 
     @Override
@@ -599,23 +627,29 @@ public final class DaggerRadioApplication_HiltComponents_SingletonC {
       @Override
       public T get() {
         switch (id) {
-          case 0: // cz.internetradio.app.repository.RadioRepository 
-          return (T) new RadioRepository(singletonCImpl.radioDao());
+          case 0: // cz.internetradio.app.api.RadioBrowserApi 
+          return (T) AppModule_ProvideRadioBrowserApiFactory.provideRadioBrowserApi();
 
-          case 1: // cz.internetradio.app.data.RadioDatabase 
+          case 1: // cz.internetradio.app.repository.RadioRepository 
+          return (T) new RadioRepository(singletonCImpl.radioDao(), singletonCImpl.provideRadioBrowserApiProvider.get());
+
+          case 2: // cz.internetradio.app.data.RadioDatabase 
           return (T) AppModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 2: // androidx.media3.exoplayer.ExoPlayer 
+          case 3: // androidx.media3.exoplayer.ExoPlayer 
           return (T) AppModule_ProvideExoPlayerFactory.provideExoPlayer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideDefaultAudioSinkProvider.get());
 
-          case 3: // androidx.media3.exoplayer.audio.DefaultAudioSink 
+          case 4: // androidx.media3.exoplayer.audio.DefaultAudioSink 
           return (T) AppModule_ProvideDefaultAudioSinkFactory.provideDefaultAudioSink(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideAudioSpectrumProcessorProvider.get());
 
-          case 4: // cz.internetradio.app.audio.AudioSpectrumProcessor 
+          case 5: // cz.internetradio.app.audio.AudioSpectrumProcessor 
           return (T) AppModule_ProvideAudioSpectrumProcessorFactory.provideAudioSpectrumProcessor();
 
-          case 5: // cz.internetradio.app.audio.EqualizerManager 
+          case 6: // cz.internetradio.app.audio.EqualizerManager 
           return (T) new EqualizerManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 7: // cz.internetradio.app.location.LocationService 
+          return (T) new LocationService(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);
         }

@@ -25,8 +25,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import cz.internetradio.app.api.RadioBrowserApi
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.EntryPointAccessors
 
 class RadioWidgetProvider : AppWidgetProvider() {
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface RadioWidgetEntryPoint {
+        fun getRadioBrowserApi(): RadioBrowserApi
+    }
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Main + job)
@@ -55,13 +66,19 @@ class RadioWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        // Získání závislostí přes EntryPoint
+        val entryPoint = EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            RadioWidgetEntryPoint::class.java
+        )
+        
         // Inicializace repository
         val database = Room.databaseBuilder(
             context.applicationContext,
             RadioDatabase::class.java,
             "radio_database"
         ).build()
-        radioRepository = RadioRepository(database.radioDao())
+        radioRepository = RadioRepository(database.radioDao(), entryPoint.getRadioBrowserApi())
 
         scope.launch {
             val favoriteRadios = radioRepository.getFavoriteRadios().first()

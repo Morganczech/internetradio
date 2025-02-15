@@ -19,9 +19,9 @@ abstract class RadioDatabase : RoomDatabase() {
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Přidání sloupce category s výchozí hodnotou CESKE
+                // Přidání sloupce category s výchozí hodnotou MISTNI
                 database.execSQL(
-                    "ALTER TABLE radio_stations ADD COLUMN category TEXT NOT NULL DEFAULT '${RadioCategory.CESKE.name}'"
+                    "ALTER TABLE radio_stations ADD COLUMN category TEXT NOT NULL DEFAULT '${RadioCategory.MISTNI.name}'"
                 )
             }
         }
