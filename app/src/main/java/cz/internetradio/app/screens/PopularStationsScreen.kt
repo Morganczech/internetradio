@@ -134,8 +134,10 @@ fun PopularStationsScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                countries[selectedCountry]?.stations?.sortedByDescending { it.listeners }?.let { stations ->
+                countries[selectedCountry]?.stations?.let { stations ->
                     items(stations) { station ->
+                        // Kontrola, zda je stanice v oblíbených
+                        val savedRadio = allRadios.find { it.id == station.id }
                         val radio = Radio(
                             id = station.id,
                             name = station.name,
@@ -145,7 +147,7 @@ fun PopularStationsScreen(
                             category = RadioCategory.OSTATNI,
                             startColor = Color(0xFF1976D2).copy(alpha = 0.8f),
                             endColor = Color(0xFF2196F3).copy(alpha = 0.6f),
-                            isFavorite = allRadios.any { it.id == station.id }
+                            isFavorite = savedRadio?.isFavorite ?: false
                         )
 
                         RadioItem(
