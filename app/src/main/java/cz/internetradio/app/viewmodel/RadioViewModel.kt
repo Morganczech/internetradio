@@ -29,10 +29,13 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
-<<<<<<< HEAD
 import cz.internetradio.app.model.RadioCategory
 import cz.internetradio.app.location.LocationService
 import com.google.gson.Gson
+import android.content.Intent
+import cz.internetradio.app.service.RadioService
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 
 private data class Country(
     val name: String,
@@ -46,12 +49,6 @@ private data class PopularStation(
     val imageUrl: String,
     val description: String
 )
-=======
-import android.content.Intent
-import cz.internetradio.app.service.RadioService
-import android.content.BroadcastReceiver
-import android.content.IntentFilter
->>>>>>> feature/add-radio-form
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -106,7 +103,6 @@ class RadioViewModel @Inject constructor(
 
     private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
 
-<<<<<<< HEAD
     private val _localStations = MutableStateFlow<List<RadioStation>?>(null)
     val localStations: StateFlow<List<RadioStation>?> = _localStations
 
@@ -115,7 +111,7 @@ class RadioViewModel @Inject constructor(
 
     private val _fadeOutDuration = MutableStateFlow(60)
     val fadeOutDuration: StateFlow<Int> = _fadeOutDuration
-=======
+
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d("RadioViewModel", "Přijat broadcast: ${intent.action}")
@@ -165,7 +161,6 @@ class RadioViewModel @Inject constructor(
             }
         }
     }
->>>>>>> feature/add-radio-form
 
     companion object {
         const val DEFAULT_MAX_FAVORITES = 10
@@ -189,11 +184,6 @@ class RadioViewModel @Inject constructor(
     }
 
     init {
-<<<<<<< HEAD
-        setupPlayerListener()
-=======
-        initializeDatabase()
->>>>>>> feature/add-radio-form
         loadSavedState()
         _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
         _fadeOutDuration.value = prefs.getInt(PREFS_FADE_OUT_DURATION, DEFAULT_FADE_OUT_DURATION)
@@ -201,11 +191,6 @@ class RadioViewModel @Inject constructor(
         loadEqualizerState()
         setupWearableListener()
         
-<<<<<<< HEAD
-        // Nastavení equalizeru pro ExoPlayer
-        equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
-        loadLocalStations()
-=======
         try {
             // Registrace broadcast receiveru s explicitním povolením exportu
             val filter = IntentFilter(RadioService.ACTION_PLAYBACK_STATE_CHANGED)
@@ -218,8 +203,8 @@ class RadioViewModel @Inject constructor(
         } catch (e: Exception) {
             Log.e("RadioViewModel", "Chyba při registraci receiveru: ${e.message}")
         }
-    }
->>>>>>> feature/add-radio-form
+
+        loadLocalStations()
 
         // Inicializace oblíbených stanic při prvním spuštění
         viewModelScope.launch {
@@ -231,8 +216,6 @@ class RadioViewModel @Inject constructor(
         viewModelScope.launch {
             // Načtení uložené hlasitosti
             val savedVolume = prefs.getFloat("volume", 1.0f)
-            val exponentialVolume = linearToExponential(savedVolume)
-            exoPlayer.volume = exponentialVolume
             _volume.value = savedVolume
 
             // Načtení posledního přehrávaného rádia
@@ -244,13 +227,6 @@ class RadioViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-<<<<<<< HEAD
-    private fun preparePlayer(url: String) {
-        val mediaItem = MediaItem.fromUri(url)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
     }
 
     fun getAllRadios(): Flow<List<Radio>> = radioRepository.getAllRadios()
@@ -272,23 +248,7 @@ class RadioViewModel @Inject constructor(
                     _showMaxFavoritesError.value = true
                     return@launch
                 }
-                // Nejprve zkontrolujeme, jestli stanice už v databázi existuje
-                val existingRadio = radioRepository.getRadioById(radio.id)
-                if (existingRadio == null) {
-                    // Pokud stanice neexistuje, vytvoříme novou a rovnou ji přidáme jako oblíbenou
-                    val radioStation = RadioStation(
-                        stationuuid = radio.id,
-                        name = radio.name,
-                        url = radio.streamUrl,
-                        url_resolved = radio.streamUrl,
-                        favicon = radio.imageUrl,
-                        tags = radio.description
-                    )
-                    radioRepository.addRadioStationToFavorites(radioStation, radio.category)
-                } else {
-                    // Pokud stanice existuje, jen ji označíme jako oblíbenou
-                    radioRepository.toggleFavorite(radio.id)
-                }
+                radioRepository.toggleFavorite(radio.id)
             }
         }
     }
@@ -297,8 +257,68 @@ class RadioViewModel @Inject constructor(
         _showMaxFavoritesError.value = false
     }
 
-=======
->>>>>>> feature/add-radio-form
+    fun deleteRadio(radio: Radio) {
+        viewModelScope.launch {
+            radioRepository.deleteRadio(radio)
+            // Pokud je smazané rádio právě přehrávané, zastav přehrávání
+            if (radio.id == currentRadio.value?.id) {
+                stopPlayback()
+            }
+        }
+    }
+
+    private fun loadLocalStations() {
+        viewModelScope.launch {
+            val countryCode = locationService.getCurrentCountry()
+            if (countryCode != null) {
+                _currentCountryCode.value = countryCode
+                RadioCategory.setCurrentCountryCode(countryCode)
+                val stations = radioRepository.getStationsByCountry(countryCode)
+                _localStations.value = stations
+            }
+        }
+    }
+
+    fun refreshLocalStations() {
+        loadLocalStations()
+    }
+
+    private suspend fun initializeFavoriteStations() {
+        // Kontrola, zda už byly stanice inicializovány
+        val isInitialized = prefs.getBoolean("favorites_initialized", false)
+        if (!isInitialized) {
+            val favoriteCount = radioRepository.getFavoriteRadios().first().size
+            if (favoriteCount == 0) {
+                // Načtení stanic ze souboru podle jazyka/lokace
+                val countryCode = locationService.getCurrentCountry() ?: 
+                    if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
+
+                try {
+                    val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
+                    val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
+                    val countryData = Gson().fromJson(jsonString, Country::class.java)
+                    
+                    // Přidání stanic do oblíbených
+                    countryData.stations.take(10).forEach { station ->
+                        val radioStation = RadioStation(
+                            stationuuid = station.id,
+                            name = station.name,
+                            url = station.streamUrl,
+                            url_resolved = station.streamUrl,
+                            favicon = station.imageUrl,
+                            tags = station.description
+                        )
+                        radioRepository.addRadioStationToFavorites(radioStation, RadioCategory.MISTNI)
+                    }
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "Chyba při inicializaci oblíbených stanic", e)
+                }
+            }
+            // Označení, že inicializace proběhla
+            prefs.edit().putBoolean("favorites_initialized", true).apply()
+        }
+    }
+
     fun playRadio(radio: Radio) {
         viewModelScope.launch {
             try {
@@ -360,11 +380,6 @@ class RadioViewModel @Inject constructor(
 
     fun setVolume(newVolume: Float) {
         val clampedVolume = newVolume.coerceIn(0f, 1f)
-<<<<<<< HEAD
-        val exponentialVolume = linearToExponential(clampedVolume)
-        exoPlayer.volume = exponentialVolume
-=======
->>>>>>> feature/add-radio-form
         _volume.value = clampedVolume
         // Uložení hlasitosti
         prefs.edit().putFloat("volume", clampedVolume).apply()
@@ -525,7 +540,6 @@ class RadioViewModel @Inject constructor(
         }
     }
 
-<<<<<<< HEAD
     fun searchStations(query: String, onResult: (List<RadioStation>?) -> Unit) {
         viewModelScope.launch {
             Log.d("RadioViewModel", "Začínám vyhledávat stanice pro dotaz: $query")
@@ -589,101 +603,11 @@ class RadioViewModel @Inject constructor(
             radioRepository.removeStation(radioId)
             // Pokud je stanice právě přehrávána, zastavíme přehrávání
             if (currentRadio.value?.id == radioId) {
-=======
-    fun getAllRadios(): Flow<List<Radio>> = radioRepository.getAllRadios()
-
-    fun getFavoriteRadios(): Flow<List<Radio>> = radioRepository.getFavoriteRadios()
-
-    fun setMaxFavorites(value: Int) {
-        _maxFavorites.value = value
-        prefs.edit().putInt(PREFS_MAX_FAVORITES, value).apply()
-    }
-
-    fun toggleFavorite(radio: Radio) {
-        viewModelScope.launch {
-            if (radio.isFavorite) {
-                radioRepository.removeFavorite(radio.id)
-            } else {
-                val favoriteCount = radioRepository.getFavoriteRadios().first().size
-                if (favoriteCount >= maxFavorites.value) {
-                    _showMaxFavoritesError.value = true
-                    return@launch
-                }
-                radioRepository.toggleFavorite(radio.id)
-            }
-        }
-    }
-
-    fun dismissMaxFavoritesError() {
-        _showMaxFavoritesError.value = false
-    }
-
-    fun deleteRadio(radio: Radio) {
-        viewModelScope.launch {
-            radioRepository.deleteRadio(radio)
-            // Pokud je smazané rádio právě přehrávané, zastav přehrávání
-            if (radio.id == currentRadio.value?.id) {
->>>>>>> feature/add-radio-form
                 stopPlayback()
             }
         }
     }
 
-<<<<<<< HEAD
-    private fun loadLocalStations() {
-        viewModelScope.launch {
-            val countryCode = locationService.getCurrentCountry()
-            if (countryCode != null) {
-                _currentCountryCode.value = countryCode
-                RadioCategory.setCurrentCountryCode(countryCode)
-                val stations = radioRepository.getStationsByCountry(countryCode)
-                _localStations.value = stations
-            }
-        }
-    }
-
-    fun refreshLocalStations() {
-        loadLocalStations()
-    }
-
-    private suspend fun initializeFavoriteStations() {
-        // Kontrola, zda už byly stanice inicializovány
-        val isInitialized = prefs.getBoolean("favorites_initialized", false)
-        if (!isInitialized) {
-            val favoriteCount = radioRepository.getFavoriteRadios().first().size
-            if (favoriteCount == 0) {
-                // Načtení stanic ze souboru podle jazyka/lokace
-                val countryCode = locationService.getCurrentCountry() ?: 
-                    if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
-
-                try {
-                    val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
-                    val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
-                    val countryData = Gson().fromJson(jsonString, Country::class.java)
-                    
-                    // Přidání stanic do oblíbených
-                    countryData.stations.take(10).forEach { station ->
-                        val radioStation = RadioStation(
-                            stationuuid = station.id,
-                            name = station.name,
-                            url = station.streamUrl,
-                            url_resolved = station.streamUrl,
-                            favicon = station.imageUrl,
-                            tags = station.description
-                        )
-                        radioRepository.addRadioStationToFavorites(radioStation, RadioCategory.MISTNI)
-                    }
-                } catch (e: Exception) {
-                    Log.e("RadioViewModel", "Chyba při inicializaci oblíbených stanic", e)
-                }
-            }
-            // Označení, že inicializace proběhla
-            prefs.edit().putBoolean("favorites_initialized", true).apply()
-        }
-    }
-
-=======
->>>>>>> feature/add-radio-form
     override fun onCleared() {
         super.onCleared()
         equalizerManager.release()

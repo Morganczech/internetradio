@@ -32,16 +32,13 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.PowerManager
 import android.content.BroadcastReceiver
-<<<<<<< HEAD
 import cz.internetradio.app.api.RadioBrowserApi
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-=======
 import cz.internetradio.app.MainActivity
 import android.util.Log
 import coil.ImageLoader
 import coil.request.ImageRequest
->>>>>>> feature/add-radio-form
 
 @AndroidEntryPoint
 class RadioService : Service() {

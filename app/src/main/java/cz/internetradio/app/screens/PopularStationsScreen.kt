@@ -57,7 +57,8 @@ private val COUNTRIES = mapOf(
 @Composable
 fun PopularStationsScreen(
     viewModel: RadioViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: (String) -> Unit
 ) {
     val context = LocalContext.current
     var selectedCountry by remember { mutableStateOf<String?>(null) }
@@ -154,7 +155,9 @@ fun PopularStationsScreen(
                             radio = radio,
                             isSelected = radio.id == currentRadio?.id,
                             onRadioClick = { viewModel.playRadio(radio) },
-                            onFavoriteClick = { viewModel.toggleFavorite(radio) }
+                            onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                            onEditClick = { onNavigateToEdit(radio.id) },
+                            onDeleteClick = { viewModel.removeStation(radio.id) }
                         )
                     }
                 }
@@ -170,8 +173,6 @@ fun PopularStationsScreen(
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = { viewModel.togglePlayPause() },
                     viewModel = viewModel
                 )
             }

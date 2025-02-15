@@ -136,7 +136,9 @@ class MainActivity : ComponentActivity() {
                                     onNavigateToPopularStations = {
                                         navController.navigate(Screen.PopularStations.route)
                                     },
-                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) },
+                                    onNavigateToAddRadio = { 
+                                        navController.navigate(Screen.AddRadio.route) 
+                                    },
                                     onNavigateToEdit = { radioId ->
                                         navController.navigate(Screen.EditRadio.createRoute(radioId))
                                     }

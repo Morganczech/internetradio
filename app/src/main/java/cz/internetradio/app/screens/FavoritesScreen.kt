@@ -9,14 +9,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-<<<<<<< HEAD
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-=======
 import androidx.compose.runtime.*
->>>>>>> feature/add-radio-form
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,13 +29,10 @@ fun FavoritesScreen(
     viewModel: RadioViewModel,
     onNavigateToAllStations: () -> Unit,
     onNavigateToSettings: () -> Unit,
-<<<<<<< HEAD
     onNavigateToBrowseStations: () -> Unit,
-    onNavigateToPopularStations: () -> Unit
-=======
+    onNavigateToPopularStations: () -> Unit,
     onNavigateToAddRadio: () -> Unit,
     onNavigateToEdit: (String) -> Unit
->>>>>>> feature/add-radio-form
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -88,7 +79,6 @@ fun FavoritesScreen(
                         contentDescription = "Nastavení"
                     )
                 }
-<<<<<<< HEAD
                 
                 IconButton(
                     onClick = onNavigateToPopularStations,
@@ -122,9 +112,6 @@ fun FavoritesScreen(
                         .size(48.dp)
                         .padding(8.dp)
                 ) {
-=======
-                IconButton(onClick = onNavigateToAllStations) {
->>>>>>> feature/add-radio-form
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Přejít na všechny stanice"

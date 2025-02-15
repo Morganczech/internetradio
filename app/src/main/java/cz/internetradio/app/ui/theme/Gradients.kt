@@ -7,7 +7,7 @@ import kotlin.random.Random
 object Gradients {
     // Předdefinované gradienty pro kategorie
     private val categoryGradients = mapOf(
-        RadioCategory.CESKE to Pair(
+        RadioCategory.MISTNI to Pair(
             Color(0xFF1976D2), // Modrá - symbolizuje českou vlajku
             Color(0xFF0D47A1)
         ),
@@ -27,13 +27,41 @@ object Gradients {
             Color(0xFFE040FB), // Neonově fialová - taneční, energická
             Color(0xFFAA00FF)
         ),
+        RadioCategory.ELEKTRONICKA to Pair(
+            Color(0xFF00BCD4), // Tyrkysová - elektronická, moderní
+            Color(0xFF0097A7)
+        ),
+        RadioCategory.KLASICKA to Pair(
+            Color(0xFF8D6E63), // Hnědá - klasická, vážná
+            Color(0xFF6D4C41)
+        ),
+        RadioCategory.COUNTRY to Pair(
+            Color(0xFFFF9800), // Oranžová - country, western
+            Color(0xFFF57C00)
+        ),
+        RadioCategory.FOLK to Pair(
+            Color(0xFF689F38), // Zelená - folk, příroda
+            Color(0xFF558B2F)
+        ),
+        RadioCategory.MLUVENE_SLOVO to Pair(
+            Color(0xFF3F51B5), // Indigová - mluvené slovo
+            Color(0xFF303F9F)
+        ),
+        RadioCategory.DETSKE to Pair(
+            Color(0xFFFF4081), // Růžová - dětské
+            Color(0xFFF50057)
+        ),
+        RadioCategory.NABOZENSKE to Pair(
+            Color(0xFF7E57C2), // Fialová - náboženské
+            Color(0xFF5E35B1)
+        ),
         RadioCategory.ZPRAVODAJSKE to Pair(
             Color(0xFF2C5282), // Tmavě modrá - seriózní
             Color(0xFF1A365D)
         ),
         RadioCategory.VLASTNI to Pair(
-            Color(0xFF1A1A1A), // Tmavě šedá - neutrální
-            Color(0xFF2D2D2D)
+            Color(0xFF9C27B0), // Fialová - vlastní stanice
+            Color(0xFF7B1FA2)
         ),
         RadioCategory.OSTATNI to Pair(
             Color(0xFF455A64), // Šedomodrá - neutrální
@@ -54,7 +82,7 @@ object Gradients {
         Pair(Color(0xFFF15BB5), Color(0xFFD44D9A)), // Magenta
         Pair(Color(0xFF00BBF9), Color(0xFF00A6DF)), // Světle modrá
         Pair(Color(0xFFFEE440), Color(0xFFE5CD3D)), // Žlutá
-        Pair(Color(0xFF00F5D4), Color(0xFF00D9BC)), // Mátová
+        Pair(Color(0xFF00F5D4), Color(0xFF00D9BC))  // Mátová
     )
 
     // Získá gradient pro danou kategorii
