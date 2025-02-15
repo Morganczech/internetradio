@@ -25,6 +25,9 @@ class AddRadioViewModel @Inject constructor(
     private val _validationError = MutableStateFlow<ValidationError?>(null)
     val validationError: StateFlow<ValidationError?> = _validationError.asStateFlow()
 
+    private val _selectedGradientId = MutableStateFlow<Int?>(null)
+    val selectedGradientId: StateFlow<Int?> = _selectedGradientId.asStateFlow()
+
     sealed class ValidationError {
         object DuplicateStreamUrl : ValidationError()
         object DuplicateName : ValidationError()
@@ -58,12 +61,12 @@ class AddRadioViewModel @Inject constructor(
                         return@launch
                     }
 
-                    // Získáme gradient podle kategorie
-                    val (startColor, endColor) = if (category == RadioCategory.VLASTNI) {
-                        // Pro vlastní stanice použijeme náhodný gradient
+                    // Získáme gradient podle kategorie nebo vybraného gradientu
+                    val (startColor, endColor) = _selectedGradientId.value?.let { gradientId ->
+                        Gradients.getGradientById(gradientId)
+                    } ?: if (category == RadioCategory.VLASTNI) {
                         Gradients.getRandomGradient()
                     } else {
-                        // Pro ostatní kategorie použijeme předdefinovaný gradient
                         Gradients.getGradientForCategory(category)
                     }
 
@@ -75,7 +78,8 @@ class AddRadioViewModel @Inject constructor(
                         description = description ?: "",
                         startColor = startColor,
                         endColor = endColor,
-                        category = category
+                        category = category,
+                        gradientId = _selectedGradientId.value
                     )
 
                     repository.insertRadio(radio)
@@ -129,8 +133,10 @@ class AddRadioViewModel @Inject constructor(
                         return@launch
                     }
 
-                    // Získáme gradient podle kategorie
-                    val (startColor, endColor) = if (existingRadio.isFavorite) {
+                    // Získáme gradient podle vybraného gradientu nebo kategorie
+                    val (startColor, endColor) = _selectedGradientId.value?.let { gradientId ->
+                        Gradients.getGradientById(gradientId)
+                    } ?: if (existingRadio.isFavorite) {
                         Gradients.getGradientForCategory(RadioCategory.VLASTNI)
                     } else {
                         Gradients.getGradientForCategory(category)
@@ -144,9 +150,9 @@ class AddRadioViewModel @Inject constructor(
                         description = description ?: "",
                         startColor = startColor,
                         endColor = endColor,
-                        // Zachováme kategorii a originalCategory podle stavu oblíbenosti
                         category = if (existingRadio.isFavorite) RadioCategory.VLASTNI else category,
-                        originalCategory = if (existingRadio.isFavorite) category else null
+                        originalCategory = if (existingRadio.isFavorite) category else null,
+                        gradientId = _selectedGradientId.value
                     )
 
                     repository.insertRadio(updatedRadio)
@@ -157,5 +163,9 @@ class AddRadioViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setSelectedGradient(gradientId: Int) {
+        _selectedGradientId.value = gradientId
     }
 } 

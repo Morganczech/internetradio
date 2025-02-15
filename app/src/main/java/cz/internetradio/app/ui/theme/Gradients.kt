@@ -85,9 +85,43 @@ object Gradients {
         Pair(Color(0xFF00F5D4), Color(0xFF00D9BC))  // Mátová
     )
 
-    // Získá gradient pro danou kategorii
-    fun getGradientForCategory(category: RadioCategory): Pair<Color, Color> {
-        return categoryGradients[category] ?: getRandomGradient()
+    // Všechny dostupné gradienty pro výběr
+    val availableGradients = listOf(
+        GradientOption(0, "Modrá - Česká", Pair(Color(0xFF1976D2), Color(0xFF0D47A1))),
+        GradientOption(1, "Růžová - Pop", Pair(Color(0xFFE91E63), Color(0xFFC2185B))),
+        GradientOption(2, "Tmavě šedá - Rock", Pair(Color(0xFF424242), Color(0xFF212121))),
+        GradientOption(3, "Fialová - Jazz", Pair(Color(0xFF6A1B9A), Color(0xFF4A148C))),
+        GradientOption(4, "Neonová - Dance", Pair(Color(0xFFE040FB), Color(0xFFAA00FF))),
+        GradientOption(5, "Tyrkysová - Elektronická", Pair(Color(0xFF00BCD4), Color(0xFF0097A7))),
+        GradientOption(6, "Hnědá - Klasická", Pair(Color(0xFF8D6E63), Color(0xFF6D4C41))),
+        GradientOption(7, "Oranžová - Country", Pair(Color(0xFFFF9800), Color(0xFFF57C00))),
+        GradientOption(8, "Zelená - Folk", Pair(Color(0xFF689F38), Color(0xFF558B2F))),
+        GradientOption(9, "Indigová - Mluvené slovo", Pair(Color(0xFF3F51B5), Color(0xFF303F9F))),
+        GradientOption(10, "Růžová - Dětské", Pair(Color(0xFFFF4081), Color(0xFFF50057))),
+        GradientOption(11, "Fialová - Náboženské", Pair(Color(0xFF7E57C2), Color(0xFF5E35B1))),
+        GradientOption(12, "Tmavě modrá - Zpravodajské", Pair(Color(0xFF2C5282), Color(0xFF1A365D))),
+        GradientOption(13, "Červená", Pair(Color(0xFFFF6B6B), Color(0xFFFF4949))),
+        GradientOption(14, "Žlutá/Oranžová", Pair(Color(0xFFFFBE0B), Color(0xFFFB8500))),
+        GradientOption(15, "Levandulová", Pair(Color(0xFF9B5DE5), Color(0xFF8046C3))),
+        GradientOption(16, "Mátová", Pair(Color(0xFF00F5D4), Color(0xFF00D9BC)))
+    )
+
+    data class GradientOption(
+        val id: Int,
+        val name: String,
+        val colors: Pair<Color, Color>
+    )
+
+    // Získá gradient podle ID
+    fun getGradientById(id: Int?): Pair<Color, Color> {
+        return id?.let { gradientId ->
+            availableGradients.find { it.id == gradientId }?.colors
+        } ?: getRandomGradient()
+    }
+
+    // Získá gradient pro danou kategorii nebo vybraný gradient
+    fun getGradientForCategory(category: RadioCategory, selectedGradientId: Int? = null): Pair<Color, Color> {
+        return selectedGradientId?.let { getGradientById(it) } ?: categoryGradients[category] ?: getRandomGradient()
     }
 
     // Získá náhodný gradient pro vlastní stanice
