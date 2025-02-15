@@ -31,6 +31,20 @@ import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import cz.internetradio.app.model.RadioCategory
 import cz.internetradio.app.location.LocationService
+import com.google.gson.Gson
+
+private data class Country(
+    val name: String,
+    val stations: List<PopularStation>
+)
+
+private data class PopularStation(
+    val id: String,
+    val name: String,
+    val streamUrl: String,
+    val imageUrl: String,
+    val description: String
+)
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -128,6 +142,11 @@ class RadioViewModel @Inject constructor(
         // Nastavení equalizeru pro ExoPlayer
         equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
         loadLocalStations()
+
+        // Inicializace oblíbených stanic při prvním spuštění
+        viewModelScope.launch {
+            initializeFavoriteStations()
+        }
     }
 
     private fun setupPlayerListener() {
@@ -555,6 +574,42 @@ class RadioViewModel @Inject constructor(
 
     fun refreshLocalStations() {
         loadLocalStations()
+    }
+
+    private suspend fun initializeFavoriteStations() {
+        // Kontrola, zda už byly stanice inicializovány
+        val isInitialized = prefs.getBoolean("favorites_initialized", false)
+        if (!isInitialized) {
+            val favoriteCount = radioRepository.getFavoriteRadios().first().size
+            if (favoriteCount == 0) {
+                // Načtení stanic ze souboru podle jazyka/lokace
+                val countryCode = locationService.getCurrentCountry() ?: 
+                    if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
+
+                try {
+                    val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
+                    val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
+                    val countryData = Gson().fromJson(jsonString, Country::class.java)
+                    
+                    // Přidání stanic do oblíbených
+                    countryData.stations.take(10).forEach { station ->
+                        val radioStation = RadioStation(
+                            stationuuid = station.id,
+                            name = station.name,
+                            url = station.streamUrl,
+                            url_resolved = station.streamUrl,
+                            favicon = station.imageUrl,
+                            tags = station.description
+                        )
+                        radioRepository.addRadioStationToFavorites(radioStation, RadioCategory.MISTNI)
+                    }
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "Chyba při inicializaci oblíbených stanic", e)
+                }
+            }
+            // Označení, že inicializace proběhla
+            prefs.edit().putBoolean("favorites_initialized", true).apply()
+        }
     }
 
     override fun onCleared() {
