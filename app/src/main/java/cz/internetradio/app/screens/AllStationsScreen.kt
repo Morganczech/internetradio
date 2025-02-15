@@ -89,7 +89,7 @@ fun AllStationsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            placeholder = { Text("Vyhledat rádio...") },
+            placeholder = { Text("Vyhledat uložené rádio...") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,

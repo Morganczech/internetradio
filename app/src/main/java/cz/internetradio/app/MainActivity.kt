@@ -237,12 +237,19 @@ fun RadioItem(
                         )
                         radio.description?.let { description ->
                             Text(
-                                text = description,
+                                text = if (description.isBlank()) "Internetové rádio" 
+                                      else if (description.length > 50) description.take(50) + "..." 
+                                      else description,
                                 style = MaterialTheme.typography.body2,
                                 modifier = Modifier.padding(top = 4.dp),
                                 color = Color.White.copy(alpha = 0.7f)
                             )
-                        }
+                        } ?: Text(
+                            text = "Internetové rádio",
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
                     }
                 }
                 
