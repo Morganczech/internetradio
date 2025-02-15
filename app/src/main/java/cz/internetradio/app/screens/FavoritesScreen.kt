@@ -7,7 +7,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,7 +29,9 @@ import androidx.compose.animation.slideOutVertically
 fun FavoritesScreen(
     viewModel: RadioViewModel,
     onNavigateToAllStations: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToBrowseStations: () -> Unit,
+    onNavigateToPopularStations: () -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -64,6 +68,32 @@ fun FavoritesScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Nastavení",
+                        tint = Color.White
+                    )
+                }
+                
+                IconButton(
+                    onClick = onNavigateToPopularStations,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = "Populární stanice",
+                        tint = Color.White
+                    )
+                }
+                
+                IconButton(
+                    onClick = onNavigateToBrowseStations,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Vyhledat stanice",
                         tint = Color.White
                     )
                 }

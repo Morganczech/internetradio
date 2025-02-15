@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.audio.AudioSink
 import cz.internetradio.app.data.RadioDatabase
 import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.audio.AudioSpectrumProcessor
+import cz.internetradio.app.api.RadioBrowserApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -106,5 +107,11 @@ object AppModule {
     @Provides
     fun provideRadioDao(database: RadioDatabase): RadioDao {
         return database.radioDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRadioBrowserApi(): RadioBrowserApi {
+        return RadioBrowserApi()
     }
 } 

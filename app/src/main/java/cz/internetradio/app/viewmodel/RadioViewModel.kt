@@ -9,6 +9,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
 import cz.internetradio.app.model.Radio
+import cz.internetradio.app.model.RadioStation
 import cz.internetradio.app.repository.RadioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,22 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import cz.internetradio.app.model.RadioCategory
+import cz.internetradio.app.location.LocationService
+import com.google.gson.Gson
+
+private data class Country(
+    val name: String,
+    val stations: List<PopularStation>
+)
+
+private data class PopularStation(
+    val id: String,
+    val name: String,
+    val streamUrl: String,
+    val imageUrl: String,
+    val description: String
+)
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -36,7 +53,8 @@ class RadioViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val locationService: LocationService
 ) : ViewModel(), DataClient.OnDataChangedListener {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("radio_prefs", Context.MODE_PRIVATE)
@@ -59,13 +77,16 @@ class RadioViewModel @Inject constructor(
     private val _remainingTimeMinutes = MutableStateFlow<Int?>(null)
     val remainingTimeMinutes: StateFlow<Int?> = _remainingTimeMinutes
 
+    private val _remainingTimeSeconds = MutableStateFlow<Int?>(null)
+    val remainingTimeSeconds: StateFlow<Int?> = _remainingTimeSeconds
+
     private val _showOnlyFavorites = MutableStateFlow(false)
     val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
 
     private val _showMaxFavoritesError = MutableStateFlow(false)
     val showMaxFavoritesError: StateFlow<Boolean> = _showMaxFavoritesError
 
-    private val _maxFavorites = MutableStateFlow(8)
+    private val _maxFavorites = MutableStateFlow(10)
     val maxFavorites: StateFlow<Int> = _maxFavorites
 
     private val _currentPreset = MutableStateFlow(EqualizerPreset.NORMAL)
@@ -79,9 +100,20 @@ class RadioViewModel @Inject constructor(
 
     private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
 
+    private val _localStations = MutableStateFlow<List<RadioStation>?>(null)
+    val localStations: StateFlow<List<RadioStation>?> = _localStations
+
+    private val _currentCountryCode = MutableStateFlow<String?>(null)
+    val currentCountryCode: StateFlow<String?> = _currentCountryCode
+
+    private val _fadeOutDuration = MutableStateFlow(60)
+    val fadeOutDuration: StateFlow<Int> = _fadeOutDuration
+
     companion object {
-        const val DEFAULT_MAX_FAVORITES = 8
+        const val DEFAULT_MAX_FAVORITES = 10
         const val PREFS_MAX_FAVORITES = "max_favorites"
+        const val PREFS_FADE_OUT_DURATION = "fade_out_duration"
+        const val DEFAULT_FADE_OUT_DURATION = 60 // sekund
     }
 
     val radioStations: StateFlow<List<Radio>> = if (_showOnlyFavorites.value) {
@@ -100,20 +132,20 @@ class RadioViewModel @Inject constructor(
 
     init {
         setupPlayerListener()
-        initializeDatabase()
         loadSavedState()
         _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
+        _fadeOutDuration.value = prefs.getInt(PREFS_FADE_OUT_DURATION, DEFAULT_FADE_OUT_DURATION)
         _bandValues.value = _currentPreset.value.bands
         loadEqualizerState()
         setupWearableListener()
         
         // Nastavení equalizeru pro ExoPlayer
         equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
-    }
+        loadLocalStations()
 
-    private fun initializeDatabase() {
+        // Inicializace oblíbených stanic při prvním spuštění
         viewModelScope.launch {
-            radioRepository.initializeDefaultRadios()
+            initializeFavoriteStations()
         }
     }
 
@@ -188,7 +220,9 @@ class RadioViewModel @Inject constructor(
         viewModelScope.launch {
             // Načtení uložené hlasitosti
             val savedVolume = prefs.getFloat("volume", 1.0f)
-            setVolume(savedVolume)
+            val exponentialVolume = linearToExponential(savedVolume)
+            exoPlayer.volume = exponentialVolume
+            _volume.value = savedVolume
 
             // Načtení posledního přehrávaného rádia
             val lastRadioId = prefs.getString("last_radio_id", null)
@@ -229,7 +263,23 @@ class RadioViewModel @Inject constructor(
                     _showMaxFavoritesError.value = true
                     return@launch
                 }
-                radioRepository.toggleFavorite(radio.id)
+                // Nejprve zkontrolujeme, jestli stanice už v databázi existuje
+                val existingRadio = radioRepository.getRadioById(radio.id)
+                if (existingRadio == null) {
+                    // Pokud stanice neexistuje, vytvoříme novou a rovnou ji přidáme jako oblíbenou
+                    val radioStation = RadioStation(
+                        stationuuid = radio.id,
+                        name = radio.name,
+                        url = radio.streamUrl,
+                        url_resolved = radio.streamUrl,
+                        favicon = radio.imageUrl,
+                        tags = radio.description
+                    )
+                    radioRepository.addRadioStationToFavorites(radioStation, radio.category)
+                } else {
+                    // Pokud stanice existuje, jen ji označíme jako oblíbenou
+                    radioRepository.toggleFavorite(radio.id)
+                }
             }
         }
     }
@@ -277,26 +327,58 @@ class RadioViewModel @Inject constructor(
         updateWearableState()
     }
 
+    private fun linearToExponential(value: Float): Float {
+        return (Math.pow(value.toDouble(), 4.0)).toFloat()
+    }
+
+    private fun exponentialToLinear(value: Float): Float {
+        return Math.pow(value.toDouble(), 0.25).toFloat()
+    }
+
     fun setVolume(newVolume: Float) {
         val clampedVolume = newVolume.coerceIn(0f, 1f)
-        exoPlayer.volume = clampedVolume
+        val exponentialVolume = linearToExponential(clampedVolume)
+        exoPlayer.volume = exponentialVolume
         _volume.value = clampedVolume
         // Uložení hlasitosti
         prefs.edit().putFloat("volume", clampedVolume).apply()
     }
 
+    fun setFadeOutDuration(seconds: Int) {
+        _fadeOutDuration.value = seconds
+        prefs.edit().putInt(PREFS_FADE_OUT_DURATION, seconds).apply()
+    }
+
     fun setSleepTimer(minutes: Int?) {
         _sleepTimerMinutes.value = minutes
         _remainingTimeMinutes.value = minutes
+        _remainingTimeSeconds.value = 0
         
         viewModelScope.launch {
             if (minutes != null) {
                 val startTime = System.currentTimeMillis()
                 val endTime = startTime + (minutes * 60 * 1000L)
+                val fadeOutDurationMs = (_fadeOutDuration.value * 1000L)
+                val fadeOutStartTime = endTime - fadeOutDurationMs
+                val initialVolume = _volume.value
 
                 while (System.currentTimeMillis() < endTime && _sleepTimerMinutes.value == minutes) {
-                    val remaining = ((endTime - System.currentTimeMillis()) / 1000L / 60L).toInt()
-                    _remainingTimeMinutes.value = remaining
+                    val currentTime = System.currentTimeMillis()
+                    val remainingTotal = endTime - currentTime
+                    val remainingMinutes = (remainingTotal / 1000L / 60L).toInt()
+                    val remainingSeconds = ((remainingTotal / 1000L) % 60L).toInt()
+                    
+                    _remainingTimeMinutes.value = remainingMinutes
+                    _remainingTimeSeconds.value = remainingSeconds
+
+                    // Začít fade out podle nastavené doby
+                    if (currentTime >= fadeOutStartTime) {
+                        val fadeOutElapsed = currentTime - fadeOutStartTime
+                        val fadeOutProgress = fadeOutElapsed.toFloat() / fadeOutDurationMs
+                        val newVolume = initialVolume * (1f - fadeOutProgress)
+                        setVolume(newVolume.coerceIn(0f, initialVolume))
+                    }
+
                     delay(1000) // Aktualizace každou sekundu
                 }
 
@@ -304,9 +386,13 @@ class RadioViewModel @Inject constructor(
                     stopPlayback()
                     _sleepTimerMinutes.value = null
                     _remainingTimeMinutes.value = null
+                    _remainingTimeSeconds.value = null
+                    // Obnovení původní hlasitosti
+                    setVolume(initialVolume)
                 }
             } else {
                 _remainingTimeMinutes.value = null
+                _remainingTimeSeconds.value = null
             }
         }
     }
@@ -403,6 +489,126 @@ class RadioViewModel @Inject constructor(
             if (currentIndex > 0) {
                 playRadio(favoriteRadios[currentIndex - 1])
             }
+        }
+    }
+
+    fun searchStations(query: String, onResult: (List<RadioStation>?) -> Unit) {
+        viewModelScope.launch {
+            Log.d("RadioViewModel", "Začínám vyhledávat stanice pro dotaz: $query")
+            val result = radioRepository.searchStationsByName(query)
+            Log.d("RadioViewModel", "Výsledek vyhledávání: ${result?.size ?: 0} stanic")
+            
+            // Získání všech uložených stanic pro kontrolu
+            val savedStations = radioRepository.getAllRadios().first()
+            
+            result?.forEach { station -> 
+                // Kontrola, zda je stanice již uložená
+                val savedStation = savedStations.find { 
+                    it.streamUrl == station.url_resolved || it.streamUrl == station.url 
+                }
+                if (savedStation != null) {
+                    station.isFromRadioBrowser = false
+                    station.category = savedStation.category
+                } else {
+                    station.isFromRadioBrowser = true
+                    station.category = determineCategory(station.tags)
+                }
+            }
+            onResult(result)
+        }
+    }
+
+    private fun determineCategory(tags: String?): RadioCategory {
+        if (tags == null) return RadioCategory.OSTATNI
+        
+        val lowerTags = tags.lowercase()
+        return when {
+            lowerTags.contains("pop") || lowerTags.contains("top 40") -> RadioCategory.POP
+            lowerTags.contains("rock") || lowerTags.contains("metal") || lowerTags.contains("punk") -> RadioCategory.ROCK
+            lowerTags.contains("jazz") || lowerTags.contains("blues") || lowerTags.contains("soul") -> RadioCategory.JAZZ
+            lowerTags.contains("dance") || lowerTags.contains("techno") || lowerTags.contains("house") || lowerTags.contains("disco") -> RadioCategory.DANCE
+            lowerTags.contains("electronic") || lowerTags.contains("electro") || lowerTags.contains("ambient") -> RadioCategory.ELEKTRONICKA
+            lowerTags.contains("classic") || lowerTags.contains("classical") || lowerTags.contains("orchestra") || lowerTags.contains("symphony") -> RadioCategory.KLASICKA
+            lowerTags.contains("country") || lowerTags.contains("western") -> RadioCategory.COUNTRY
+            lowerTags.contains("folk") || lowerTags.contains("folklore") || lowerTags.contains("traditional") -> RadioCategory.FOLK
+            lowerTags.contains("talk") || lowerTags.contains("speech") || lowerTags.contains("spoken") -> RadioCategory.MLUVENE_SLOVO
+            lowerTags.contains("kids") || lowerTags.contains("children") || lowerTags.contains("junior") -> RadioCategory.DETSKE
+            lowerTags.contains("religious") || lowerTags.contains("christian") || lowerTags.contains("gospel") -> RadioCategory.NABOZENSKE
+            lowerTags.contains("news") || lowerTags.contains("information") || lowerTags.contains("actualit") -> RadioCategory.ZPRAVODAJSKE
+            else -> RadioCategory.OSTATNI
+        }
+    }
+
+    fun addStationToFavorites(station: RadioStation, category: RadioCategory) {
+        viewModelScope.launch {
+            val favoriteCount = radioRepository.getFavoriteRadios().first().size
+            if (favoriteCount >= maxFavorites.value) {
+                _showMaxFavoritesError.value = true
+                return@launch
+            }
+            radioRepository.addRadioStationToFavorites(station, category)
+        }
+    }
+
+    fun removeStation(radioId: String) {
+        viewModelScope.launch {
+            radioRepository.removeStation(radioId)
+            // Pokud je stanice právě přehrávána, zastavíme přehrávání
+            if (currentRadio.value?.id == radioId) {
+                stopPlayback()
+            }
+        }
+    }
+
+    private fun loadLocalStations() {
+        viewModelScope.launch {
+            val countryCode = locationService.getCurrentCountry()
+            if (countryCode != null) {
+                _currentCountryCode.value = countryCode
+                RadioCategory.setCurrentCountryCode(countryCode)
+                val stations = radioRepository.getStationsByCountry(countryCode)
+                _localStations.value = stations
+            }
+        }
+    }
+
+    fun refreshLocalStations() {
+        loadLocalStations()
+    }
+
+    private suspend fun initializeFavoriteStations() {
+        // Kontrola, zda už byly stanice inicializovány
+        val isInitialized = prefs.getBoolean("favorites_initialized", false)
+        if (!isInitialized) {
+            val favoriteCount = radioRepository.getFavoriteRadios().first().size
+            if (favoriteCount == 0) {
+                // Načtení stanic ze souboru podle jazyka/lokace
+                val countryCode = locationService.getCurrentCountry() ?: 
+                    if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
+
+                try {
+                    val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
+                    val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
+                    val countryData = Gson().fromJson(jsonString, Country::class.java)
+                    
+                    // Přidání stanic do oblíbených
+                    countryData.stations.take(10).forEach { station ->
+                        val radioStation = RadioStation(
+                            stationuuid = station.id,
+                            name = station.name,
+                            url = station.streamUrl,
+                            url_resolved = station.streamUrl,
+                            favicon = station.imageUrl,
+                            tags = station.description
+                        )
+                        radioRepository.addRadioStationToFavorites(radioStation, RadioCategory.MISTNI)
+                    }
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "Chyba při inicializaci oblíbených stanic", e)
+                }
+            }
+            // Označení, že inicializace proběhla
+            prefs.edit().putBoolean("favorites_initialized", true).apply()
         }
     }
 

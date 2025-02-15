@@ -31,12 +31,23 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.PowerManager
 import android.content.BroadcastReceiver
+import cz.internetradio.app.api.RadioBrowserApi
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class RadioService : Service() {
 
-    private lateinit var exoPlayer: ExoPlayer
+    @Inject
+    lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var database: RadioDatabase
+
+    @Inject
+    lateinit var radioBrowserApi: RadioBrowserApi
+
     private lateinit var radioRepository: RadioRepository
-    private lateinit var database: RadioDatabase
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var wakeLock: PowerManager.WakeLock
 
@@ -106,30 +117,8 @@ class RadioService : Service() {
             setReferenceCounted(false)
         }
         
-        // Optimalizovaný ExoPlayer
-        exoPlayer = ExoPlayer.Builder(this)
-            .setLoadControl(
-                DefaultLoadControl.Builder()
-                    .setBufferDurationsMs(
-                        bufferSize,  // Minimální buffer
-                        bufferSize * 2, // Maximální buffer
-                        bufferSize / 2, // Buffer pro začátek přehrávání
-                        bufferSize / 2  // Buffer pro pokračování po rebufferingu
-                    )
-                    .setPrioritizeTimeOverSizeThresholds(true)
-                    .build()
-            )
-            .build()
-        
-        // Inicializace Room databáze
-        database = Room.databaseBuilder(
-            applicationContext,
-            RadioDatabase::class.java,
-            "radio_database"
-        ).build()
-        
-        // Inicializace repository s RadioDao
-        radioRepository = RadioRepository(database.radioDao())
+        // Inicializace repository s RadioDao a RadioBrowserApi
+        radioRepository = RadioRepository(database.radioDao(), radioBrowserApi)
         
         // Inicializace MediaSession
         mediaSession = MediaSessionCompat(this, "RadioService").apply {

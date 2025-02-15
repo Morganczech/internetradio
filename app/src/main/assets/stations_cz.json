@@ -1,0 +1,75 @@
+{
+  "name": "Česká republika",
+  "stations": [
+    {
+      "id": "radiozurnal",
+      "name": "ČRo Radiožurnál",
+      "streamUrl": "https://rozhlas.stream/radiozurnal_mp3_128.mp3",
+      "imageUrl": "https://api.rozhlas.cz/data/v2/images/logo/radiozurnal.png",
+      "description": "Zpravodajství, publicistika, sport"
+    },
+    {
+      "id": "evropa2",
+      "name": "Evropa 2",
+      "streamUrl": "https://ice.actve.net/fm-evropa2-128",
+      "imageUrl": "https://www.evropa2.cz/content/images/logo_evropa2.png",
+      "description": "Nejlepší hudba a zábava"
+    },
+    {
+      "id": "impuls",
+      "name": "Rádio Impuls",
+      "streamUrl": "https://icecast1.play.cz/impuls128.mp3",
+      "imageUrl": "https://www.impuls.cz/content/images/logo_impuls.png",
+      "description": "Největší česká rádiová stanice"
+    },
+    {
+      "id": "blanik",
+      "name": "Radio Blaník",
+      "streamUrl": "https://ice.actve.net/fm-blanik-128",
+      "imageUrl": "https://www.radioblanik.cz/content/images/logo_blanik.png",
+      "description": "Pohodové české rádio"
+    },
+    {
+      "id": "kiss",
+      "name": "Radio Kiss Total",
+      "streamUrl": "https://ice.actve.net/web-kiss",
+      "imageUrl": "https://www.kiss.cz/content/images/logo_kiss.png",
+      "description": "Moderní hudební rádio"
+    },
+    {
+      "id": "hitradio",
+      "name": "Hitrádio Total",
+      "streamUrl": "https://ice.actve.net/web-hi",
+      "imageUrl": "https://www.hitradio.cz/content/images/logo_hitradio.png",
+      "description": "Hity pro lepší náladu"
+    },
+    {
+      "id": "frekvence1",
+      "name": "Frekvence 1",
+      "streamUrl": "https://ice.actve.net/fm-frekvence1-128",
+      "imageUrl": "https://www.frekvence1.cz/content/images/logo_frekvence1.png",
+      "description": "Rádio pro dobrou náladu"
+    },
+    {
+      "id": "beat",
+      "name": "Radio Beat",
+      "streamUrl": "https://ice.actve.net/fm-beat-128",
+      "imageUrl": "https://www.radiobeat.cz/content/images/logo_beat.png",
+      "description": "Rocková legenda"
+    },
+    {
+      "id": "dvojka",
+      "name": "ČRo Dvojka",
+      "streamUrl": "https://rozhlas.stream/dvojka_mp3_128.mp3",
+      "imageUrl": "https://api.rozhlas.cz/data/v2/images/logo/dvojka.png",
+      "description": "Rádio, které je s vámi"
+    },
+    {
+      "id": "country",
+      "name": "Country Radio",
+      "streamUrl": "https://ice.actve.net/fm-country-128",
+      "imageUrl": "https://www.countryradio.cz/content/images/logo_country.png",
+      "description": "Pravé country rádio"
+    }
+  ]
+} 
