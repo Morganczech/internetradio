@@ -185,7 +185,7 @@ fun BrowseStationsScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         selectedCategory?.let { category ->
                             stations.find { it.isFromRadioBrowser }?.let { station ->
@@ -194,9 +194,9 @@ fun BrowseStationsScreen(
                         }
                         showCategoryDialog = false
                     },
-                    enabled = selectedCategory != null
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Přidat")
+                    Text("Přidat do oblíbených")
                 }
             },
             dismissButton = {

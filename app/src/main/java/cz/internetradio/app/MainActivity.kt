@@ -122,8 +122,22 @@ class MainActivity : ComponentActivity() {
                         
                         NavHost(
                             navController = navController,
-                            startDestination = Screen.Favorites.route
+                            startDestination = Screen.AllStations.route
                         ) {
+                            composable(Screen.AllStations.route) {
+                                AllStationsScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToSettings = {
+                                        navController.navigate(Screen.Settings.route)
+                                    },
+                                    onNavigateToBrowseStations = {
+                                        navController.navigate(Screen.BrowseStations.route)
+                                    },
+                                    onNavigateToPopularStations = {
+                                        navController.navigate(Screen.PopularStations.route)
+                                    }
+                                )
+                            }
                             composable(Screen.Favorites.route) {
                                 FavoritesScreen(
                                     viewModel = viewModel,
@@ -138,14 +152,6 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToPopularStations = {
                                         navController.navigate(Screen.PopularStations.route)
-                                    }
-                                )
-                            }
-                            composable(Screen.AllStations.route) {
-                                AllStationsScreen(
-                                    viewModel = viewModel,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
                                     }
                                 )
                             }

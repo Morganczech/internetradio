@@ -34,7 +34,10 @@ import androidx.compose.ui.text.input.ImeAction
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToPopularStations: () -> Unit,
+    onNavigateToBrowseStations: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -52,12 +55,26 @@ fun AllStationsScreen(
     ) {
         // Top App Bar
         TopAppBar(
-            title = { Text("Všechny stanice") },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
+            title = { Text("Moje stanice") },
+            actions = {
+                IconButton(onClick = onNavigateToPopularStations) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Zpět",
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = "Populární stanice",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = onNavigateToBrowseStations) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Vyhledat stanice",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Nastavení",
                         tint = Color.White
                     )
                 }
