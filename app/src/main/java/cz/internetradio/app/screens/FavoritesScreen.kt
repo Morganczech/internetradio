@@ -29,10 +29,14 @@ fun FavoritesScreen(
     viewModel: RadioViewModel,
     onNavigateToAllStations: () -> Unit,
     onNavigateToSettings: () -> Unit,
+<<<<<<< HEAD
     onNavigateToBrowseStations: () -> Unit,
     onNavigateToPopularStations: () -> Unit,
     onNavigateToAddRadio: () -> Unit,
     onNavigateToEdit: (String) -> Unit
+=======
+    onNavigateToFavoriteSongs: () -> Unit
+>>>>>>> feature/favorite-songs
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -183,7 +187,14 @@ fun FavoritesScreen(
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
+<<<<<<< HEAD
                     viewModel = viewModel
+=======
+                    isPlaying = isPlaying,
+                    onPlayPauseClick = { viewModel.togglePlayPause() },
+                    viewModel = viewModel,
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
+>>>>>>> feature/favorite-songs
                 )
             }
         }

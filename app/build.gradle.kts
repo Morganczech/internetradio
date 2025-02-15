@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    kotlin("kapt")
 }
 
 android {
@@ -24,7 +25,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,6 +35,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -43,6 +45,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -51,6 +54,13 @@ android {
     }
 
     packaging {
+        resources {
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE*")
+            excludes.add("META-INF/NOTICE*")
+            excludes.add("META-INF/*.kotlin_module")
+        }
     }
 }
 
@@ -61,6 +71,8 @@ tasks.withType<JavaCompile>().configureEach {
 dependencies {
     val composeBomVersion = "2023.10.01"
     val roomVersion = "2.6.1"
+    
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.core:core-ktx:1.12.0")
@@ -94,9 +106,13 @@ dependencies {
     // Media Session
     implementation("androidx.media:media:1.7.0")
 
+<<<<<<< HEAD
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+=======
+    // OkHttp pro přehrávání streamů
+>>>>>>> feature/favorite-songs
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Hilt
@@ -104,7 +120,9 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.50")
 
     // JTransforms pro FFT
-    implementation("com.github.wendykierp:JTransforms:3.1")
+    implementation("com.github.wendykierp:JTransforms:3.1") {
+        exclude(group = "junit", module = "junit")
+    }
     implementation("org.apache.commons:commons-math3:3.6.1")
 
     // Wearable

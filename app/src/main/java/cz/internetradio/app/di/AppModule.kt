@@ -1,14 +1,11 @@
 package cz.internetradio.app.di
 
 import android.content.Context
-import androidx.room.Room
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.AudioSink
-import cz.internetradio.app.data.RadioDatabase
-import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.audio.AudioSpectrumProcessor
 import cz.internetradio.app.api.RadioBrowserApi
 import dagger.Module
@@ -91,6 +88,7 @@ object AppModule {
                 addAnalyticsListener(EventLogger("RadioPlayer"))
             }
     }
+<<<<<<< HEAD
 
     @Provides
     @Singleton
@@ -114,4 +112,6 @@ object AppModule {
     fun provideRadioBrowserApi(): RadioBrowserApi {
         return RadioBrowserApi()
     }
+=======
+>>>>>>> feature/favorite-songs
 } 

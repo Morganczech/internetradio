@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -45,7 +46,15 @@ import androidx.navigation.NavType
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.navigation.Screen
+<<<<<<< HEAD
 import cz.internetradio.app.screens.*
+=======
+import cz.internetradio.app.screens.AllStationsScreen
+import cz.internetradio.app.screens.FavoritesScreen
+import cz.internetradio.app.screens.SettingsScreen
+import cz.internetradio.app.screens.EqualizerScreen
+import cz.internetradio.app.screens.FavoriteSongsScreen
+>>>>>>> feature/favorite-songs
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
@@ -55,9 +64,16 @@ import androidx.compose.animation.*
 import cz.internetradio.app.components.AudioVisualizer
 import androidx.compose.ui.draw.alpha
 import android.util.Log
+<<<<<<< HEAD
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import cz.internetradio.app.model.RadioCategory
+=======
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+>>>>>>> feature/favorite-songs
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -124,6 +140,23 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = Screen.AllStations.route
                         ) {
+<<<<<<< HEAD
+=======
+                            composable(Screen.Favorites.route) {
+                                FavoritesScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToAllStations = {
+                                        navController.navigate(Screen.AllStations.route)
+                                    },
+                                    onNavigateToSettings = {
+                                        navController.navigate(Screen.Settings.route)
+                                    },
+                                    onNavigateToFavoriteSongs = {
+                                        navController.navigate(Screen.FavoriteSongs.route)
+                                    }
+                                )
+                            }
+>>>>>>> feature/favorite-songs
                             composable(Screen.AllStations.route) {
                                 AllStationsScreen(
                                     viewModel = viewModel,
@@ -149,6 +182,9 @@ class MainActivity : ComponentActivity() {
                                     viewModel = viewModel,
                                     onNavigateBack = {
                                         navController.popBackStack()
+                                    },
+                                    onNavigateToFavoriteSongs = {
+                                        navController.navigate(Screen.FavoriteSongs.route)
                                     }
                                 )
                             }
@@ -177,13 +213,20 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+<<<<<<< HEAD
                             composable(Screen.AddRadio.route) {
                                 AddRadioScreen(
+=======
+                            composable(Screen.FavoriteSongs.route) {
+                                FavoriteSongsScreen(
+                                    viewModel = viewModel,
+>>>>>>> feature/favorite-songs
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }
                                 )
                             }
+<<<<<<< HEAD
                             composable(
                                 route = Screen.EditRadio.route,
                                 arguments = listOf(navArgument("radioId") { type = NavType.StringType })
@@ -195,6 +238,8 @@ class MainActivity : ComponentActivity() {
                                     radioToEdit = radioId
                                 )
                             }
+=======
+>>>>>>> feature/favorite-songs
                         }
                     }
                 }
@@ -347,7 +392,14 @@ fun RadioItem(
 @Composable
 fun PlayerControls(
     radio: Radio,
+<<<<<<< HEAD
     viewModel: RadioViewModel
+=======
+    isPlaying: Boolean,
+    onPlayPauseClick: () -> Unit,
+    viewModel: RadioViewModel,
+    onNavigateToFavoriteSongs: () -> Unit = {}
+>>>>>>> feature/favorite-songs
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
@@ -509,6 +561,51 @@ fun PlayerControls(
                                     contentDescription = "Další stanice",
                                     tint = Color.White
                                 )
+                            }
+
+                            // Tlačítka pro práci se skladbami
+                            Row {
+                                if (currentMetadata != null) {
+                                    IconButton(
+                                        onClick = { viewModel.saveSongToFavorites() }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlaylistAdd,
+                                            contentDescription = "Uložit skladbu",
+                                            tint = Color.White
+                                        )
+                                    }
+                                }
+                                IconButton(
+                                    onClick = onNavigateToFavoriteSongs
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.QueueMusic,
+                                        contentDescription = "Zobrazit oblíbené skladby",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                        }
+
+                        // Zobrazení zprávy o uložení skladby
+                        val songSavedMessage by viewModel.showSongSavedMessage.collectAsState()
+                        val scope = rememberCoroutineScope()
+                        
+                        songSavedMessage?.let { message ->
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.caption,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                            LaunchedEffect(message) {
+                                scope.launch {
+                                    delay(2000)
+                                    viewModel.dismissSongSavedMessage()
+                                }
                             }
                         }
 
