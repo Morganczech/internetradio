@@ -8,8 +8,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
         android:name=".RadioApplication"
@@ -45,22 +43,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/radio_widget_info" />
         </receiver>
-
-        <!-- Spotify Auth Redirect -->
-        <activity
-            android:name=".auth.SpotifyAuthActivity"
-            android:exported="true"
-            android:launchMode="singleTask"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:host="callback"
-                    android:scheme="cz.internetradio.app" />
-            </intent-filter>
-        </activity>
 
     </application>
 </manifest> 

@@ -24,14 +24,8 @@ import androidx.media3.common.C
 import cz.internetradio.app.audio.AudioSpectrumProcessor
 import android.util.Log
 import com.google.android.gms.wearable.*
-import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.DataEvent
-import com.google.android.gms.wearable.DataEventBuffer
-import com.google.android.gms.wearable.DataMapItem
-import com.google.android.gms.wearable.PutDataMapRequest
-import com.google.android.gms.wearable.Wearable
-import cz.internetradio.app.api.LastFmManager
-import cz.internetradio.app.api.YouTubeMusicManager
+import android.content.ClipboardManager
+import android.content.ClipData
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -41,8 +35,6 @@ class RadioViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
-    private val lastFmManager: LastFmManager,
-    private val youTubeMusicManager: YouTubeMusicManager,
     @ApplicationContext private val context: Context
 ) : ViewModel(), DataClient.OnDataChangedListener {
 
@@ -471,55 +463,18 @@ class RadioViewModel @Inject constructor(
         }
     }
 
-    fun exportToSpotify(songs: List<FavoriteSong>) {
-        viewModelScope.launch {
-            // TODO: Implementace exportu do Spotify
-            _showSongSavedMessage.value = "Export do Spotify zatím není implementován"
-        }
-    }
-
-    fun exportToYouTubeMusic(songs: List<FavoriteSong>) {
-        viewModelScope.launch {
-            val success = youTubeMusicManager.exportToPlaylist(songs)
-            _showSongSavedMessage.value = if (success) {
-                "Skladby byly exportovány do YouTube Music"
-            } else {
-                "Nepodařilo se exportovat skladby do YouTube Music"
+    fun copyToClipboard(song: FavoriteSong) {
+        val text = buildString {
+            append(song.title)
+            song.artist?.let { artist ->
+                append(" - ")
+                append(artist)
             }
         }
-    }
-
-    fun playOnYouTube(song: FavoriteSong) {
-        viewModelScope.launch {
-            try {
-                youTubeMusicManager.playOnYouTube(song, context)
-            } catch (e: Exception) {
-                _showSongSavedMessage.value = "Nepodařilo se přehrát skladbu na YouTube"
-            }
-        }
-    }
-
-    fun searchLyrics(song: FavoriteSong) {
-        viewModelScope.launch {
-            // TODO: Implementace vyhledání textu
-            _showSongSavedMessage.value = "Vyhledání textu zatím není implementováno"
-        }
-    }
-
-    fun shareSong(song: FavoriteSong) {
-        viewModelScope.launch {
-            // TODO: Implementace sdílení
-            _showSongSavedMessage.value = "Sdílení zatím není implementováno"
-        }
-    }
-
-    suspend fun getAlbumArtUrl(artist: String?, track: String): String? {
-        if (artist == null) return null
-        return try {
-            lastFmManager.getAlbumArtUrl(artist, track)
-        } catch (e: Exception) {
-            null
-        }
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Skladba", text)
+        clipboard.setPrimaryClip(clip)
+        _showSongSavedMessage.value = "Zkopírováno do schránky"
     }
 
     override fun onCleared() {
