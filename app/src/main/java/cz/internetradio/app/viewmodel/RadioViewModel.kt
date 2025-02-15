@@ -86,7 +86,7 @@ class RadioViewModel @Inject constructor(
     private val _showMaxFavoritesError = MutableStateFlow(false)
     val showMaxFavoritesError: StateFlow<Boolean> = _showMaxFavoritesError
 
-    private val _maxFavorites = MutableStateFlow(8)
+    private val _maxFavorites = MutableStateFlow(10)
     val maxFavorites: StateFlow<Int> = _maxFavorites
 
     private val _currentPreset = MutableStateFlow(EqualizerPreset.NORMAL)
@@ -110,7 +110,7 @@ class RadioViewModel @Inject constructor(
     val fadeOutDuration: StateFlow<Int> = _fadeOutDuration
 
     companion object {
-        const val DEFAULT_MAX_FAVORITES = 8
+        const val DEFAULT_MAX_FAVORITES = 10
         const val PREFS_MAX_FAVORITES = "max_favorites"
         const val PREFS_FADE_OUT_DURATION = "fade_out_duration"
         const val DEFAULT_FADE_OUT_DURATION = 60 // sekund

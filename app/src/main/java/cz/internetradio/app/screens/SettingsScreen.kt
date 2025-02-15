@@ -65,8 +65,8 @@ fun SettingsScreen(
             Slider(
                 value = maxFavorites.toFloat(),
                 onValueChange = { viewModel.setMaxFavorites(it.toInt()) },
-                valueRange = 5f..20f,
-                steps = 14,
+                valueRange = 10f..20f,
+                steps = 9,
                 modifier = Modifier.fillMaxWidth()
             )
             
