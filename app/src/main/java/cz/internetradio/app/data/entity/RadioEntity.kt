@@ -5,19 +5,21 @@ import androidx.room.PrimaryKey
 import cz.internetradio.app.model.Radio
 import androidx.compose.ui.graphics.Color
 import cz.internetradio.app.model.RadioCategory
+import androidx.compose.ui.graphics.toArgb
 
-@Entity(tableName = "radio_stations")
+@Entity(tableName = "radios")
 data class RadioEntity(
     @PrimaryKey
     val id: String,
     val name: String,
     val streamUrl: String,
     val imageUrl: String,
-    val description: String?,
-    val startColorValue: Long,
-    val endColorValue: Long,
-    val isFavorite: Boolean = false,
-    val category: String = RadioCategory.MISTNI.name
+    val description: String,
+    val category: RadioCategory,
+    val originalCategory: RadioCategory?,
+    val startColor: Int,
+    val endColor: Int,
+    val isFavorite: Boolean
 ) {
     fun toRadio(): Radio = Radio(
         id = id,
@@ -25,10 +27,11 @@ data class RadioEntity(
         streamUrl = streamUrl,
         imageUrl = imageUrl,
         description = description,
-        startColor = Color(startColorValue.toULong()),
-        endColor = Color(endColorValue.toULong()),
-        isFavorite = isFavorite,
-        category = RadioCategory.valueOf(category)
+        category = category,
+        originalCategory = originalCategory,
+        startColor = Color(startColor),
+        endColor = Color(endColor),
+        isFavorite = isFavorite
     )
 
     companion object {
@@ -38,10 +41,11 @@ data class RadioEntity(
             streamUrl = radio.streamUrl,
             imageUrl = radio.imageUrl,
             description = radio.description,
-            startColorValue = radio.startColor.value.toLong(),
-            endColorValue = radio.endColor.value.toLong(),
-            isFavorite = radio.isFavorite,
-            category = radio.category.name
+            category = radio.category,
+            originalCategory = radio.originalCategory,
+            startColor = radio.startColor.toArgb(),
+            endColor = radio.endColor.toArgb(),
+            isFavorite = radio.isFavorite
         )
     }
 } 

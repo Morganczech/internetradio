@@ -72,7 +72,7 @@ class AddRadioViewModel @Inject constructor(
                         name = name,
                         streamUrl = finalStreamUrl,
                         imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
-                        description = description,
+                        description = description ?: "",
                         startColor = startColor,
                         endColor = endColor,
                         category = category
@@ -140,7 +140,7 @@ class AddRadioViewModel @Inject constructor(
                         name = name,
                         streamUrl = finalStreamUrl,
                         imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
-                        description = description,
+                        description = description ?: "",
                         startColor = startColor,
                         endColor = endColor,
                         category = category

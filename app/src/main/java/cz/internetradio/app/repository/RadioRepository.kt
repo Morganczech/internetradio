@@ -47,7 +47,8 @@ class RadioRepository @Inject constructor(
     suspend fun toggleFavorite(radioId: String) {
         val radio = radioDao.getRadioById(radioId)
         radio?.let {
-            radioDao.updateFavoriteStatus(radioId, !it.isFavorite)
+            val newCategory = if (!it.isFavorite) RadioCategory.VLASTNI else it.originalCategory ?: it.category
+            radioDao.updateFavoriteStatusAndCategory(radioId, !it.isFavorite, newCategory)
         }
     }
 
@@ -67,9 +68,10 @@ class RadioRepository @Inject constructor(
             imageUrl = radioStation.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
             description = radioStation.tags ?: "",
             category = category,
+            originalCategory = category,
             startColor = category.startColor,
             endColor = category.endColor,
-            isFavorite = true
+            isFavorite = false
         )
         radioDao.insertRadio(RadioEntity.fromRadio(radio))
     }

@@ -216,7 +216,7 @@ fun RadioItem(
     onFavoriteClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isCustomStation: Boolean = radio.category === RadioCategory.VLASTNI
+    isCustomStation: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -297,47 +297,45 @@ fun RadioItem(
                         )
                     }
                     
-                    if (isCustomStation) {
-                        IconButton(onClick = { showMenu = true }) {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Více možností",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                showMenu = false
+                                onEditClick()
+                            }
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Více možností",
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
                                 tint = Color.White
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Upravit stanici")
                         }
-                        
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                        DropdownMenuItem(
+                            onClick = {
+                                showMenu = false
+                                onDeleteClick()
+                            }
                         ) {
-                            DropdownMenuItem(
-                                onClick = {
-                                    showMenu = false
-                                    onEditClick()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = null,
-                                    tint = Color.White
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Upravit stanici")
-                            }
-                            DropdownMenuItem(
-                                onClick = {
-                                    showMenu = false
-                                    onDeleteClick()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = null,
-                                    tint = Color.White
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Smazat stanici")
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Smazat stanici")
                         }
                     }
                 }

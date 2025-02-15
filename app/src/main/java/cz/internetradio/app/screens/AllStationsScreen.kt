@@ -133,6 +133,21 @@ fun AllStationsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
+            // Prioritní kategorie
+            item {
+                CategoryChip(
+                    text = RadioCategory.VLASTNI.title,
+                    isSelected = selectedCategory == RadioCategory.VLASTNI,
+                    onClick = { selectedCategory = RadioCategory.VLASTNI }
+                )
+            }
+            item {
+                CategoryChip(
+                    text = RadioCategory.MISTNI.title,
+                    isSelected = selectedCategory == RadioCategory.MISTNI,
+                    onClick = { selectedCategory = RadioCategory.MISTNI }
+                )
+            }
             item {
                 CategoryChip(
                     text = "Vše",
@@ -140,7 +155,11 @@ fun AllStationsScreen(
                     onClick = { selectedCategory = null }
                 )
             }
-            items(RadioCategory.values()) { category ->
+            // Ostatní kategorie (kromě již zobrazených)
+            items(RadioCategory.values().filter { 
+                it != RadioCategory.VLASTNI && 
+                it != RadioCategory.MISTNI 
+            }) { category ->
                 CategoryChip(
                     text = category.title,
                     isSelected = selectedCategory == category,
