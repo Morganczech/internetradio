@@ -143,6 +143,9 @@ class MainActivity : ComponentActivity() {
                                     viewModel = viewModel,
                                     onNavigateBack = {
                                         navController.popBackStack()
+                                    },
+                                    onNavigateToFavoriteSongs = {
+                                        navController.navigate(Screen.FavoriteSongs.route)
                                     }
                                 )
                             }
@@ -426,16 +429,18 @@ fun PlayerControls(
                                 )
                             }
 
-                            // Tlačítko pro uložení aktuální skladby
-                            if (currentMetadata != null) {
-                                IconButton(
-                                    onClick = { viewModel.saveSongToFavorites() }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.PlaylistAdd,
-                                        contentDescription = "Uložit skladbu",
-                                        tint = Color.White
-                                    )
+                            // Tlačítka pro práci se skladbami
+                            Row {
+                                if (currentMetadata != null) {
+                                    IconButton(
+                                        onClick = { viewModel.saveSongToFavorites() }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlaylistAdd,
+                                            contentDescription = "Uložit skladbu",
+                                            tint = Color.White
+                                        )
+                                    }
                                 }
                                 IconButton(
                                     onClick = onNavigateToFavoriteSongs
