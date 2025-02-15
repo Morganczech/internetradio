@@ -103,11 +103,11 @@ class RadioRepository @Inject constructor(
             streamUrl = radioStation.url_resolved ?: radioStation.url,
             imageUrl = radioStation.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
             description = radioStation.tags ?: "",
-            category = RadioCategory.VLASTNI,  // Nastavíme kategorii na VLASTNI, protože je to oblíbená stanice
+            category = category,  // Použijeme vybranou kategorii
             originalCategory = category,  // Uložíme původní kategorii
             startColor = category.startColor,
             endColor = category.endColor,
-            isFavorite = true  // Nastavíme jako oblíbenou
+            isFavorite = false  // Stanice není automaticky oblíbená
         )
         radioDao.insertRadio(RadioEntity.fromRadio(radio))
     }
