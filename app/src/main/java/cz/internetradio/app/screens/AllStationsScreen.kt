@@ -34,7 +34,6 @@ import androidx.compose.ui.text.input.ImeAction
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
-    onNavigateBack: () -> Unit,
     onNavigateToPopularStations: () -> Unit,
     onNavigateToBrowseStations: () -> Unit,
     onNavigateToSettings: () -> Unit

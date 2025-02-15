@@ -43,12 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.navigation.Screen
-import cz.internetradio.app.screens.AllStationsScreen
-import cz.internetradio.app.screens.FavoritesScreen
-import cz.internetradio.app.screens.SettingsScreen
-import cz.internetradio.app.screens.EqualizerScreen
-import cz.internetradio.app.screens.BrowseStationsScreen
-import cz.internetradio.app.screens.PopularStationsScreen
+import cz.internetradio.app.screens.*
 import cz.internetradio.app.viewmodel.RadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
@@ -127,23 +122,6 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.AllStations.route) {
                                 AllStationsScreen(
                                     viewModel = viewModel,
-                                    onNavigateToSettings = {
-                                        navController.navigate(Screen.Settings.route)
-                                    },
-                                    onNavigateToBrowseStations = {
-                                        navController.navigate(Screen.BrowseStations.route)
-                                    },
-                                    onNavigateToPopularStations = {
-                                        navController.navigate(Screen.PopularStations.route)
-                                    }
-                                )
-                            }
-                            composable(Screen.Favorites.route) {
-                                FavoritesScreen(
-                                    viewModel = viewModel,
-                                    onNavigateToAllStations = {
-                                        navController.navigate(Screen.AllStations.route)
-                                    },
                                     onNavigateToSettings = {
                                         navController.navigate(Screen.Settings.route)
                                     },
