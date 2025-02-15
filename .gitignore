@@ -98,4 +98,9 @@ lint/tmp/
 
 # App specific
 app/build/
-wear/build/ 
+wear/build/
+
+# Build directories
+**/build/
+**/build/intermediates/
+**/build/outputs/ 
