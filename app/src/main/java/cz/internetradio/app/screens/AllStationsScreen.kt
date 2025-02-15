@@ -184,7 +184,8 @@ fun AllStationsScreen(
                         radio = radio,
                         isSelected = radio.id == currentRadio?.id,
                         onRadioClick = { viewModel.playRadio(radio) },
-                        onFavoriteClick = { viewModel.toggleFavorite(radio) }
+                        onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                        onRemoveClick = { viewModel.removeStation(radio.id) }
                     )
                 }
             }

@@ -515,6 +515,16 @@ class RadioViewModel @Inject constructor(
         }
     }
 
+    fun removeStation(radioId: String) {
+        viewModelScope.launch {
+            radioRepository.removeStation(radioId)
+            // Pokud je stanice právě přehrávána, zastavíme přehrávání
+            if (currentRadio.value?.id == radioId) {
+                stopPlayback()
+            }
+        }
+    }
+
     private fun loadLocalStations() {
         viewModelScope.launch {
             val countryCode = locationService.getCurrentCountry()

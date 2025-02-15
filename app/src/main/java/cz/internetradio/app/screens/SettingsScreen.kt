@@ -21,6 +21,9 @@ fun SettingsScreen(
     onNavigateToEqualizer: () -> Unit
 ) {
     val maxFavorites by viewModel.maxFavorites.collectAsState()
+    val equalizerEnabled by viewModel.equalizerEnabled.collectAsState()
+    val fadeOutDuration by viewModel.fadeOutDuration.collectAsState()
+    var showFadeOutDialog by remember { mutableStateOf(false) }
     
     Column(
         modifier = Modifier
@@ -86,6 +89,43 @@ fun SettingsScreen(
             Divider(color = Color.White.copy(alpha = 0.1f))
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Nastavení doby fade-outu
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showFadeOutDialog = true }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Doba zeslabení zvuku",
+                        style = MaterialTheme.typography.subtitle1,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "$fadeOutDuration sekund",
+                        style = MaterialTheme.typography.caption,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "Před vypnutím časovače spánku",
+                        style = MaterialTheme.typography.caption,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Změnit dobu zeslabení",
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Tlačítko pro přechod na equalizer
             Row(
                 modifier = Modifier
@@ -118,5 +158,50 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showFadeOutDialog) {
+        AlertDialog(
+            onDismissRequest = { showFadeOutDialog = false },
+            title = { Text("Doba zeslabení zvuku") },
+            text = {
+                Column {
+                    Text(
+                        text = "Nastavte dobu, po kterou se bude postupně snižovat hlasitost před vypnutím časovače spánku.",
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    listOf(30, 60, 90, 120).forEach { seconds ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setFadeOutDuration(seconds)
+                                    showFadeOutDialog = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = fadeOutDuration == seconds,
+                                onClick = {
+                                    viewModel.setFadeOutDuration(seconds)
+                                    showFadeOutDialog = false
+                                }
+                            )
+                            Text(
+                                text = "$seconds sekund",
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFadeOutDialog = false }) {
+                    Text("Zavřít")
+                }
+            }
+        )
     }
 } 

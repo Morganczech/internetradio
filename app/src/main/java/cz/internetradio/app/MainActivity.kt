@@ -16,6 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -186,7 +190,8 @@ fun RadioItem(
     radio: Radio,
     isSelected: Boolean,
     onRadioClick: () -> Unit,
-    onFavoriteClick: () -> Unit
+    onFavoriteClick: () -> Unit,
+    onRemoveClick: (() -> Unit)? = null
 ) {
     Card(
         modifier = Modifier
@@ -245,12 +250,26 @@ fun RadioItem(
                     }
                 }
                 
-                IconButton(onClick = onFavoriteClick) {
-                    Icon(
-                        imageVector = if (radio.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (radio.isFavorite) "Odebrat z oblíbených" else "Přidat do oblíbených",
-                        tint = Color.White
-                    )
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (onRemoveClick != null) {
+                        IconButton(onClick = onRemoveClick) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Odstranit stanici",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            imageVector = if (radio.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (radio.isFavorite) "Odebrat z oblíbených" else "Přidat do oblíbených",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
         }
@@ -266,7 +285,8 @@ fun PlayerControls(
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
-    val remainingTime by viewModel.remainingTimeMinutes.collectAsState()
+    val remainingMinutes by viewModel.remainingTimeMinutes.collectAsState()
+    val remainingSeconds by viewModel.remainingTimeSeconds.collectAsState()
     val currentMetadata by viewModel.currentMetadata.collectAsState()
     var showTimerDropdown by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
@@ -460,15 +480,15 @@ fun PlayerControls(
                         }
                         
                         // Zobrazení zbývajícího času časovače
-                        remainingTime?.let { time ->
-                            if (time > 0) {
-                                Text(
-                                    text = "Zbývá: $time min",
-                                    style = MaterialTheme.typography.caption,
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    color = Color.White
-                                )
-                            }
+                        val minutes = remainingMinutes ?: 0
+                        val seconds = remainingSeconds ?: 0
+                        if (minutes > 0 || seconds > 0) {
+                            Text(
+                                text = "Zbývá: $minutes:${String.format("%02d", seconds)}",
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(top = 4.dp),
+                                color = Color.White
+                            )
                         }
                     }
                 }

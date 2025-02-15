@@ -70,4 +70,10 @@ class RadioRepository @Inject constructor(
         )
         radioDao.insertRadio(RadioEntity.fromRadio(radio))
     }
+
+    suspend fun removeStation(radioId: String) {
+        radioDao.getRadioById(radioId)?.let { radio ->
+            radioDao.deleteRadio(radio)
+        }
+    }
 } 
