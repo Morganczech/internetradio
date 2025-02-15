@@ -63,6 +63,9 @@ class RadioViewModel @Inject constructor(
     private val _remainingTimeMinutes = MutableStateFlow<Int?>(null)
     val remainingTimeMinutes: StateFlow<Int?> = _remainingTimeMinutes
 
+    private val _remainingTimeSeconds = MutableStateFlow<Int?>(null)
+    val remainingTimeSeconds: StateFlow<Int?> = _remainingTimeSeconds
+
     private val _showOnlyFavorites = MutableStateFlow(false)
     val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
 
@@ -89,9 +92,14 @@ class RadioViewModel @Inject constructor(
     private val _currentCountryCode = MutableStateFlow<String?>(null)
     val currentCountryCode: StateFlow<String?> = _currentCountryCode
 
+    private val _fadeOutDuration = MutableStateFlow(60)
+    val fadeOutDuration: StateFlow<Int> = _fadeOutDuration
+
     companion object {
         const val DEFAULT_MAX_FAVORITES = 8
         const val PREFS_MAX_FAVORITES = "max_favorites"
+        const val PREFS_FADE_OUT_DURATION = "fade_out_duration"
+        const val DEFAULT_FADE_OUT_DURATION = 60 // sekund
     }
 
     val radioStations: StateFlow<List<Radio>> = if (_showOnlyFavorites.value) {
@@ -112,6 +120,7 @@ class RadioViewModel @Inject constructor(
         setupPlayerListener()
         loadSavedState()
         _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
+        _fadeOutDuration.value = prefs.getInt(PREFS_FADE_OUT_DURATION, DEFAULT_FADE_OUT_DURATION)
         _bandValues.value = _currentPreset.value.bands
         loadEqualizerState()
         setupWearableListener()
@@ -192,7 +201,9 @@ class RadioViewModel @Inject constructor(
         viewModelScope.launch {
             // Načtení uložené hlasitosti
             val savedVolume = prefs.getFloat("volume", 1.0f)
-            setVolume(savedVolume)
+            val exponentialVolume = linearToExponential(savedVolume)
+            exoPlayer.volume = exponentialVolume
+            _volume.value = savedVolume
 
             // Načtení posledního přehrávaného rádia
             val lastRadioId = prefs.getString("last_radio_id", null)
@@ -281,26 +292,58 @@ class RadioViewModel @Inject constructor(
         updateWearableState()
     }
 
+    private fun linearToExponential(value: Float): Float {
+        return (Math.pow(value.toDouble(), 4.0)).toFloat()
+    }
+
+    private fun exponentialToLinear(value: Float): Float {
+        return Math.pow(value.toDouble(), 0.25).toFloat()
+    }
+
     fun setVolume(newVolume: Float) {
         val clampedVolume = newVolume.coerceIn(0f, 1f)
-        exoPlayer.volume = clampedVolume
+        val exponentialVolume = linearToExponential(clampedVolume)
+        exoPlayer.volume = exponentialVolume
         _volume.value = clampedVolume
         // Uložení hlasitosti
         prefs.edit().putFloat("volume", clampedVolume).apply()
     }
 
+    fun setFadeOutDuration(seconds: Int) {
+        _fadeOutDuration.value = seconds
+        prefs.edit().putInt(PREFS_FADE_OUT_DURATION, seconds).apply()
+    }
+
     fun setSleepTimer(minutes: Int?) {
         _sleepTimerMinutes.value = minutes
         _remainingTimeMinutes.value = minutes
+        _remainingTimeSeconds.value = 0
         
         viewModelScope.launch {
             if (minutes != null) {
                 val startTime = System.currentTimeMillis()
                 val endTime = startTime + (minutes * 60 * 1000L)
+                val fadeOutDurationMs = (_fadeOutDuration.value * 1000L)
+                val fadeOutStartTime = endTime - fadeOutDurationMs
+                val initialVolume = _volume.value
 
                 while (System.currentTimeMillis() < endTime && _sleepTimerMinutes.value == minutes) {
-                    val remaining = ((endTime - System.currentTimeMillis()) / 1000L / 60L).toInt()
-                    _remainingTimeMinutes.value = remaining
+                    val currentTime = System.currentTimeMillis()
+                    val remainingTotal = endTime - currentTime
+                    val remainingMinutes = (remainingTotal / 1000L / 60L).toInt()
+                    val remainingSeconds = ((remainingTotal / 1000L) % 60L).toInt()
+                    
+                    _remainingTimeMinutes.value = remainingMinutes
+                    _remainingTimeSeconds.value = remainingSeconds
+
+                    // Začít fade out podle nastavené doby
+                    if (currentTime >= fadeOutStartTime) {
+                        val fadeOutElapsed = currentTime - fadeOutStartTime
+                        val fadeOutProgress = fadeOutElapsed.toFloat() / fadeOutDurationMs
+                        val newVolume = initialVolume * (1f - fadeOutProgress)
+                        setVolume(newVolume.coerceIn(0f, initialVolume))
+                    }
+
                     delay(1000) // Aktualizace každou sekundu
                 }
 
@@ -308,9 +351,13 @@ class RadioViewModel @Inject constructor(
                     stopPlayback()
                     _sleepTimerMinutes.value = null
                     _remainingTimeMinutes.value = null
+                    _remainingTimeSeconds.value = null
+                    // Obnovení původní hlasitosti
+                    setVolume(initialVolume)
                 }
             } else {
                 _remainingTimeMinutes.value = null
+                _remainingTimeSeconds.value = null
             }
         }
     }
