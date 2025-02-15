@@ -6,4 +6,8 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Equalizer : Screen("equalizer")
     object PopularStations : Screen("popular_stations")
+    object AddRadio : Screen("add_radio")
+    object EditRadio : Screen("edit_radio/{radioId}") {
+        fun createRoute(radioId: String) = "edit_radio/$radioId"
+    }
 } 

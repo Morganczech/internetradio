@@ -40,6 +40,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.navigation.Screen
@@ -53,6 +55,9 @@ import androidx.compose.animation.*
 import cz.internetradio.app.components.AudioVisualizer
 import androidx.compose.ui.draw.alpha
 import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import cz.internetradio.app.model.RadioCategory
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -130,6 +135,10 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToPopularStations = {
                                         navController.navigate(Screen.PopularStations.route)
+                                    },
+                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) },
+                                    onNavigateToEdit = { radioId ->
+                                        navController.navigate(Screen.EditRadio.createRoute(radioId))
                                     }
                                 )
                             }
@@ -144,20 +153,18 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.PopularStations.route) {
                                 PopularStationsScreen(
                                     viewModel = viewModel,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToEdit = { radioId ->
+                                        navController.navigate(Screen.EditRadio.createRoute(radioId))
                                     }
                                 )
                             }
                             composable(Screen.Settings.route) {
                                 SettingsScreen(
                                     viewModel = viewModel,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
-                                    },
-                                    onNavigateToEqualizer = {
-                                        navController.navigate(Screen.Equalizer.route)
-                                    }
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToEqualizer = { navController.navigate(Screen.Equalizer.route) },
+                                    onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) }
                                 )
                             }
                             composable(Screen.Equalizer.route) {
@@ -166,6 +173,24 @@ class MainActivity : ComponentActivity() {
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }
+                                )
+                            }
+                            composable(Screen.AddRadio.route) {
+                                AddRadioScreen(
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable(
+                                route = Screen.EditRadio.route,
+                                arguments = listOf(navArgument("radioId") { type = NavType.StringType })
+                            ) { backStackEntry ->
+                                val radioId = backStackEntry.arguments?.getString("radioId") ?: return@composable
+                                AddRadioScreen(
+                                    viewModel = hiltViewModel(),
+                                    onNavigateBack = { navController.popBackStack() },
+                                    radioToEdit = radioId
                                 )
                             }
                         }
@@ -187,8 +212,12 @@ fun RadioItem(
     isSelected: Boolean,
     onRadioClick: () -> Unit,
     onFavoriteClick: () -> Unit,
-    onRemoveClick: (() -> Unit)? = null
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    isCustomStation: Boolean = radio.category === RadioCategory.VLASTNI
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,7 +254,9 @@ fun RadioItem(
                             model = radio.imageUrl,
                             contentDescription = "Logo ${radio.name}",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
+                            contentScale = ContentScale.Fit,
+                            fallback = painterResource(id = R.drawable.ic_radio_default),
+                            error = painterResource(id = R.drawable.ic_radio_default)
                         )
                     }
                     Column {
@@ -254,24 +285,58 @@ fun RadioItem(
                 }
                 
                 Row(
-                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (onRemoveClick != null) {
-                        IconButton(onClick = onRemoveClick) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Odstranit stanici",
-                                tint = Color.White
-                            )
-                        }
-                    }
                     IconButton(onClick = onFavoriteClick) {
                         Icon(
                             imageVector = if (radio.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = if (radio.isFavorite) "Odebrat z oblíbených" else "Přidat do oblíbených",
                             tint = Color.White
                         )
+                    }
+                    
+                    if (isCustomStation) {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Více možností",
+                                tint = Color.White
+                            )
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    showMenu = false
+                                    onEditClick()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Upravit stanici")
+                            }
+                            DropdownMenuItem(
+                                onClick = {
+                                    showMenu = false
+                                    onDeleteClick()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Smazat stanici")
+                            }
+                        }
                     }
                 }
             }
@@ -282,8 +347,6 @@ fun RadioItem(
 @Composable
 fun PlayerControls(
     radio: Radio,
-    isPlaying: Boolean,
-    onPlayPauseClick: () -> Unit,
     viewModel: RadioViewModel
 ) {
     val volume by viewModel.volume.collectAsState()
@@ -291,9 +354,14 @@ fun PlayerControls(
     val remainingMinutes by viewModel.remainingTimeMinutes.collectAsState()
     val remainingSeconds by viewModel.remainingTimeSeconds.collectAsState()
     val currentMetadata by viewModel.currentMetadata.collectAsState()
+    val currentRadio by viewModel.currentRadio.collectAsState()
+    val isPlaying by viewModel.isPlaying.collectAsState()
     var showTimerDropdown by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
+
+    // Použijeme aktuální rádio ze stavu místo parametru
+    val displayedRadio = currentRadio ?: radio
 
     Card(
         modifier = Modifier
@@ -306,7 +374,7 @@ fun PlayerControls(
             modifier = Modifier
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(radio.startColor, radio.endColor)
+                        colors = listOf(displayedRadio.startColor, displayedRadio.endColor)
                     )
                 )
         ) {
@@ -331,7 +399,7 @@ fun PlayerControls(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = radio.name,
+                            text = displayedRadio.name,
                             style = MaterialTheme.typography.h6,
                             color = Color.White
                         )
@@ -348,7 +416,7 @@ fun PlayerControls(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (!isExpanded) {
-                            IconButton(onClick = onPlayPauseClick) {
+                            IconButton(onClick = { viewModel.togglePlayPause() }) {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
@@ -424,7 +492,7 @@ fun PlayerControls(
                             }
 
                             IconButton(
-                                onClick = onPlayPauseClick
+                                onClick = { viewModel.togglePlayPause() }
                             ) {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,

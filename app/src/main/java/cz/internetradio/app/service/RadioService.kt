@@ -2,6 +2,7 @@ package cz.internetradio.app.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -31,9 +32,16 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.os.PowerManager
 import android.content.BroadcastReceiver
+<<<<<<< HEAD
 import cz.internetradio.app.api.RadioBrowserApi
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+=======
+import cz.internetradio.app.MainActivity
+import android.util.Log
+import coil.ImageLoader
+import coil.request.ImageRequest
+>>>>>>> feature/add-radio-form
 
 @AndroidEntryPoint
 class RadioService : Service() {
@@ -50,6 +58,7 @@ class RadioService : Service() {
     private lateinit var radioRepository: RadioRepository
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var notificationManager: NotificationManager
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -65,6 +74,26 @@ class RadioService : Service() {
 
     private var bufferSize = 2000 // Výchozí velikost bufferu v ms
     
+    companion object {
+        const val ACTION_PLAY = "cz.internetradio.app.action.PLAY"
+        const val ACTION_PAUSE = "cz.internetradio.app.action.PAUSE"
+        const val ACTION_NEXT = "cz.internetradio.app.action.NEXT"
+        const val ACTION_PREVIOUS = "cz.internetradio.app.action.PREVIOUS"
+        const val ACTION_STOP = "cz.internetradio.app.action.STOP"
+        const val ACTION_SET_VOLUME = "cz.internetradio.app.action.SET_VOLUME"
+        const val EXTRA_RADIO_ID = "radio_id"
+        const val EXTRA_VOLUME = "volume"
+        const val EXTRA_IS_PLAYING = "is_playing"
+        const val EXTRA_METADATA = "metadata"
+        const val EXTRA_CURRENT_RADIO = "current_radio"
+        private const val NOTIFICATION_CHANNEL_ID = "radio_channel"
+        private const val NOTIFICATION_ID = 1
+        private const val WAKELOCK_TAG = "RadioService::WakeLock"
+
+        // Broadcast akce pro komunikaci s ViewModel
+        const val ACTION_PLAYBACK_STATE_CHANGED = "cz.internetradio.app.action.PLAYBACK_STATE_CHANGED"
+    }
+
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
@@ -84,19 +113,36 @@ class RadioService : Service() {
         }
     }
 
-    companion object {
-        const val ACTION_PLAY = "cz.internetradio.app.action.PLAY"
-        const val ACTION_PAUSE = "cz.internetradio.app.action.PAUSE"
-        const val ACTION_NEXT = "cz.internetradio.app.action.NEXT"
-        const val ACTION_PREVIOUS = "cz.internetradio.app.action.PREVIOUS"
-        const val EXTRA_RADIO_ID = "radio_id"
-        private const val NOTIFICATION_CHANNEL_ID = "radio_channel"
-        private const val NOTIFICATION_ID = 1
-        private const val WAKELOCK_TAG = "RadioService::WakeLock"
-    }
-
     override fun onCreate() {
         super.onCreate()
+        
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        // Inicializace MediaSession hned na začátku
+        mediaSession = MediaSessionCompat(this, "RadioService").apply {
+            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    _currentRadio.value?.let { playRadio(it) }
+                }
+
+                override fun onPause() {
+                    pausePlayback()
+                }
+
+                override fun onSkipToNext() {
+                    playNextRadio()
+                }
+
+                override fun onSkipToPrevious() {
+                    playPreviousRadio()
+                }
+
+                override fun onStop() {
+                    stopPlayback()
+                }
+            })
+        }
         
         // Detekce připojení k nabíječce
         val batteryStatus = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
@@ -120,31 +166,20 @@ class RadioService : Service() {
         // Inicializace repository s RadioDao a RadioBrowserApi
         radioRepository = RadioRepository(database.radioDao(), radioBrowserApi)
         
-        // Inicializace MediaSession
-        mediaSession = MediaSessionCompat(this, "RadioService").apply {
-            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
-            setCallback(object : MediaSessionCompat.Callback() {
-                override fun onPlay() {
-                    _currentRadio.value?.let { playRadio(it) }
-                }
-
-                override fun onPause() {
-                    pausePlayback()
-                }
-
-                override fun onSkipToNext() {
-                    playNextRadio()
-                }
-
-                override fun onSkipToPrevious() {
-                    playPreviousRadio()
-                }
-            })
-        }
-        
         setupPlayer()
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, createNotification())
+        
+        // Vytvoření základní notifikace pro foreground service
+        val initialNotification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("Internet Radio")
+            .setContentText("Připraveno k přehrávání")
+            .setSmallIcon(R.drawable.ic_radio_default)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+            
+        startForeground(NOTIFICATION_ID, initialNotification)
         
         // Registrace receiveru pro sledování stavu baterie
         val filter = IntentFilter().apply {
@@ -158,8 +193,12 @@ class RadioService : Service() {
     private fun setupPlayer() {
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                Log.d("RadioService", "onIsPlayingChanged: $isPlaying")
                 _isPlaying.value = isPlaying
                 updatePlaybackState()
+                updateNotification()
+                broadcastPlaybackState()
+                
                 // Aktualizace widgetu
                 RadioWidgetProvider.updateWidgets(
                     applicationContext,
@@ -168,104 +207,378 @@ class RadioService : Service() {
                 )
             }
 
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+                Log.d("RadioService", "onPlaybackStateChanged: $playbackState")
+                // Přidáno pro lepší synchronizaci
+                broadcastPlaybackState()
+            }
+
             override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
                 val title = mediaMetadata.title?.toString()
                 val artist = mediaMetadata.artist?.toString()
                 
+                // Kontrola, zda metadata nejsou stejná jako název nebo popis rádia
+                val radio = _currentRadio.value
+                val isDefaultMetadata = title == radio?.name || title == radio?.description ||
+                                      artist == radio?.name || artist == radio?.description
+                
                 val metadata = when {
-                    !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
-                    !title.isNullOrBlank() -> title
-                    !artist.isNullOrBlank() -> artist
+                    !isDefaultMetadata && !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
+                    !isDefaultMetadata && !title.isNullOrBlank() -> title
+                    !isDefaultMetadata && !artist.isNullOrBlank() -> artist
                     else -> null
                 }
                 
+                Log.d("RadioService", "onMediaMetadataChanged: $metadata (title: $title, artist: $artist)")
                 _currentMetadata.value = metadata
                 updateMediaMetadata(artist, title)
+                updateNotification()
+                broadcastPlaybackState()
             }
         })
     }
 
-    private fun updatePlaybackState() {
-        val state = if (_isPlaying.value) {
-            PlaybackStateCompat.STATE_PLAYING
-        } else {
-            PlaybackStateCompat.STATE_PAUSED
+    private fun broadcastPlaybackState() {
+        try {
+            Log.d("RadioService", "Odesílám broadcast - playing: ${_isPlaying.value}, radio: ${_currentRadio.value?.name}")
+            val intent = Intent(ACTION_PLAYBACK_STATE_CHANGED).apply {
+                putExtra(EXTRA_IS_PLAYING, _isPlaying.value)
+                putExtra(EXTRA_METADATA, _currentMetadata.value)
+                putExtra(EXTRA_CURRENT_RADIO, _currentRadio.value?.id)
+                // Přidání flagů pro zajištění doručení
+                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            }
+            // Použití applicationContext pro zajištění doručení
+            applicationContext.sendBroadcast(intent)
+            Log.d("RadioService", "Broadcast odeslán úspěšně")
+        } catch (e: Exception) {
+            Log.e("RadioService", "Chyba při odesílání broadcastu: ${e.message}")
         }
+    }
 
-        val playbackState = PlaybackStateCompat.Builder()
-            .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
-            .setActions(
-                PlaybackStateCompat.ACTION_PLAY or
-                PlaybackStateCompat.ACTION_PAUSE or
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-            )
-            .build()
+    private fun updatePlaybackState() {
+        try {
+            val state = if (_isPlaying.value) {
+                PlaybackStateCompat.STATE_PLAYING
+            } else {
+                PlaybackStateCompat.STATE_PAUSED
+            }
 
-        mediaSession.setPlaybackState(playbackState)
+            val playbackState = PlaybackStateCompat.Builder()
+                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+                .setActions(
+                    PlaybackStateCompat.ACTION_PLAY or
+                    PlaybackStateCompat.ACTION_PAUSE or
+                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                    PlaybackStateCompat.ACTION_STOP
+                )
+                .build()
+
+            mediaSession.setPlaybackState(playbackState)
+        } catch (e: Exception) {
+            // Ignorujeme chybu při aktualizaci stavu
+        }
     }
 
     private fun updateMediaMetadata(artist: String?, title: String?) {
-        val radio = _currentRadio.value ?: return
-        
-        val metadataBuilder = MediaMetadataCompat.Builder()
-            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: radio.name)
-            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.description)
-            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
-            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, radio.name)
-            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: radio.name)
-            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: radio.description)
+        try {
+            val radio = _currentRadio.value ?: return
+            
+            // Sestavení textu metadat pro notifikaci
+            val displayMetadata = when {
+                !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
+                !title.isNullOrBlank() -> title
+                !artist.isNullOrBlank() -> artist
+                else -> null
+            }
+            _currentMetadata.value = displayMetadata
+            
+            // Vytvoření metadat pro MediaSession
+            val metadataBuilder = MediaMetadataCompat.Builder()
+                // Základní metadata
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, displayMetadata)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
+                
+                // Metadata pro zobrazení
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displayMetadata)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
+                
+                // Metadata pro Bluetooth AVRCP
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1) // Stream nemá délku
+                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, radio.category.title)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
+                
+                // Metadata pro notifikaci a lock screen
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, radio.imageUrl)
 
-        mediaSession.setMetadata(metadataBuilder.build())
+            // Nastavení metadat do MediaSession
+            mediaSession.setMetadata(metadataBuilder.build())
+            
+            Log.d("RadioService", "Metadata aktualizována - title: ${title ?: radio.name}, artist: ${artist ?: radio.description}")
+        } catch (e: Exception) {
+            Log.e("RadioService", "Chyba při aktualizaci metadat: ${e.message}")
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("RadioService", "onStartCommand: ${intent?.action}")
         when (intent?.action) {
             ACTION_PLAY -> {
                 val radioId = intent.getStringExtra(EXTRA_RADIO_ID)
                 if (radioId != null) {
                     serviceScope.launch {
                         val radio = radioRepository.getRadioById(radioId)
-                        radio?.let { playRadio(it) }
+                        radio?.let { 
+                            Log.d("RadioService", "Spouštím rádio z ID: ${radio.name}")
+                            playRadio(it) 
+                        }
+                    }
+                } else {
+                    _currentRadio.value?.let { 
+                        Log.d("RadioService", "Obnovuji přehrávání: ${it.name}")
+                        playRadio(it) 
                     }
                 }
             }
-            ACTION_PAUSE -> pausePlayback()
-            ACTION_NEXT -> playNextRadio()
-            ACTION_PREVIOUS -> playPreviousRadio()
+            ACTION_PAUSE -> {
+                Log.d("RadioService", "Pozastavuji přehrávání")
+                pausePlayback()
+            }
+            ACTION_NEXT -> {
+                Log.d("RadioService", "Přepínám na další")
+                playNextRadio()
+            }
+            ACTION_PREVIOUS -> {
+                Log.d("RadioService", "Přepínám na předchozí")
+                playPreviousRadio()
+            }
+            ACTION_STOP -> {
+                Log.d("RadioService", "Zastavuji přehrávání")
+                stopPlayback()
+            }
+            ACTION_SET_VOLUME -> {
+                val volume = intent.getFloatExtra(EXTRA_VOLUME, 1.0f)
+                Log.d("RadioService", "Nastavuji hlasitost: $volume")
+                exoPlayer.volume = volume
+            }
         }
         return START_STICKY
     }
 
+    private fun initMediaSession() {
+        if (!::mediaSession.isInitialized) {
+            mediaSession = MediaSessionCompat(this, "RadioService").apply {
+                setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+                setCallback(object : MediaSessionCompat.Callback() {
+                    override fun onPlay() {
+                        _currentRadio.value?.let { playRadio(it) }
+                    }
+
+                    override fun onPause() {
+                        pausePlayback()
+                    }
+
+                    override fun onSkipToNext() {
+                        playNextRadio()
+                    }
+
+                    override fun onSkipToPrevious() {
+                        playPreviousRadio()
+                    }
+
+                    override fun onStop() {
+                        stopPlayback()
+                    }
+                })
+            }
+        }
+    }
+
+    private fun createNotification(): NotificationCompat.Builder {
+        val radio = _currentRadio.value
+        val isPlaying = _isPlaying.value
+        val metadata = _currentMetadata.value
+
+        // Intent pro otevření aplikace
+        val contentIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val contentPendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            contentIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("Tento telefon") // První řádek - kam se přehrává zvuk
+            .setContentText(radio?.name) // Druhý řádek - název rádia
+            .setSubText(metadata) // Třetí řádek - metadata (název písně)
+            .setSmallIcon(R.drawable.ic_radio_default)
+            .setContentIntent(contentPendingIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+
+        // Načtení ikony rádia pomocí Coil
+        radio?.imageUrl?.let { imageUrl ->
+            try {
+                val request = ImageRequest.Builder(this)
+                    .data(imageUrl)
+                    .target { drawable ->
+                        val bitmap = (drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                        bitmap?.let {
+                            builder.setLargeIcon(it)
+                            // Aktualizace notifikace s ikonou
+                            notificationManager.notify(NOTIFICATION_ID, builder.build())
+                        }
+                    }
+                    .build()
+                ImageLoader(this).enqueue(request)
+            } catch (e: Exception) {
+                Log.e("RadioService", "Chyba při načítání ikony rádia: ${e.message}")
+            }
+        }
+
+        // Přidáme ovládací tlačítka pouze pokud máme aktivní rádio
+        if (radio != null) {
+            try {
+                // Intenty pro ovládací tlačítka
+                val playPauseIntent = Intent(this, RadioService::class.java).apply {
+                    action = if (isPlaying) ACTION_PAUSE else ACTION_PLAY
+                }
+                val playPausePendingIntent = PendingIntent.getService(
+                    this,
+                    0,
+                    playPauseIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val previousIntent = Intent(this, RadioService::class.java).apply {
+                    action = ACTION_PREVIOUS
+                }
+                val previousPendingIntent = PendingIntent.getService(
+                    this,
+                    1,
+                    previousIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val nextIntent = Intent(this, RadioService::class.java).apply {
+                    action = ACTION_NEXT
+                }
+                val nextPendingIntent = PendingIntent.getService(
+                    this,
+                    2,
+                    nextIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val stopIntent = Intent(this, RadioService::class.java).apply {
+                    action = ACTION_STOP
+                }
+                val stopPendingIntent = PendingIntent.getService(
+                    this,
+                    3,
+                    stopIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                builder
+                    .addAction(
+                        R.drawable.ic_skip_previous,
+                        "Předchozí",
+                        previousPendingIntent
+                    )
+                    .addAction(
+                        if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
+                        if (isPlaying) "Pozastavit" else "Přehrát",
+                        playPausePendingIntent
+                    )
+                    .addAction(
+                        R.drawable.ic_skip_next,
+                        "Další",
+                        nextPendingIntent
+                    )
+                    .addAction(
+                        R.drawable.ic_close,
+                        "Ukončit",
+                        stopPendingIntent
+                    )
+
+                if (mediaSession.isActive) {
+                    builder.setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(1, 2))
+                }
+                
+                builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            } catch (e: Exception) {
+                Log.e("RadioService", "Chyba při vytváření ovládacích prvků notifikace: ${e.message}")
+            }
+        }
+
+        return builder
+    }
+
+    private fun updateNotification() {
+        notificationManager.notify(NOTIFICATION_ID, createNotification().build())
+    }
+
     private fun playRadio(radio: Radio) {
+        Log.d("RadioService", "Spouštím rádio: ${radio.name}")
         if (!wakeLock.isHeld) {
-            wakeLock.acquire(24 * 60 * 60 * 1000L) // 24 hodin maximum
+            wakeLock.acquire(24 * 60 * 60 * 1000L)
         }
         
+        initMediaSession()
+        
         _currentRadio.value = radio
-        exoPlayer.setMediaItem(MediaItem.fromUri(radio.streamUrl))
+        
+        // Nastavení MediaItem s metadaty pro ExoPlayer
+        val mediaItem = MediaItem.Builder()
+            .setUri(radio.streamUrl)
+            .setMediaMetadata(
+                androidx.media3.common.MediaMetadata.Builder()
+                    .setIsBrowsable(false)
+                    .setIsPlayable(true)
+                    .build()
+            )
+            .build()
+            
+        exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.play()
+        
         _isPlaying.value = true
         mediaSession.isActive = true
-        updateMediaMetadata(null, radio.name)
         
-        // Aktualizace notifikace a widgetu
-        startForeground(NOTIFICATION_ID, createNotification())
+        // Aktualizace notifikace bez výchozích metadat
+        updateNotification()
+        broadcastPlaybackState()
+        
         RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
     }
 
     private fun pausePlayback() {
+        Log.d("RadioService", "Pozastavuji přehrávání")
         exoPlayer.pause()
         _isPlaying.value = false
         updatePlaybackState()
+        updateNotification()
+        broadcastPlaybackState()
         
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
         
-        // Aktualizace notifikace a widgetu
-        startForeground(NOTIFICATION_ID, createNotification())
+        // Aktualizace widgetu
         RadioWidgetProvider.updateWidgets(
             applicationContext,
             false,
@@ -273,12 +586,32 @@ class RadioService : Service() {
         )
     }
 
+    private fun stopPlayback() {
+        Log.d("RadioService", "Zastavuji přehrávání")
+        exoPlayer.stop()
+        _isPlaying.value = false
+        _currentRadio.value = null
+        _currentMetadata.value = null
+        mediaSession.isActive = false
+        broadcastPlaybackState()
+        
+        if (wakeLock.isHeld) {
+            wakeLock.release()
+        }
+        
+        stopForeground(true)
+        stopSelf()
+    }
+
     private fun playNextRadio() {
         serviceScope.launch {
             val favoriteRadios = radioRepository.getFavoriteRadios().first()
             val currentIndex = favoriteRadios.indexOfFirst { it.id == _currentRadio.value?.id }
             if (currentIndex < favoriteRadios.size - 1) {
-                playRadio(favoriteRadios[currentIndex + 1])
+                val nextRadio = favoriteRadios[currentIndex + 1]
+                Log.d("RadioService", "Přepínám na další rádio: ${nextRadio.name}")
+                playRadio(nextRadio)
+                broadcastPlaybackState()
             }
         }
     }
@@ -288,7 +621,10 @@ class RadioService : Service() {
             val favoriteRadios = radioRepository.getFavoriteRadios().first()
             val currentIndex = favoriteRadios.indexOfFirst { it.id == _currentRadio.value?.id }
             if (currentIndex > 0) {
-                playRadio(favoriteRadios[currentIndex - 1])
+                val previousRadio = favoriteRadios[currentIndex - 1]
+                Log.d("RadioService", "Přepínám na předchozí rádio: ${previousRadio.name}")
+                playRadio(previousRadio)
+                broadcastPlaybackState()
             }
         }
     }
@@ -296,21 +632,14 @@ class RadioService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            "Radio Playback",
+            "Přehrávání rádia",
             NotificationManager.IMPORTANCE_LOW
-        )
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        ).apply {
+            description = "Ovládání přehrávání internetového rádia"
+            setShowBadge(false)
+        }
         notificationManager.createNotificationChannel(channel)
     }
-
-    private fun createNotification() = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        .setContentTitle("Internet Radio")
-        .setContentText("Přehrávání rádia")
-        .setSmallIcon(R.drawable.ic_radio_default)
-        .setPriority(NotificationCompat.PRIORITY_LOW)
-        .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-            .setMediaSession(mediaSession.sessionToken))
-        .build()
 
     private fun recreatePlayer() {
         val currentPosition = exoPlayer.currentPosition

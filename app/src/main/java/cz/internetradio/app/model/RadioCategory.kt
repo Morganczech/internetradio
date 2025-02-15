@@ -72,6 +72,11 @@ enum class RadioCategory(
         Color(0xFF20B2AA),
         Color(0xFF008B8B)
     ),
+    VLASTNI(
+        "Moje stanice",
+        Color(0xFF9C27B0),
+        Color(0xFF7B1FA2)
+    ),
     OSTATNI(
         "Ostatní",
         Color(0xFF808080),

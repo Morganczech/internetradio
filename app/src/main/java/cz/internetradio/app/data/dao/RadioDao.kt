@@ -15,7 +15,7 @@ interface RadioDao {
     @Query("SELECT * FROM radio_stations WHERE id = :radioId LIMIT 1")
     suspend fun getRadioById(radioId: String): RadioEntity?
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRadio(radio: RadioEntity)
 
     @Update
@@ -32,4 +32,10 @@ interface RadioDao {
 
     @Query("DELETE FROM radio_stations")
     suspend fun deleteAllRadios()
+
+    @Query("SELECT EXISTS(SELECT 1 FROM radio_stations WHERE LOWER(streamUrl) = LOWER(:streamUrl))")
+    suspend fun existsByStreamUrl(streamUrl: String): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM radio_stations WHERE LOWER(name) = LOWER(:name))")
+    suspend fun existsByName(name: String): Boolean
 } 

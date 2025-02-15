@@ -79,4 +79,20 @@ class RadioRepository @Inject constructor(
             radioDao.deleteRadio(radio)
         }
     }
+
+    suspend fun insertRadio(radio: Radio) {
+        radioDao.insertRadio(RadioEntity.fromRadio(radio))
+    }
+
+    suspend fun deleteRadio(radio: Radio) {
+        radioDao.deleteRadio(RadioEntity.fromRadio(radio))
+    }
+
+    suspend fun existsByStreamUrl(streamUrl: String): Boolean {
+        return radioDao.existsByStreamUrl(streamUrl)
+    }
+
+    suspend fun existsByName(name: String): Boolean {
+        return radioDao.existsByName(name)
+    }
 } 

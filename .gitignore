@@ -1,4 +1,23 @@
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log/OS Files
+*.log
+
+# Android Studio generated files and folders
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+output.json
+
+# IntelliJ
 *.iml
+<<<<<<< HEAD
 .gradle
 /local.properties
 /.idea
@@ -63,6 +82,12 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+=======
+.idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+>>>>>>> feature/add-radio-form
 
 # Keystore files
 *.jks
@@ -71,6 +96,7 @@ lint/tmp/
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
+<<<<<<< HEAD
 # Android Patch
 gen-external-apklibs
 
@@ -104,3 +130,7 @@ wear/build/
 **/build/
 **/build/intermediates/
 **/build/outputs/ 
+=======
+# Android Profiling
+*.hprof
+>>>>>>> feature/add-radio-form

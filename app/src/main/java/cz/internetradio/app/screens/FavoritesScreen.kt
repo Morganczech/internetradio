@@ -9,10 +9,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+<<<<<<< HEAD
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+=======
+import androidx.compose.runtime.*
+>>>>>>> feature/add-radio-form
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,19 +28,50 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import cz.internetradio.app.model.Radio
 
 @Composable
 fun FavoritesScreen(
     viewModel: RadioViewModel,
     onNavigateToAllStations: () -> Unit,
     onNavigateToSettings: () -> Unit,
+<<<<<<< HEAD
     onNavigateToBrowseStations: () -> Unit,
     onNavigateToPopularStations: () -> Unit
+=======
+    onNavigateToAddRadio: () -> Unit,
+    onNavigateToEdit: (String) -> Unit
+>>>>>>> feature/add-radio-form
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
     val maxFavorites by viewModel.maxFavorites.collectAsState()
+    var showDeleteDialog: Radio? by remember { mutableStateOf<Radio?>(null) }
+
+    // Dialog pro potvrzení smazání
+    showDeleteDialog?.let { radio ->
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = null },
+            title = { Text("Smazat stanici") },
+            text = { Text("Opravdu chcete smazat stanici ${radio.name}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteRadio(radio)
+                        showDeleteDialog = null
+                    }
+                ) {
+                    Text("Smazat", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = null }) {
+                    Text("Zrušit")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -44,33 +79,16 @@ fun FavoritesScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        // Hlavička
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Oblíbené stanice",
-                style = MaterialTheme.typography.h5,
-                color = Color.White
-            )
-            
-            Row {
-                IconButton(
-                    onClick = onNavigateToSettings,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(8.dp)
-                ) {
+        TopAppBar(
+            title = { Text("Oblíbené") },
+            actions = {
+                IconButton(onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Nastavení",
-                        tint = Color.White
+                        contentDescription = "Nastavení"
                     )
                 }
+<<<<<<< HEAD
                 
                 IconButton(
                     onClick = onNavigateToPopularStations,
@@ -104,14 +122,16 @@ fun FavoritesScreen(
                         .size(48.dp)
                         .padding(8.dp)
                 ) {
+=======
+                IconButton(onClick = onNavigateToAllStations) {
+>>>>>>> feature/add-radio-form
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Přidat stanice",
-                        tint = Color.White
+                        contentDescription = "Přejít na všechny stanice"
                     )
                 }
             }
-        }
+        )
 
         if (favoriteRadios.isEmpty()) {
             Box(
@@ -158,12 +178,9 @@ fun FavoritesScreen(
                         radio = radio,
                         isSelected = radio.id == currentRadio?.id,
                         onRadioClick = { viewModel.playRadio(radio) },
-                        onFavoriteClick = { 
-                            viewModel.toggleFavorite(radio)
-                            if (radio.id == currentRadio?.id) {
-                                viewModel.stopPlayback()
-                            }
-                        }
+                        onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                        onEditClick = { onNavigateToEdit(radio.id) },
+                        onDeleteClick = { showDeleteDialog = radio }
                     )
                 }
             }
@@ -179,8 +196,6 @@ fun FavoritesScreen(
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = { viewModel.togglePlayPause() },
                     viewModel = viewModel
                 )
             }
