@@ -45,7 +45,10 @@ class RadioRepository @Inject constructor(
     }
 
     suspend fun toggleFavorite(radioId: String) {
-        radioDao.updateFavoriteStatus(radioId, true)
+        val radio = radioDao.getRadioById(radioId)
+        radio?.let {
+            radioDao.updateFavoriteStatus(radioId, !it.isFavorite)
+        }
     }
 
     suspend fun removeFavorite(radioId: String) {
@@ -66,7 +69,7 @@ class RadioRepository @Inject constructor(
             category = category,
             startColor = category.startColor,
             endColor = category.endColor,
-            isFavorite = false
+            isFavorite = true
         )
         radioDao.insertRadio(RadioEntity.fromRadio(radio))
     }

@@ -244,7 +244,23 @@ class RadioViewModel @Inject constructor(
                     _showMaxFavoritesError.value = true
                     return@launch
                 }
-                radioRepository.toggleFavorite(radio.id)
+                // Nejprve zkontrolujeme, jestli stanice už v databázi existuje
+                val existingRadio = radioRepository.getRadioById(radio.id)
+                if (existingRadio == null) {
+                    // Pokud stanice neexistuje, vytvoříme novou a rovnou ji přidáme jako oblíbenou
+                    val radioStation = RadioStation(
+                        stationuuid = radio.id,
+                        name = radio.name,
+                        url = radio.streamUrl,
+                        url_resolved = radio.streamUrl,
+                        favicon = radio.imageUrl,
+                        tags = radio.description
+                    )
+                    radioRepository.addRadioStationToFavorites(radioStation, radio.category)
+                } else {
+                    // Pokud stanice existuje, jen ji označíme jako oblíbenou
+                    radioRepository.toggleFavorite(radio.id)
+                }
             }
         }
     }
