@@ -9,6 +9,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
 import cz.internetradio.app.model.Radio
+import cz.internetradio.app.model.RadioStation
 import cz.internetradio.app.repository.RadioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,8 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import cz.internetradio.app.model.RadioCategory
+import cz.internetradio.app.location.LocationService
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
@@ -36,7 +39,8 @@ class RadioViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val locationService: LocationService
 ) : ViewModel(), DataClient.OnDataChangedListener {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("radio_prefs", Context.MODE_PRIVATE)
@@ -79,6 +83,12 @@ class RadioViewModel @Inject constructor(
 
     private val frequencies = listOf(60f, 230f, 910f, 3600f, 14000f)  // Hz
 
+    private val _localStations = MutableStateFlow<List<RadioStation>?>(null)
+    val localStations: StateFlow<List<RadioStation>?> = _localStations
+
+    private val _currentCountryCode = MutableStateFlow<String?>(null)
+    val currentCountryCode: StateFlow<String?> = _currentCountryCode
+
     companion object {
         const val DEFAULT_MAX_FAVORITES = 8
         const val PREFS_MAX_FAVORITES = "max_favorites"
@@ -100,7 +110,6 @@ class RadioViewModel @Inject constructor(
 
     init {
         setupPlayerListener()
-        initializeDatabase()
         loadSavedState()
         _maxFavorites.value = prefs.getInt(PREFS_MAX_FAVORITES, DEFAULT_MAX_FAVORITES)
         _bandValues.value = _currentPreset.value.bands
@@ -109,12 +118,7 @@ class RadioViewModel @Inject constructor(
         
         // Nastavení equalizeru pro ExoPlayer
         equalizerManager.setupEqualizer(exoPlayer.audioSessionId)
-    }
-
-    private fun initializeDatabase() {
-        viewModelScope.launch {
-            radioRepository.initializeDefaultRadios()
-        }
+        loadLocalStations()
     }
 
     private fun setupPlayerListener() {
@@ -404,6 +408,80 @@ class RadioViewModel @Inject constructor(
                 playRadio(favoriteRadios[currentIndex - 1])
             }
         }
+    }
+
+    fun searchStations(query: String, onResult: (List<RadioStation>?) -> Unit) {
+        viewModelScope.launch {
+            Log.d("RadioViewModel", "Začínám vyhledávat stanice pro dotaz: $query")
+            val result = radioRepository.searchStationsByName(query)
+            Log.d("RadioViewModel", "Výsledek vyhledávání: ${result?.size ?: 0} stanic")
+            
+            // Získání všech uložených stanic pro kontrolu
+            val savedStations = radioRepository.getAllRadios().first()
+            
+            result?.forEach { station -> 
+                // Kontrola, zda je stanice již uložená
+                val savedStation = savedStations.find { 
+                    it.streamUrl == station.url_resolved || it.streamUrl == station.url 
+                }
+                if (savedStation != null) {
+                    station.isFromRadioBrowser = false
+                    station.category = savedStation.category
+                } else {
+                    station.isFromRadioBrowser = true
+                    station.category = determineCategory(station.tags)
+                }
+            }
+            onResult(result)
+        }
+    }
+
+    private fun determineCategory(tags: String?): RadioCategory {
+        if (tags == null) return RadioCategory.OSTATNI
+        
+        val lowerTags = tags.lowercase()
+        return when {
+            lowerTags.contains("pop") || lowerTags.contains("top 40") -> RadioCategory.POP
+            lowerTags.contains("rock") || lowerTags.contains("metal") || lowerTags.contains("punk") -> RadioCategory.ROCK
+            lowerTags.contains("jazz") || lowerTags.contains("blues") || lowerTags.contains("soul") -> RadioCategory.JAZZ
+            lowerTags.contains("dance") || lowerTags.contains("techno") || lowerTags.contains("house") || lowerTags.contains("disco") -> RadioCategory.DANCE
+            lowerTags.contains("electronic") || lowerTags.contains("electro") || lowerTags.contains("ambient") -> RadioCategory.ELEKTRONICKA
+            lowerTags.contains("classic") || lowerTags.contains("classical") || lowerTags.contains("orchestra") || lowerTags.contains("symphony") -> RadioCategory.KLASICKA
+            lowerTags.contains("country") || lowerTags.contains("western") -> RadioCategory.COUNTRY
+            lowerTags.contains("folk") || lowerTags.contains("folklore") || lowerTags.contains("traditional") -> RadioCategory.FOLK
+            lowerTags.contains("talk") || lowerTags.contains("speech") || lowerTags.contains("spoken") -> RadioCategory.MLUVENE_SLOVO
+            lowerTags.contains("kids") || lowerTags.contains("children") || lowerTags.contains("junior") -> RadioCategory.DETSKE
+            lowerTags.contains("religious") || lowerTags.contains("christian") || lowerTags.contains("gospel") -> RadioCategory.NABOZENSKE
+            lowerTags.contains("news") || lowerTags.contains("information") || lowerTags.contains("actualit") -> RadioCategory.ZPRAVODAJSKE
+            else -> RadioCategory.OSTATNI
+        }
+    }
+
+    fun addStationToFavorites(station: RadioStation, category: RadioCategory) {
+        viewModelScope.launch {
+            val favoriteCount = radioRepository.getFavoriteRadios().first().size
+            if (favoriteCount >= maxFavorites.value) {
+                _showMaxFavoritesError.value = true
+                return@launch
+            }
+            radioRepository.addRadioStationToFavorites(station, category)
+        }
+    }
+
+    private fun loadLocalStations() {
+        viewModelScope.launch {
+            val countryCode = locationService.getCurrentCountry()
+            if (countryCode != null) {
+                _currentCountryCode.value = countryCode
+                RadioCategory.setCurrentCountryCode(countryCode)
+                val stations = radioRepository.getStationsByCountry(countryCode)
+                _localStations.value = stations
+            }
+        }
+    }
+
+    fun refreshLocalStations() {
+        loadLocalStations()
     }
 
     override fun onCleared() {

@@ -16,6 +16,12 @@ class RadioRepository @Inject constructor(
     private val radioDao: RadioDao,
     private val radioBrowserApi: RadioBrowserApi
 ) {
+    fun getAllRadios(): Flow<List<Radio>> {
+        return radioDao.getAllRadios().map { entities ->
+            entities.map { it.toRadio() }
+        }
+    }
+
     suspend fun searchStationsByName(name: String): List<RadioStation>? {
         return radioBrowserApi.searchStationsByName(name)
     }
@@ -57,7 +63,10 @@ class RadioRepository @Inject constructor(
             streamUrl = radioStation.url_resolved ?: radioStation.url,
             imageUrl = radioStation.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
             description = radioStation.tags ?: "",
-            category = category
+            category = category,
+            startColor = category.startColor,
+            endColor = category.endColor,
+            isFavorite = false
         )
         radioDao.insertRadio(RadioEntity.fromRadio(radio))
     }
