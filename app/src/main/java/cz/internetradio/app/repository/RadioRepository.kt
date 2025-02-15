@@ -47,7 +47,11 @@ class RadioRepository @Inject constructor(
     suspend fun toggleFavorite(radioId: String) {
         val radio = radioDao.getRadioById(radioId)
         radio?.let {
-            val newCategory = if (!it.isFavorite) RadioCategory.VLASTNI else it.originalCategory ?: it.category
+            val newCategory = if (!it.isFavorite) {
+                RadioCategory.VLASTNI
+            } else {
+                it.originalCategory ?: it.category
+            }
             radioDao.updateFavoriteStatusAndCategory(radioId, !it.isFavorite, newCategory)
         }
     }
