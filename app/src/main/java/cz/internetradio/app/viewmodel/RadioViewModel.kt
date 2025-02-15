@@ -298,20 +298,24 @@ class RadioViewModel @Inject constructor(
                     val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
                     val countryData = Gson().fromJson(jsonString, Country::class.java)
                     
-                    // Přidání stanic do oblíbených
+                    // Přidání stanic do databáze
                     countryData.stations.take(10).forEach { station ->
-                        val radioStation = RadioStation(
-                            stationuuid = station.id,
+                        val radio = Radio(
+                            id = station.id,
                             name = station.name,
-                            url = station.streamUrl,
-                            url_resolved = station.streamUrl,
-                            favicon = station.imageUrl,
-                            tags = station.description
+                            streamUrl = station.streamUrl,
+                            imageUrl = station.imageUrl,
+                            description = station.description,
+                            category = RadioCategory.MISTNI,
+                            originalCategory = RadioCategory.MISTNI,
+                            startColor = RadioCategory.MISTNI.startColor,
+                            endColor = RadioCategory.MISTNI.endColor,
+                            isFavorite = false
                         )
-                        radioRepository.addRadioStationToFavorites(radioStation, RadioCategory.MISTNI)
+                        radioRepository.insertRadio(radio)
                     }
                 } catch (e: Exception) {
-                    Log.e("RadioViewModel", "Chyba při inicializaci oblíbených stanic", e)
+                    Log.e("RadioViewModel", "Chyba při inicializaci místních stanic", e)
                 }
             }
             // Označení, že inicializace proběhla

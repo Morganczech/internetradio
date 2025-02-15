@@ -44,7 +44,7 @@ fun AllStationsScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
-    var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
+    var selectedCategory by remember { mutableStateOf<RadioCategory?>(RadioCategory.MISTNI) }
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 

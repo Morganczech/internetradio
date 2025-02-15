@@ -51,6 +51,7 @@ fun AddRadioScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .imePadding()
     ) {
         Column(
