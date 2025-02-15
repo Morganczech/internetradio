@@ -108,6 +108,9 @@ class AddRadioViewModel @Inject constructor(
         viewModelScope.launch {
             if (name.isBlank() || streamUrl.isBlank()) return@launch
 
+            // Načteme existující rádio pro zachování některých vlastností
+            val existingRadio = repository.getRadioById(radioId) ?: return@launch
+
             // Parsování URL streamu
             when (val result = StreamUrlParser.parseUrl(streamUrl)) {
                 is StreamUrlParser.Result.Success -> {
@@ -115,13 +118,13 @@ class AddRadioViewModel @Inject constructor(
 
                     // Kontrola duplicit s finální URL (kromě aktuální stanice)
                     if (repository.existsByStreamUrl(finalStreamUrl) && 
-                        repository.getRadioById(radioId)?.streamUrl != finalStreamUrl) {
+                        existingRadio.streamUrl != finalStreamUrl) {
                         _validationError.value = ValidationError.DuplicateStreamUrl
                         return@launch
                     }
 
                     if (repository.existsByName(name) && 
-                        repository.getRadioById(radioId)?.name != name) {
+                        existingRadio.name != name) {
                         _validationError.value = ValidationError.DuplicateName
                         return@launch
                     }
@@ -135,18 +138,20 @@ class AddRadioViewModel @Inject constructor(
                         Gradients.getGradientForCategory(category)
                     }
 
-                    val radio = Radio(
-                        id = radioId,
+                    // Vytvoříme aktualizované rádio se zachováním originalCategory a isFavorite
+                    val updatedRadio = existingRadio.copy(
                         name = name,
                         streamUrl = finalStreamUrl,
                         imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
                         description = description ?: "",
                         startColor = startColor,
                         endColor = endColor,
-                        category = category
+                        // Zachováme kategorii a originalCategory podle stavu oblíbenosti
+                        category = if (existingRadio.isFavorite) RadioCategory.VLASTNI else category,
+                        originalCategory = if (existingRadio.isFavorite) existingRadio.originalCategory else category
                     )
 
-                    repository.insertRadio(radio)
+                    repository.insertRadio(updatedRadio)
                     onSuccess()
                 }
                 is StreamUrlParser.Result.Error -> {

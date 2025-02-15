@@ -13,6 +13,9 @@ interface RadioDao {
     @Query("SELECT * FROM radios WHERE isFavorite = 1")
     fun getFavoriteRadios(): Flow<List<RadioEntity>>
 
+    @Query("SELECT * FROM radios WHERE category = :category")
+    fun getRadiosByCategory(category: RadioCategory): Flow<List<RadioEntity>>
+
     @Query("SELECT * FROM radios WHERE id = :radioId")
     suspend fun getRadioById(radioId: String): RadioEntity?
 

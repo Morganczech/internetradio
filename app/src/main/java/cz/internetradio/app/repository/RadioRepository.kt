@@ -9,6 +9,7 @@ import cz.internetradio.app.model.Radio
 import cz.internetradio.app.model.RadioStation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import cz.internetradio.app.model.RadioCategory
 
 @Singleton
@@ -31,7 +32,20 @@ class RadioRepository @Inject constructor(
     }
 
     suspend fun getStationsByCountry(country: String): List<RadioStation>? {
-        return radioBrowserApi.getStationsByCountry(country)
+        // Načteme stanice z databáze v kategorii MISTNI
+        val entities = radioDao.getRadiosByCategory(RadioCategory.MISTNI).first()
+        return entities.map { entity ->
+            RadioStation(
+                stationuuid = entity.id,
+                name = entity.name,
+                url = entity.streamUrl,
+                url_resolved = entity.streamUrl,
+                favicon = entity.imageUrl,
+                tags = entity.description,
+                category = entity.category,
+                isFromRadioBrowser = false
+            )
+        }
     }
 
     suspend fun getTags(): List<String>? {
@@ -47,17 +61,35 @@ class RadioRepository @Inject constructor(
     suspend fun toggleFavorite(radioId: String) {
         val radio = radioDao.getRadioById(radioId)
         radio?.let {
-            val newCategory = if (!it.isFavorite) {
-                RadioCategory.VLASTNI
+            if (!it.isFavorite) {
+                // Při přidání do oblíbených uložíme původní kategorii a nastavíme VLASTNI
+                val updatedRadio = it.copy(
+                    originalCategory = it.category,
+                    category = RadioCategory.VLASTNI,
+                    isFavorite = true
+                )
+                radioDao.insertRadio(updatedRadio)
             } else {
-                it.originalCategory ?: it.category
+                // Při odebrání z oblíbených vrátíme do původní kategorie
+                val updatedRadio = it.copy(
+                    category = it.originalCategory ?: it.category,
+                    isFavorite = false
+                )
+                radioDao.insertRadio(updatedRadio)
             }
-            radioDao.updateFavoriteStatusAndCategory(radioId, !it.isFavorite, newCategory)
         }
     }
 
     suspend fun removeFavorite(radioId: String) {
-        radioDao.updateFavoriteStatus(radioId, false)
+        val radio = radioDao.getRadioById(radioId)
+        radio?.let {
+            // Při odebrání z oblíbených vrátíme do původní kategorie
+            val updatedRadio = it.copy(
+                category = it.originalCategory ?: it.category,
+                isFavorite = false
+            )
+            radioDao.insertRadio(updatedRadio)
+        }
     }
 
     suspend fun getRadioById(radioId: String): Radio? {
@@ -71,11 +103,11 @@ class RadioRepository @Inject constructor(
             streamUrl = radioStation.url_resolved ?: radioStation.url,
             imageUrl = radioStation.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
             description = radioStation.tags ?: "",
-            category = category,
-            originalCategory = category,
+            category = RadioCategory.VLASTNI,  // Nastavíme kategorii na VLASTNI, protože je to oblíbená stanice
+            originalCategory = category,  // Uložíme původní kategorii
             startColor = category.startColor,
             endColor = category.endColor,
-            isFavorite = false
+            isFavorite = true  // Nastavíme jako oblíbenou
         )
         radioDao.insertRadio(RadioEntity.fromRadio(radio))
     }
