@@ -1,321 +1,279 @@
 package cz.internetradio.app.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import cz.internetradio.app.model.RadioCategory
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import cz.internetradio.app.ui.theme.Gradients
+import cz.internetradio.app.screens.AddRadioViewModel
+import cz.internetradio.app.model.RadioCategory
 
 @Composable
 fun AddRadioScreen(
-    viewModel: AddRadioViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
+    viewModel: AddRadioViewModel = hiltViewModel(),
     radioToEdit: String? = null
 ) {
+    var showGradientPicker by remember { mutableStateOf(false) }
+    var showCategoryPicker by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    val selectedGradientId by viewModel.selectedGradientId.collectAsState()
+    
     var name by remember { mutableStateOf("") }
     var streamUrl by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(RadioCategory.VLASTNI) }
-    var isDropdownExpanded by remember { mutableStateOf(false) }
-    
-    // Načtení existující stanice pro editaci
+    val validationError by viewModel.validationError.collectAsState()
+
+    // Načtení existujícího rádia pro úpravu
     LaunchedEffect(radioToEdit) {
         if (radioToEdit != null) {
             viewModel.loadRadioForEdit(radioToEdit)?.let { radio ->
                 name = radio.name
                 streamUrl = radio.streamUrl
-                imageUrl = radio.imageUrl ?: ""
-                description = radio.description ?: ""
+                imageUrl = radio.imageUrl
+                description = radio.description
                 selectedCategory = radio.category
+                radio.gradientId?.let { viewModel.setSelectedGradient(it) }
             }
         }
     }
 
-    // Validační stavy
-    var nameError by remember { mutableStateOf(false) }
-    var streamUrlError by remember { mutableStateOf(false) }
-
-    val validationError by viewModel.validationError.collectAsState()
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
             .imePadding()
+            .verticalScroll(scrollState)
     ) {
+        TopAppBar(
+            title = { Text(if (radioToEdit != null) "Upravit stanici" else "Přidat stanici") },
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Zpět")
+                }
+            },
+            backgroundColor = MaterialTheme.colors.surface,
+            elevation = 0.dp
+        )
+
+        // Formulář pro úpravu stanice
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TopAppBar(
-                title = { Text(if (radioToEdit != null) "Upravit stanici" else "Přidat stanici") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Zpět",
-                            tint = MaterialTheme.colors.onPrimary
-                        )
-                    }
-                },
-                backgroundColor = MaterialTheme.colors.surface,
-                elevation = 4.dp
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Název stanice") },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Column(
+            OutlinedTextField(
+                value = streamUrl,
+                onValueChange = { streamUrl = it },
+                label = { Text("URL streamu") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = imageUrl,
+                onValueChange = { imageUrl = it },
+                label = { Text("URL obrázku (volitelné)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = { Text("Popis (volitelné)") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3
+            )
+
+            // Výběr kategorie
+            OutlinedTextField(
+                value = selectedCategory.title,
+                onValueChange = { },
+                readOnly = true,
+                label = { Text("Kategorie") },
+                trailingIcon = {
+                    IconButton(onClick = { showCategoryPicker = !showCategoryPicker }) {
+                        Icon(Icons.Default.ArrowDropDown, "Rozbalit")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            DropdownMenu(
+                expanded = showCategoryPicker,
+                onDismissRequest = { showCategoryPicker = false }
+            ) {
+                RadioCategory.values().forEach { category ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedCategory = category
+                            showCategoryPicker = false
+                        }
+                    ) {
+                        Text(category.title)
+                    }
+                }
+            }
+
+            // Výběr gradientu
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .clickable { showGradientPicker = true },
+                shape = RoundedCornerShape(8.dp),
+                elevation = 4.dp
             ) {
-                when (validationError) {
-                    is AddRadioViewModel.ValidationError.DuplicateStreamUrl -> {
-                        Text(
-                            text = "Stanice s touto URL již existuje",
-                            color = MaterialTheme.colors.error,
-                            style = MaterialTheme.typography.caption,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-                    is AddRadioViewModel.ValidationError.DuplicateName -> {
-                        Text(
-                            text = "Stanice s tímto názvem již existuje",
-                            color = MaterialTheme.colors.error,
-                            style = MaterialTheme.typography.caption,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-                    is AddRadioViewModel.ValidationError.StreamError -> {
-                        Text(
-                            text = (validationError as AddRadioViewModel.ValidationError.StreamError).message,
-                            color = MaterialTheme.colors.error,
-                            style = MaterialTheme.typography.caption,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-                    null -> { /* Bez chyby */ }
-                }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { 
-                            name = it
-                            nameError = it.isBlank()
-                            viewModel.clearValidationError()
-                        },
-                        label = { Text("Název rádia") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = nameError,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = MaterialTheme.colors.primary,
-                            unfocusedBorderColor = Color.Gray,
-                            errorBorderColor = Color.Red,
-                            textColor = Color.White,
-                            focusedLabelColor = MaterialTheme.colors.primary,
-                            unfocusedLabelColor = Color.Gray
-                        )
-                    )
-                    if (nameError) {
-                        Text(
-                            text = "Název je povinný",
-                            color = MaterialTheme.colors.error,
-                            style = MaterialTheme.typography.caption,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
-                }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = streamUrl,
-                        onValueChange = { 
-                            streamUrl = it
-                            streamUrlError = !it.startsWith("http://") && !it.startsWith("https://")
-                            viewModel.clearValidationError()
-                        },
-                        label = { Text("Stream URL") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = streamUrlError,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = MaterialTheme.colors.primary,
-                            unfocusedBorderColor = Color.Gray,
-                            errorBorderColor = Color.Red,
-                            textColor = Color.White,
-                            focusedLabelColor = MaterialTheme.colors.primary,
-                            unfocusedLabelColor = Color.Gray
-                        )
-                    )
-                    Text(
-                        text = if (streamUrlError) "URL musí začínat http:// nebo https://"
-                              else "Např. https://ice.actve.net/fm-evropa2-128",
-                        color = if (streamUrlError) MaterialTheme.colors.error else Color.Gray,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                    )
-                }
-
-                OutlinedTextField(
-                    value = imageUrl,
-                    onValueChange = { imageUrl = it },
-                    label = { Text("URL ikony (volitelné)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = MaterialTheme.colors.primary,
-                        unfocusedBorderColor = Color.Gray,
-                        textColor = Color.White,
-                        focusedLabelColor = MaterialTheme.colors.primary,
-                        unfocusedLabelColor = Color.Gray
-                    )
-                )
-
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Popis (volitelný)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = MaterialTheme.colors.primary,
-                        unfocusedBorderColor = Color.Gray,
-                        textColor = Color.White,
-                        focusedLabelColor = MaterialTheme.colors.primary,
-                        unfocusedLabelColor = Color.Gray
-                    )
-                )
-
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = selectedCategory.title,
-                        onValueChange = { },
-                        label = { Text("Kategorie") },
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { isDropdownExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Vybrat kategorii",
-                                    tint = Color.White
-                                )
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = MaterialTheme.colors.primary,
-                            unfocusedBorderColor = Color.Gray,
-                            textColor = Color.White,
-                            focusedLabelColor = MaterialTheme.colors.primary,
-                            unfocusedLabelColor = Color.Gray
-                        )
-                    )
-
-                    DropdownMenu(
-                        expanded = isDropdownExpanded,
-                        onDismissRequest = { isDropdownExpanded = false },
-                        modifier = Modifier.fillMaxWidth(0.9f)
-                    ) {
-                        RadioCategory.values()
-                            .sortedWith(compareBy { 
-                                when(it) {
-                                    RadioCategory.VLASTNI -> -1
-                                    RadioCategory.OSTATNI -> RadioCategory.values().size
-                                    else -> it.ordinal
-                                }
-                            })
-                            .forEach { category ->
-                                DropdownMenuItem(
-                                    onClick = {
-                                        selectedCategory = category
-                                        isDropdownExpanded = false
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = selectedGradientId?.let { id ->
+                                    Gradients.availableGradients.find { it.id == id }?.colors?.let { 
+                                        listOf(it.first, it.second)
                                     }
-                                ) {
-                                    Text(category.title)
-                                }
-                            }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                } ?: listOf(Color.Gray, Color.DarkGray)
+                            )
+                        )
                 ) {
-                    OutlinedButton(
-                        onClick = onNavigateBack,
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.White
-                        )
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Zrušit",
-                            style = MaterialTheme.typography.button.copy(
-                                fontSize = 16.sp
-                            )
+                            text = selectedGradientId?.let { id ->
+                                Gradients.availableGradients.find { it.id == id }?.name
+                            } ?: "Vybrat gradient",
+                            color = Color.White
                         )
-                    }
-
-                    Button(
-                        onClick = {
-                            nameError = name.isBlank()
-                            streamUrlError = !streamUrl.startsWith("http://") && !streamUrl.startsWith("https://")
-                            
-                            if (!nameError && !streamUrlError) {
-                                if (radioToEdit != null) {
-                                    viewModel.updateRadio(
-                                        radioId = radioToEdit,
-                                        name = name,
-                                        streamUrl = streamUrl,
-                                        imageUrl = imageUrl.takeIf { it.isNotBlank() },
-                                        description = description.takeIf { it.isNotBlank() },
-                                        category = selectedCategory,
-                                        onSuccess = { onNavigateBack() }
-                                    )
-                                } else {
-                                    viewModel.addRadio(
-                                        name = name,
-                                        streamUrl = streamUrl,
-                                        imageUrl = imageUrl.takeIf { it.isNotBlank() },
-                                        description = description.takeIf { it.isNotBlank() },
-                                        category = selectedCategory,
-                                        onSuccess = { onNavigateBack() }
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.primary,
-                            contentColor = Color.White
-                        ),
-                        enabled = name.isNotBlank() && streamUrl.isNotBlank()
-                    ) {
-                        Text(
-                            "Uložit",
-                            style = MaterialTheme.typography.button.copy(
-                                fontSize = 16.sp
-                            )
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            contentDescription = "Vybrat",
+                            tint = Color.White
                         )
                     }
                 }
             }
+
+            // Tlačítko pro uložení
+            Button(
+                onClick = {
+                    if (radioToEdit != null) {
+                        viewModel.updateRadio(
+                            radioId = radioToEdit,
+                            name = name,
+                            streamUrl = streamUrl,
+                            imageUrl = if (imageUrl.isBlank()) null else imageUrl,
+                            description = if (description.isBlank()) null else description,
+                            category = selectedCategory,
+                            onSuccess = onNavigateBack
+                        )
+                    } else {
+                        viewModel.addRadio(
+                            name = name,
+                            streamUrl = streamUrl,
+                            imageUrl = if (imageUrl.isBlank()) null else imageUrl,
+                            description = if (description.isBlank()) null else description,
+                            category = selectedCategory,
+                            onSuccess = onNavigateBack
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = name.isNotBlank() && streamUrl.isNotBlank()
+            ) {
+                Text(if (radioToEdit != null) "Uložit změny" else "Přidat stanici")
+            }
         }
+
+        // Zobrazení chyby validace
+        validationError?.let { error ->
+            Text(
+                text = when (error) {
+                    is AddRadioViewModel.ValidationError.DuplicateStreamUrl -> "Stanice s touto URL již existuje"
+                    is AddRadioViewModel.ValidationError.DuplicateName -> "Stanice s tímto názvem již existuje"
+                    is AddRadioViewModel.ValidationError.StreamError -> error.message
+                },
+                color = MaterialTheme.colors.error,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+    }
+
+    if (showGradientPicker) {
+        AlertDialog(
+            onDismissRequest = { showGradientPicker = false },
+            title = { Text("Vyberte gradient") },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Gradients.availableGradients.forEach { gradient ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                                .clickable {
+                                    viewModel.setSelectedGradient(gradient.id)
+                                    showGradientPicker = false
+                                },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                gradient.colors.first,
+                                                gradient.colors.second
+                                            )
+                                        )
+                                    )
+                            ) {
+                                Text(
+                                    text = gradient.name,
+                                    color = Color.White,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterStart)
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showGradientPicker = false }) {
+                    Text("Zrušit")
+                }
+            }
+        )
     }
 } 
