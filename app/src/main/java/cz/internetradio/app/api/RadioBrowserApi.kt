@@ -23,7 +23,7 @@ class RadioBrowserApi @Inject constructor() {
             try {
                 val encodedName = java.net.URLEncoder.encode(name.trim(), "UTF-8")
                     .replace("+", "%20")
-                val url = "$baseUrl/stations/byname/$encodedName"
+                val url = "$baseUrl/stations/search?name=$encodedName&limit=100&order=votes&reverse=true"
                 Log.d("RadioBrowserApi", "Volám API: $url")
                 
                 val request = Request.Builder()

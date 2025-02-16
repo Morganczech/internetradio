@@ -606,6 +606,8 @@ class RadioViewModel @Inject constructor(
                 _showMaxFavoritesError.value = true
                 return@launch
             }
+            
+            Log.d("RadioViewModel", "Ukládám stanici: ${station.name}")
             radioRepository.addRadioStationToFavorites(station, category)
         }
     }

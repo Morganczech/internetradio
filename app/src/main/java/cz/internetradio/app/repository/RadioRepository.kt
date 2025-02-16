@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import cz.internetradio.app.model.RadioCategory
+import androidx.compose.ui.graphics.toArgb
 
 @Singleton
 class RadioRepository @Inject constructor(
@@ -65,32 +66,32 @@ class RadioRepository @Inject constructor(
     }
 
     suspend fun toggleFavorite(radioId: String) {
-        val radio = radioDao.getRadioById(radioId)
+        val radio = radioDao.getRadioById(radioId)?.toRadio()
         radio?.let {
             if (!it.isFavorite) {
                 // Při přidání do oblíbených zachováme původní kategorii
                 val updatedRadio = it.copy(
                     isFavorite = true
                 )
-                radioDao.insertRadio(updatedRadio)
+                radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
             } else {
                 // Při odebrání z oblíbených pouze zrušíme příznak oblíbené
                 val updatedRadio = it.copy(
                     isFavorite = false
                 )
-                radioDao.insertRadio(updatedRadio)
+                radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
             }
         }
     }
 
     suspend fun removeFavorite(radioId: String) {
-        val radio = radioDao.getRadioById(radioId)
+        val radio = radioDao.getRadioById(radioId)?.toRadio()
         radio?.let {
             // Při odebrání z oblíbených pouze zrušíme příznak oblíbené
             val updatedRadio = it.copy(
                 isFavorite = false
             )
-            radioDao.insertRadio(updatedRadio)
+            radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
         }
     }
 
@@ -99,24 +100,49 @@ class RadioRepository @Inject constructor(
     }
 
     suspend fun addRadioStationToFavorites(radioStation: RadioStation, category: RadioCategory) {
-        val radio = Radio(
-            id = radioStation.stationuuid ?: radioStation.url,
-            name = radioStation.name,
-            streamUrl = radioStation.url_resolved ?: radioStation.url,
-            imageUrl = radioStation.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
-            description = radioStation.tags ?: "",
-            category = category,  // Použijeme vybranou kategorii
-            originalCategory = category,  // Uložíme původní kategorii
-            startColor = category.startColor,
-            endColor = category.endColor,
-            isFavorite = false  // Stanice není automaticky oblíbená
-        )
-        radioDao.insertRadio(RadioEntity.fromRadio(radio))
+        val streamUrl = radioStation.url_resolved ?: radioStation.url
+        
+        // Kontrola, zda již existuje stanice se stejnou URL (kontrolujeme obě možné URL)
+        val existingRadio = radioDao.getAllRadios().first().find { entity -> 
+            val entityRadio = entity.toRadio()
+            entityRadio.streamUrl == streamUrl || 
+            entityRadio.streamUrl == radioStation.url ||
+            (radioStation.url_resolved != null && entityRadio.streamUrl == radioStation.url_resolved)
+        }?.toRadio()
+
+        if (existingRadio != null) {
+            // Pokud stanice existuje, zachováme její nastavení oblíbenosti a ID
+            val updatedRadio = existingRadio.copy(
+                name = radioStation.name,
+                imageUrl = radioStation.favicon ?: existingRadio.imageUrl,
+                description = radioStation.tags ?: existingRadio.description,
+                category = category,
+                originalCategory = if (existingRadio.isFavorite) existingRadio.originalCategory else category,
+                startColor = category.startColor,
+                endColor = category.endColor
+            )
+            radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
+        } else {
+            // Pokud stanice neexistuje, vytvoříme nový záznam
+            val radio = Radio(
+                id = radioStation.stationuuid ?: radioStation.url,
+                name = radioStation.name,
+                streamUrl = streamUrl,
+                imageUrl = radioStation.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                description = radioStation.tags ?: "",
+                category = category,
+                originalCategory = category,
+                startColor = category.startColor,
+                endColor = category.endColor,
+                isFavorite = false
+            )
+            radioDao.insertRadio(RadioEntity.fromRadio(radio))
+        }
     }
 
     suspend fun removeStation(radioId: String) {
-        radioDao.getRadioById(radioId)?.let { radio ->
-            radioDao.deleteRadio(radio)
+        radioDao.getRadioById(radioId)?.let { radioEntity ->
+            radioDao.deleteRadio(radioEntity)
         }
     }
 
