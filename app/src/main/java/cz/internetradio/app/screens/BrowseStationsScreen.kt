@@ -35,6 +35,7 @@ fun BrowseStationsScreen(
     var isLoading by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
     var showCategoryDialog by remember { mutableStateOf(false) }
+    var selectedStation by remember { mutableStateOf<RadioStation?>(null) }
     val currentRadio by viewModel.currentRadio.collectAsState()
 
     // Načtení místních stanic při zobrazení obrazovky
@@ -110,6 +111,7 @@ fun BrowseStationsScreen(
                                     category = RadioCategory.MISTNI
                                 },
                                 onAddToFavorites = {
+                                    selectedStation = station
                                     showCategoryDialog = true
                                     selectedCategory = null
                                 }
@@ -140,6 +142,7 @@ fun BrowseStationsScreen(
                     StationItem(
                         station = station,
                         onAddToFavorites = {
+                            selectedStation = station
                             showCategoryDialog = true
                             selectedCategory = null
                         }
@@ -167,7 +170,10 @@ fun BrowseStationsScreen(
     // Dialog pro výběr kategorie při přidávání do oblíbených
     if (showCategoryDialog) {
         AlertDialog(
-            onDismissRequest = { showCategoryDialog = false },
+            onDismissRequest = { 
+                showCategoryDialog = false
+                selectedStation = null
+            },
             title = { Text("Vyberte kategorii") },
             text = {
                 Column {
@@ -200,20 +206,24 @@ fun BrowseStationsScreen(
                 Button(
                     onClick = {
                         selectedCategory?.let { category ->
-                            stations.find { it.isFromRadioBrowser }?.let { station ->
+                            selectedStation?.let { station ->
                                 viewModel.addStationToFavorites(station, category)
                             }
                         }
                         showCategoryDialog = false
+                        selectedStation = null
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = selectedCategory != null
                 ) {
-                    Text("Přidat do oblíbených")
+                    Text("Přidat do kategorie")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCategoryDialog = false }) {
+                TextButton(onClick = { 
+                    showCategoryDialog = false 
+                    selectedStation = null
+                }) {
                     Text("Zrušit")
                 }
             }
@@ -257,11 +267,21 @@ private fun StationItem(
                 )
                 if (!station.tags.isNullOrBlank()) {
                     Text(
-                        text = station.tags,
+                        text = station.tags.let { 
+                            if (it.length > 50) it.substring(0, 47) + "..." 
+                            else it 
+                        },
                         style = MaterialTheme.typography.body2,
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
+                
+                // Dočasné zobrazení URL streamu
+                Text(
+                    text = "Stream URL: ${station.url_resolved ?: station.url}",
+                    style = MaterialTheme.typography.caption,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
                 
                 if (station.isFromRadioBrowser) {
                     TextButton(
