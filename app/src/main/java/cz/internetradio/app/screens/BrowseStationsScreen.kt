@@ -307,7 +307,7 @@ fun BrowseStationsScreen(
                                 onClick = { selectedCategory = category }
                             )
                             Text(
-                                text = category.title,
+                                text = stringResource(category.getTitleRes()),
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }

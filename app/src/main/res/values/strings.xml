@@ -19,6 +19,13 @@
     <string name="category_religious">Religious</string>
     <string name="category_news">News</string>
     <string name="category_other">Other</string>
+    <string name="category_local_cz">Czech stations</string>
+    <string name="category_local_sk">Slovak stations</string>
+    <string name="category_local_de">German stations</string>
+    <string name="category_local_at">Austrian stations</string>
+    <string name="category_local_pl">Polish stations</string>
+    <string name="category_local_gb">British stations</string>
+    <string name="category_local_us">American stations</string>
 
     <!-- Navigation -->
     <string name="nav_search">Search</string>

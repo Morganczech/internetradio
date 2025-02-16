@@ -306,7 +306,7 @@ class RadioService : Service() {
                 
                 // Metadata pro Bluetooth AVRCP
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1) // Stream nemá délku
-                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, radio.category.title)
+                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, getString(radio.category.getTitleRes()))
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
                 

@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -111,16 +112,19 @@ fun AddRadioScreen(
 
             // Výběr kategorie
             OutlinedTextField(
-                value = selectedCategory.title,
+                value = stringResource(selectedCategory.getTitleRes()),
                 onValueChange = { },
+                enabled = false,
                 readOnly = true,
-                label = { Text(stringResource(R.string.add_station_category)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showCategoryPicker = true },
                 trailingIcon = {
-                    IconButton(onClick = { showCategoryPicker = !showCategoryPicker }) {
-                        Icon(Icons.Default.ArrowDropDown, stringResource(R.string.add_station_expand))
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null
+                    )
+                }
             )
 
             DropdownMenu(
@@ -140,7 +144,7 @@ fun AddRadioScreen(
                                 showCategoryPicker = false
                             }
                         ) {
-                            Text(category.title)
+                            Text(stringResource(category.getTitleRes()))
                         }
                     }
             }

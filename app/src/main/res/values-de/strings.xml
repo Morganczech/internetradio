@@ -19,6 +19,13 @@
     <string name="category_religious">Religiös</string>
     <string name="category_news">Nachrichten</string>
     <string name="category_other">Sonstige</string>
+    <string name="category_local_cz">Tschechische Sender</string>
+    <string name="category_local_sk">Slowakische Sender</string>
+    <string name="category_local_de">Deutsche Sender</string>
+    <string name="category_local_at">Österreichische Sender</string>
+    <string name="category_local_pl">Polnische Sender</string>
+    <string name="category_local_gb">Britische Sender</string>
+    <string name="category_local_us">Amerikanische Sender</string>
 
     <!-- Navigation -->
     <string name="nav_search">Suchen</string>

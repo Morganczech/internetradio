@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -138,14 +139,14 @@ fun AllStationsScreen(
             // Prioritní kategorie
             item {
                 CategoryChip(
-                    text = RadioCategory.VLASTNI.title,
+                    text = stringResource(RadioCategory.VLASTNI.getTitleRes()),
                     isSelected = selectedCategory == RadioCategory.VLASTNI,
                     onClick = { selectedCategory = RadioCategory.VLASTNI }
                 )
             }
             item {
                 CategoryChip(
-                    text = RadioCategory.MISTNI.title,
+                    text = stringResource(RadioCategory.MISTNI.getTitleRes()),
                     isSelected = selectedCategory == RadioCategory.MISTNI,
                     onClick = { selectedCategory = RadioCategory.MISTNI }
                 )
@@ -164,7 +165,7 @@ fun AllStationsScreen(
                 it != RadioCategory.OSTATNI
             }) { category ->
                 CategoryChip(
-                    text = category.title,
+                    text = stringResource(category.getTitleRes()),
                     isSelected = selectedCategory == category,
                     onClick = { selectedCategory = category }
                 )

@@ -5,6 +5,13 @@
     
     <!-- Main Categories -->
     <string name="category_local">Stacje lokalne</string>
+    <string name="category_local_cz">Stacje czeskie</string>
+    <string name="category_local_sk">Stacje słowackie</string>
+    <string name="category_local_de">Stacje niemieckie</string>
+    <string name="category_local_at">Stacje austriackie</string>
+    <string name="category_local_pl">Stacje polskie</string>
+    <string name="category_local_gb">Stacje brytyjskie</string>
+    <string name="category_local_us">Stacje amerykańskie</string>
     <string name="category_favorites">Moje stacje</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>

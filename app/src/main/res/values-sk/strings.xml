@@ -19,6 +19,13 @@
     <string name="category_religious">Náboženské</string>
     <string name="category_news">Spravodajské</string>
     <string name="category_other">Ostatné</string>
+    <string name="category_local_cz">České stanice</string>
+    <string name="category_local_sk">Slovenské stanice</string>
+    <string name="category_local_de">Nemecké stanice</string>
+    <string name="category_local_at">Rakúske stanice</string>
+    <string name="category_local_pl">Poľské stanice</string>
+    <string name="category_local_gb">Britské stanice</string>
+    <string name="category_local_us">Americké stanice</string>
 
     <!-- Navigation -->
     <string name="nav_search">Vyhľadať</string>

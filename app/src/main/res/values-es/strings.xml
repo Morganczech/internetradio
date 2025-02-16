@@ -19,6 +19,13 @@
     <string name="category_religious">Religiosa</string>
     <string name="category_news">Noticias</string>
     <string name="category_other">Otras</string>
+    <string name="category_local_cz">Emisoras checas</string>
+    <string name="category_local_sk">Emisoras eslovacas</string>
+    <string name="category_local_de">Emisoras alemanas</string>
+    <string name="category_local_at">Emisoras austriacas</string>
+    <string name="category_local_pl">Emisoras polacas</string>
+    <string name="category_local_gb">Emisoras británicas</string>
+    <string name="category_local_us">Emisoras estadounidenses</string>
 
     <!-- Navigation -->
     <string name="nav_search">Buscar</string>

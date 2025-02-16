@@ -5,6 +5,13 @@
     
     <!-- Main Categories -->
     <string name="category_local">Místní stanice</string>
+    <string name="category_local_cz">České stanice</string>
+    <string name="category_local_sk">Slovenské stanice</string>
+    <string name="category_local_de">Německé stanice</string>
+    <string name="category_local_at">Rakouské stanice</string>
+    <string name="category_local_pl">Polské stanice</string>
+    <string name="category_local_gb">Britské stanice</string>
+    <string name="category_local_us">Americké stanice</string>
     <string name="category_favorites">Moje stanice</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
