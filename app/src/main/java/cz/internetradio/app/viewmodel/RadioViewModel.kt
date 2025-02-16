@@ -13,6 +13,7 @@ import cz.internetradio.app.model.RadioStation
 import cz.internetradio.app.repository.RadioRepository
 import cz.internetradio.app.repository.FavoriteSongRepository
 import cz.internetradio.app.model.FavoriteSong
+import cz.internetradio.app.api.SearchParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay

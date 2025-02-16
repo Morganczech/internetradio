@@ -5,6 +5,7 @@ import javax.inject.Singleton
 import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.data.entity.RadioEntity
 import cz.internetradio.app.api.RadioBrowserApi
+import cz.internetradio.app.api.SearchParams
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.model.RadioStation
 import kotlinx.coroutines.flow.Flow
