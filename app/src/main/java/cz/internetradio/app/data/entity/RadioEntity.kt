@@ -19,7 +19,9 @@ data class RadioEntity(
     val originalCategory: RadioCategory?,
     val startColor: Int,
     val endColor: Int,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val gradientId: Int?,
+    val bitrate: Int?
 ) {
     fun toRadio(): Radio = Radio(
         id = id,
@@ -31,7 +33,9 @@ data class RadioEntity(
         originalCategory = originalCategory,
         startColor = Color(startColor),
         endColor = Color(endColor),
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        gradientId = gradientId,
+        bitrate = bitrate
     )
 
     companion object {
@@ -45,7 +49,9 @@ data class RadioEntity(
             originalCategory = radio.originalCategory,
             startColor = radio.startColor.toArgb(),
             endColor = radio.endColor.toArgb(),
-            isFavorite = radio.isFavorite
+            isFavorite = radio.isFavorite,
+            gradientId = radio.gradientId,
+            bitrate = radio.bitrate
         )
     }
 } 

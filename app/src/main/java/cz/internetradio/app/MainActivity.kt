@@ -460,6 +460,15 @@ fun PlayerControls(
                             style = MaterialTheme.typography.h6,
                             color = Color.White
                         )
+                        // Zobrazení kvality streamu
+                        displayedRadio.bitrate?.let { bitrate ->
+                            Text(
+                                text = "$bitrate kbps",
+                                style = MaterialTheme.typography.caption,
+                                color = Color.White.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(top = 2.dp)
+                            )
+                        }
                         currentMetadata?.let { metadata ->
                             Text(
                                 text = metadata,

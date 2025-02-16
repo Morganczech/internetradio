@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import cz.internetradio.app.model.RadioCategory
 import androidx.compose.ui.graphics.toArgb
+import android.util.Log
 
 @Singleton
 class RadioRepository @Inject constructor(
@@ -120,7 +121,13 @@ class RadioRepository @Inject constructor(
                 category = category,
                 originalCategory = if (existingRadio.isFavorite) existingRadio.originalCategory else category,
                 startColor = category.startColor,
-                endColor = category.endColor
+                endColor = category.endColor,
+                bitrate = try {
+                    radioStation.bitrate?.toInt()
+                } catch (e: NumberFormatException) {
+                    Log.w("RadioRepository", "Nepodařilo se převést bitrate na číslo: ${radioStation.bitrate}")
+                    null
+                }
             )
             radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
         } else {
@@ -135,7 +142,13 @@ class RadioRepository @Inject constructor(
                 originalCategory = category,
                 startColor = category.startColor,
                 endColor = category.endColor,
-                isFavorite = false
+                isFavorite = false,
+                bitrate = try {
+                    radioStation.bitrate?.toInt()
+                } catch (e: NumberFormatException) {
+                    Log.w("RadioRepository", "Nepodařilo se převést bitrate na číslo: ${radioStation.bitrate}")
+                    null
+                }
             )
             radioDao.insertRadio(RadioEntity.fromRadio(radio))
         }
