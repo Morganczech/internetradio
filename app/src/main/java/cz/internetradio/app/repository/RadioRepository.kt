@@ -68,17 +68,14 @@ class RadioRepository @Inject constructor(
         val radio = radioDao.getRadioById(radioId)
         radio?.let {
             if (!it.isFavorite) {
-                // Při přidání do oblíbených uložíme původní kategorii a nastavíme VLASTNI
+                // Při přidání do oblíbených zachováme původní kategorii
                 val updatedRadio = it.copy(
-                    originalCategory = it.category,
-                    category = RadioCategory.VLASTNI,
                     isFavorite = true
                 )
                 radioDao.insertRadio(updatedRadio)
             } else {
-                // Při odebrání z oblíbených vrátíme do původní kategorie
+                // Při odebrání z oblíbených pouze zrušíme příznak oblíbené
                 val updatedRadio = it.copy(
-                    category = it.originalCategory ?: it.category,
                     isFavorite = false
                 )
                 radioDao.insertRadio(updatedRadio)
@@ -89,9 +86,8 @@ class RadioRepository @Inject constructor(
     suspend fun removeFavorite(radioId: String) {
         val radio = radioDao.getRadioById(radioId)
         radio?.let {
-            // Při odebrání z oblíbených vrátíme do původní kategorie
+            // Při odebrání z oblíbených pouze zrušíme příznak oblíbené
             val updatedRadio = it.copy(
-                category = it.originalCategory ?: it.category,
                 isFavorite = false
             )
             radioDao.insertRadio(updatedRadio)

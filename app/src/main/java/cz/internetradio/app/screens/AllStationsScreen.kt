@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,7 +46,7 @@ fun AllStationsScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
-    var selectedCategory by remember { mutableStateOf<RadioCategory?>(RadioCategory.MISTNI) }
+    var selectedCategory by rememberSaveable { mutableStateOf<RadioCategory>(RadioCategory.MISTNI) }
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -152,14 +153,15 @@ fun AllStationsScreen(
             item {
                 CategoryChip(
                     text = "Vše",
-                    isSelected = selectedCategory == null,
-                    onClick = { selectedCategory = null }
+                    isSelected = selectedCategory == RadioCategory.OSTATNI,
+                    onClick = { selectedCategory = RadioCategory.OSTATNI }
                 )
             }
-            // Ostatní kategorie (kromě již zobrazených)
+            // Ostatní kategorie (kromě již zobrazených a OSTATNI)
             items(RadioCategory.values().filter { 
                 it != RadioCategory.VLASTNI && 
-                it != RadioCategory.MISTNI 
+                it != RadioCategory.MISTNI &&
+                it != RadioCategory.OSTATNI
             }) { category ->
                 CategoryChip(
                     text = category.title,
@@ -182,7 +184,11 @@ fun AllStationsScreen(
         ) {
             val filteredRadios = allRadios
                 .filter { radio ->
-                    (selectedCategory == null || radio.category == selectedCategory) &&
+                    when {
+                        selectedCategory == RadioCategory.VLASTNI -> radio.isFavorite
+                        selectedCategory == RadioCategory.OSTATNI -> true
+                        else -> radio.category == selectedCategory
+                    } &&
                     (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
                 }
                 .sortedBy { it.name.lowercase() }
