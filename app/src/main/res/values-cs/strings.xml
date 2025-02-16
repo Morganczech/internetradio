@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Touch Radio</string>
+    
+    <!-- Main Categories -->
+    <string name="category_local">Místní stanice</string>
+    <string name="category_favorites">Moje stanice</string>
+    <string name="category_pop">Pop</string>
+    <string name="category_rock">Rock</string>
+    <string name="category_jazz">Jazz</string>
+    <string name="category_dance">Dance</string>
+    <string name="category_electronic">Elektronická</string>
+    <string name="category_classical">Klasická</string>
+    <string name="category_country">Country</string>
+    <string name="category_folk">Folk</string>
+    <string name="category_spoken_word">Mluvené slovo</string>
+    <string name="category_children">Dětské</string>
+    <string name="category_religious">Náboženské</string>
+    <string name="category_news">Zpravodajské</string>
+    <string name="category_other">Ostatní</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Vyhledat</string>
+    <string name="nav_settings">Nastavení</string>
+    <string name="nav_favorite_songs">Oblíbené skladby</string>
+    <string name="nav_equalizer">Ekvalizér</string>
+    <string name="nav_back">Zpět</string>
+
+    <!-- Player -->
+    <string name="player_play">Přehrát</string>
+    <string name="player_pause">Pozastavit</string>
+    <string name="player_stop">Zastavit</string>
+    <string name="player_next">Další stanice</string>
+    <string name="player_previous">Předchozí stanice</string>
+    <string name="player_volume">Hlasitost</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Nastavení</string>
+    <string name="settings_language">Jazyk</string>
+    <string name="settings_language_system">Systémový jazyk</string>
+    <string name="settings_language_en">Angličtina</string>
+    <string name="settings_language_cs">Čeština</string>
+    <string name="settings_language_sk">Slovenština</string>
+    <string name="settings_language_pl">Polština</string>
+    <string name="settings_language_de">Němčina</string>
+    <string name="settings_language_fr">Francouzština</string>
+    <string name="settings_language_es">Španělština</string>
+    <string name="settings_max_favorites">Maximální počet oblíbených</string>
+    <string name="settings_fade_duration">Doba zeslabení zvuku</string>
+    <string name="settings_equalizer_enabled">Povolit ekvalizér</string>
+    <string name="settings_export">Exportovat nastavení</string>
+    <string name="settings_import">Importovat nastavení</string>
+    <string name="settings_sleep_timer">Časovač vypnutí</string>
+    <string name="settings_add_station">Přidat stanici</string>
+
+    <!-- Search -->
+    <string name="search_hint">Vyhledat stanice online...</string>
+    <string name="search_no_results">Žádné stanice nenalezeny</string>
+    <string name="search_error">Chyba při vyhledávání stanic</string>
+    <string name="search_min_chars">Zadejte alespoň 3 znaky</string>
+
+    <!-- Filter -->
+    <string name="filter_sort_by">Řadit podle:</string>
+    <string name="filter_sort_by_popularity">Oblíbenosti</string>
+    <string name="filter_sort_by_name">Názvu</string>
+    <string name="filter_sort_by_quality">Kvality</string>
+    <string name="filter_country">Země:</string>
+    <string name="filter_country_czech">Česká republika</string>
+    <string name="filter_country_slovak">Slovensko</string>
+    <string name="filter_quality">Minimální kvalita:</string>
+    <string name="filter_quality_64">64 kbps</string>
+    <string name="filter_quality_128">128 kbps</string>
+    <string name="filter_quality_256">256 kbps</string>
+
+    <!-- Actions -->
+    <string name="action_add_favorite">Přidat do oblíbených</string>
+    <string name="action_remove_favorite">Odebrat z oblíbených</string>
+    <string name="action_save_song">Uložit skladbu</string>
+    <string name="action_share">Sdílet</string>
+    <string name="action_delete">Smazat</string>
+    <string name="action_edit">Upravit</string>
+    <string name="action_cancel">Zrušit</string>
+    <string name="action_save">Uložit</string>
+    <string name="action_close">Zavřít</string>
+
+    <!-- Messages -->
+    <string name="msg_favorites_limit">Dosažen maximální počet oblíbených</string>
+    <string name="msg_song_saved">Skladba byla uložena do oblíbených</string>
+    <string name="msg_station_added">Stanice byla přidána do oblíbených</string>
+    <string name="msg_station_removed">Stanice byla odebrána z oblíbených</string>
+    <string name="msg_settings_exported">Nastavení bylo úspěšně exportováno</string>
+    <string name="msg_settings_imported">Nastavení bylo úspěšně importováno</string>
+</resources> 

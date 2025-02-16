@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Touch Radio</string>
+    
+    <!-- Main Categories -->
+    <string name="category_local">Miestne stanice</string>
+    <string name="category_favorites">Moje stanice</string>
+    <string name="category_pop">Pop</string>
+    <string name="category_rock">Rock</string>
+    <string name="category_jazz">Jazz</string>
+    <string name="category_dance">Dance</string>
+    <string name="category_electronic">Elektronická</string>
+    <string name="category_classical">Klasická</string>
+    <string name="category_country">Country</string>
+    <string name="category_folk">Folk</string>
+    <string name="category_spoken_word">Hovorené slovo</string>
+    <string name="category_children">Detské</string>
+    <string name="category_religious">Náboženské</string>
+    <string name="category_news">Spravodajské</string>
+    <string name="category_other">Ostatné</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Vyhľadať</string>
+    <string name="nav_settings">Nastavenia</string>
+    <string name="nav_favorite_songs">Obľúbené skladby</string>
+    <string name="nav_equalizer">Ekvalizér</string>
+    <string name="nav_back">Späť</string>
+
+    <!-- Player -->
+    <string name="player_play">Prehrať</string>
+    <string name="player_pause">Pozastaviť</string>
+    <string name="player_stop">Zastaviť</string>
+    <string name="player_next">Ďalšia stanica</string>
+    <string name="player_previous">Predchádzajúca stanica</string>
+    <string name="player_volume">Hlasitosť</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Nastavenia</string>
+    <string name="settings_language">Jazyk</string>
+    <string name="settings_max_favorites">Maximálny počet obľúbených</string>
+    <string name="settings_fade_duration">Doba stlmenia zvuku</string>
+    <string name="settings_equalizer_enabled">Povoliť ekvalizér</string>
+    <string name="settings_export">Exportovať nastavenia</string>
+    <string name="settings_import">Importovať nastavenia</string>
+    <string name="settings_sleep_timer">Časovač vypnutia</string>
+    <string name="settings_add_station">Pridať stanicu</string>
+
+    <!-- Search -->
+    <string name="search_hint">Vyhľadať stanice online...</string>
+    <string name="search_no_results">Žiadne stanice nenájdené</string>
+    <string name="search_error">Chyba pri vyhľadávaní staníc</string>
+    <string name="search_min_chars">Zadajte aspoň 3 znaky</string>
+
+    <!-- Filter -->
+    <string name="filter_sort_by">Zoradiť podľa:</string>
+    <string name="filter_sort_by_popularity">Obľúbenosti</string>
+    <string name="filter_sort_by_name">Názvu</string>
+    <string name="filter_sort_by_quality">Kvality</string>
+    <string name="filter_country">Krajina:</string>
+    <string name="filter_country_czech">Česká republika</string>
+    <string name="filter_country_slovak">Slovensko</string>
+    <string name="filter_quality">Minimálna kvalita:</string>
+    <string name="filter_quality_64">64 kbps</string>
+    <string name="filter_quality_128">128 kbps</string>
+    <string name="filter_quality_256">256 kbps</string>
+
+    <!-- Actions -->
+    <string name="action_add_favorite">Pridať do obľúbených</string>
+    <string name="action_remove_favorite">Odobrať z obľúbených</string>
+    <string name="action_save_song">Uložiť skladbu</string>
+    <string name="action_share">Zdieľať</string>
+    <string name="action_delete">Vymazať</string>
+    <string name="action_edit">Upraviť</string>
+    <string name="action_cancel">Zrušiť</string>
+    <string name="action_save">Uložiť</string>
+    <string name="action_close">Zavrieť</string>
+
+    <!-- Messages -->
+    <string name="msg_favorites_limit">Dosiahnutý maximálny počet obľúbených</string>
+    <string name="msg_song_saved">Skladba bola uložená do obľúbených</string>
+    <string name="msg_station_added">Stanica bola pridaná do obľúbených</string>
+    <string name="msg_station_removed">Stanica bola odobratá z obľúbených</string>
+    <string name="msg_settings_exported">Nastavenia boli úspešne exportované</string>
+    <string name="msg_settings_imported">Nastavenia boli úspešne importované</string>
+</resources> 

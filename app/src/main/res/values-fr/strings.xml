@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Touch Radio</string>
+    
+    <!-- Main Categories -->
+    <string name="category_local">Stations locales</string>
+    <string name="category_favorites">Mes stations</string>
+    <string name="category_pop">Pop</string>
+    <string name="category_rock">Rock</string>
+    <string name="category_jazz">Jazz</string>
+    <string name="category_dance">Dance</string>
+    <string name="category_electronic">Électronique</string>
+    <string name="category_classical">Classique</string>
+    <string name="category_country">Country</string>
+    <string name="category_folk">Folk</string>
+    <string name="category_spoken_word">Parlé</string>
+    <string name="category_children">Enfants</string>
+    <string name="category_religious">Religieux</string>
+    <string name="category_news">Actualités</string>
+    <string name="category_other">Autres</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Rechercher</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="nav_favorite_songs">Chansons favorites</string>
+    <string name="nav_equalizer">Égaliseur</string>
+    <string name="nav_back">Retour</string>
+
+    <!-- Player -->
+    <string name="player_play">Lecture</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_stop">Arrêt</string>
+    <string name="player_next">Station suivante</string>
+    <string name="player_previous">Station précédente</string>
+    <string name="player_volume">Volume</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_language">Langue</string>
+    <string name="settings_language_system">Langue du système</string>
+    <string name="settings_language_en">Anglais</string>
+    <string name="settings_language_cs">Tchèque</string>
+    <string name="settings_language_sk">Slovaque</string>
+    <string name="settings_language_pl">Polonais</string>
+    <string name="settings_language_de">Allemand</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_es">Espagnol</string>
+    <string name="settings_max_favorites">Nombre maximum de favoris</string>
+    <string name="settings_fade_duration">Durée de fondu</string>
+    <string name="settings_equalizer_enabled">Activer l\'égaliseur</string>
+    <string name="settings_export">Exporter les paramètres</string>
+    <string name="settings_import">Importer les paramètres</string>
+    <string name="settings_sleep_timer">Minuterie de sommeil</string>
+    <string name="settings_add_station">Ajouter une station</string>
+
+    <!-- Search -->
+    <string name="search_hint">Rechercher des stations en ligne...</string>
+    <string name="search_no_results">Aucune station trouvée</string>
+    <string name="search_error">Erreur lors de la recherche</string>
+    <string name="search_min_chars">Entrez au moins 3 caractères</string>
+
+    <!-- Actions -->
+    <string name="action_add_favorite">Ajouter aux favoris</string>
+    <string name="action_remove_favorite">Retirer des favoris</string>
+    <string name="action_save_song">Enregistrer la chanson</string>
+    <string name="action_share">Partager</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_edit">Modifier</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_save">Enregistrer</string>
+    <string name="action_close">Fermer</string>
+
+    <!-- Messages -->
+    <string name="msg_favorites_limit">Nombre maximum de favoris atteint</string>
+    <string name="msg_song_saved">La chanson a été ajoutée aux favoris</string>
+    <string name="msg_station_added">La station a été ajoutée aux favoris</string>
+    <string name="msg_station_removed">La station a été retirée des favoris</string>
+    <string name="msg_settings_exported">Les paramètres ont été exportés</string>
+    <string name="msg_settings_imported">Les paramètres ont été importés</string>
+</resources> 

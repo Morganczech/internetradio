@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Touch Radio</string>
+    
+    <!-- Main Categories -->
+    <string name="category_local">Lokale Sender</string>
+    <string name="category_favorites">Meine Sender</string>
+    <string name="category_pop">Pop</string>
+    <string name="category_rock">Rock</string>
+    <string name="category_jazz">Jazz</string>
+    <string name="category_dance">Dance</string>
+    <string name="category_electronic">Elektronisch</string>
+    <string name="category_classical">Klassik</string>
+    <string name="category_country">Country</string>
+    <string name="category_folk">Folk</string>
+    <string name="category_spoken_word">Wortbeiträge</string>
+    <string name="category_children">Kinder</string>
+    <string name="category_religious">Religiös</string>
+    <string name="category_news">Nachrichten</string>
+    <string name="category_other">Sonstige</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Suchen</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="nav_favorite_songs">Lieblingssongs</string>
+    <string name="nav_equalizer">Equalizer</string>
+    <string name="nav_back">Zurück</string>
+
+    <!-- Player -->
+    <string name="player_play">Abspielen</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_stop">Stopp</string>
+    <string name="player_next">Nächster Sender</string>
+    <string name="player_previous">Vorheriger Sender</string>
+    <string name="player_volume">Lautstärke</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_language_system">Systemsprache</string>
+    <string name="settings_language_en">Englisch</string>
+    <string name="settings_language_cs">Tschechisch</string>
+    <string name="settings_language_sk">Slowakisch</string>
+    <string name="settings_language_pl">Polnisch</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_fr">Französisch</string>
+    <string name="settings_language_es">Spanisch</string>
+    <string name="settings_max_favorites">Maximale Anzahl Favoriten</string>
+    <string name="settings_fade_duration">Ausblendzeit</string>
+    <string name="settings_equalizer_enabled">Equalizer aktivieren</string>
+    <string name="settings_export">Einstellungen exportieren</string>
+    <string name="settings_import">Einstellungen importieren</string>
+    <string name="settings_sleep_timer">Schlaftimer</string>
+    <string name="settings_add_station">Sender hinzufügen</string>
+
+    <!-- Search -->
+    <string name="search_hint">Sender online suchen...</string>
+    <string name="search_no_results">Keine Sender gefunden</string>
+    <string name="search_error">Fehler bei der Sendersuche</string>
+    <string name="search_min_chars">Mindestens 3 Zeichen eingeben</string>
+
+    <!-- Filter -->
+    <string name="filter_sort_by">Sortieren nach:</string>
+    <string name="filter_sort_by_popularity">Beliebtheit</string>
+    <string name="filter_sort_by_name">Name</string>
+    <string name="filter_sort_by_quality">Qualität</string>
+    <string name="filter_country">Land:</string>
+    <string name="filter_country_czech">Tschechische Republik</string>
+    <string name="filter_country_slovak">Slowakei</string>
+    <string name="filter_quality">Minimale Qualität:</string>
+    <string name="filter_quality_64">64 kbps</string>
+    <string name="filter_quality_128">128 kbps</string>
+    <string name="filter_quality_256">256 kbps</string>
+
+    <!-- Actions -->
+    <string name="action_add_favorite">Zu Favoriten hinzufügen</string>
+    <string name="action_remove_favorite">Aus Favoriten entfernen</string>
+    <string name="action_save_song">Song speichern</string>
+    <string name="action_share">Teilen</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_edit">Bearbeiten</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_close">Schließen</string>
+
+    <!-- Messages -->
+    <string name="msg_favorites_limit">Maximale Anzahl Favoriten erreicht</string>
+    <string name="msg_song_saved">Song wurde zu Favoriten hinzugefügt</string>
+    <string name="msg_station_added">Sender wurde zu Favoriten hinzugefügt</string>
+    <string name="msg_station_removed">Sender wurde aus Favoriten entfernt</string>
+    <string name="msg_settings_exported">Einstellungen wurden exportiert</string>
+    <string name="msg_settings_imported">Einstellungen wurden importiert</string>
+</resources> 

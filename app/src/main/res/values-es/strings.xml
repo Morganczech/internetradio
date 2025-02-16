@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Touch Radio</string>
+    
+    <!-- Main Categories -->
+    <string name="category_local">Emisoras locales</string>
+    <string name="category_favorites">Mis emisoras</string>
+    <string name="category_pop">Pop</string>
+    <string name="category_rock">Rock</string>
+    <string name="category_jazz">Jazz</string>
+    <string name="category_dance">Dance</string>
+    <string name="category_electronic">Electrónica</string>
+    <string name="category_classical">Clásica</string>
+    <string name="category_country">Country</string>
+    <string name="category_folk">Folk</string>
+    <string name="category_spoken_word">Palabra hablada</string>
+    <string name="category_children">Infantil</string>
+    <string name="category_religious">Religiosa</string>
+    <string name="category_news">Noticias</string>
+    <string name="category_other">Otras</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Buscar</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="nav_favorite_songs">Canciones favoritas</string>
+    <string name="nav_equalizer">Ecualizador</string>
+    <string name="nav_back">Atrás</string>
+
+    <!-- Player -->
+    <string name="player_play">Reproducir</string>
+    <string name="player_pause">Pausar</string>
+    <string name="player_stop">Detener</string>
+    <string name="player_next">Siguiente emisora</string>
+    <string name="player_previous">Emisora anterior</string>
+    <string name="player_volume">Volumen</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_system">Idioma del sistema</string>
+    <string name="settings_language_en">Inglés</string>
+    <string name="settings_language_cs">Checo</string>
+    <string name="settings_language_sk">Eslovaco</string>
+    <string name="settings_language_pl">Polaco</string>
+    <string name="settings_language_de">Alemán</string>
+    <string name="settings_language_fr">Francés</string>
+    <string name="settings_language_es">Español</string>
+    <string name="settings_max_favorites">Número máximo de favoritos</string>
+    <string name="settings_fade_duration">Duración del fundido</string>
+    <string name="settings_equalizer_enabled">Activar ecualizador</string>
+    <string name="settings_export">Exportar ajustes</string>
+    <string name="settings_import">Importar ajustes</string>
+    <string name="settings_sleep_timer">Temporizador</string>
+    <string name="settings_add_station">Añadir emisora</string>
+
+    <!-- Search -->
+    <string name="search_hint">Buscar emisoras en línea...</string>
+    <string name="search_no_results">No se encontraron emisoras</string>
+    <string name="search_error">Error al buscar emisoras</string>
+    <string name="search_min_chars">Introduce al menos 3 caracteres</string>
+
+    <!-- Actions -->
+    <string name="action_add_favorite">Añadir a favoritos</string>
+    <string name="action_remove_favorite">Eliminar de favoritos</string>
+    <string name="action_save_song">Guardar canción</string>
+    <string name="action_share">Compartir</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_close">Cerrar</string>
+
+    <!-- Messages -->
+    <string name="msg_favorites_limit">Se alcanzó el límite de favoritos</string>
+    <string name="msg_song_saved">La canción se guardó en favoritos</string>
+    <string name="msg_station_added">La emisora se añadió a favoritos</string>
+    <string name="msg_station_removed">La emisora se eliminó de favoritos</string>
+    <string name="msg_settings_exported">Los ajustes se exportaron correctamente</string>
+    <string name="msg_settings_imported">Los ajustes se importaron correctamente</string>
+</resources> 
