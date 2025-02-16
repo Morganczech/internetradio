@@ -60,7 +60,8 @@ Mobilní aplikace pro Android, která umožňuje poslech internetových rádií.
 
 ## Požadavky
 
-- Android 8.0 (API level 26) nebo vyšší
+- Android 8.0 (Oreo) nebo novější (API level 26+)
+- Cílová verze: Android 14 (API level 34)
 - Připojení k internetu
 - Minimálně 50 MB volného místa
 
