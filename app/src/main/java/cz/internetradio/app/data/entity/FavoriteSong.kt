@@ -20,9 +20,7 @@ data class FavoriteSong(
     val radioId: String,
     
     @ColumnInfo(name = "added_at")
-    val addedAt: Long = System.currentTimeMillis(),
-    
-    val category: String? = null
+    val addedAt: Long = System.currentTimeMillis()
 ) {
     fun toModel() = cz.internetradio.app.model.FavoriteSong(
         id = id,
@@ -30,8 +28,7 @@ data class FavoriteSong(
         artist = artist,
         radioName = radioName,
         radioId = radioId,
-        addedAt = addedAt,
-        category = category
+        addedAt = addedAt
     )
 
     companion object {
@@ -41,8 +38,7 @@ data class FavoriteSong(
             artist = model.artist,
             radioName = model.radioName,
             radioId = model.radioId,
-            addedAt = model.addedAt,
-            category = model.category
+            addedAt = model.addedAt
         )
     }
 } 

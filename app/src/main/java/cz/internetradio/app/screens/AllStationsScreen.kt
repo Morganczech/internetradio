@@ -34,16 +34,12 @@ import androidx.compose.ui.text.input.ImeAction
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
-<<<<<<< HEAD
     onNavigateToSettings: () -> Unit,
     onNavigateToBrowseStations: () -> Unit,
     onNavigateToPopularStations: () -> Unit,
     onNavigateToAddRadio: () -> Unit,
-    onNavigateToEdit: (String) -> Unit
-=======
-    onNavigateBack: () -> Unit,
-    onNavigateToFavoriteSongs: () -> Unit = {}
->>>>>>> feature/favorite-songs
+    onNavigateToEdit: (String) -> Unit,
+    onNavigateToFavoriteSongs: () -> Unit
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -243,14 +239,8 @@ fun AllStationsScreen(
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
-<<<<<<< HEAD
-                    viewModel = viewModel
-=======
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = { viewModel.togglePlayPause() },
                     viewModel = viewModel,
                     onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
->>>>>>> feature/favorite-songs
                 )
             }
         }

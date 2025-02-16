@@ -416,7 +416,7 @@ class RadioService : Service() {
             .setContentTitle("Tento telefon") // První řádek - kam se přehrává zvuk
             .setContentText(radio?.name) // Druhý řádek - název rádia
             .setSubText(metadata) // Třetí řádek - metadata (název písně)
-            .setSmallIcon(R.drawable.ic_radio_default)
+            .setSmallIcon(R.drawable.ic_notification_play)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -504,7 +504,7 @@ class RadioService : Service() {
                         nextPendingIntent
                     )
                     .addAction(
-                        R.drawable.ic_close,
+                        R.drawable.ic_notification_close,
                         "Ukončit",
                         stopPendingIntent
                     )

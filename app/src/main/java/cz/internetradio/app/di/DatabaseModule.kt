@@ -6,7 +6,7 @@ import cz.internetradio.app.data.RadioDatabase
 import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.data.dao.FavoriteSongDao
 import cz.internetradio.app.repository.RadioRepository
-import cz.internetradio.app.repository.FavoriteSongRepository
+import cz.internetradio.app.api.RadioBrowserApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,13 +45,10 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideRadioRepository(radioDao: RadioDao): RadioRepository {
-        return RadioRepository(radioDao)
-    }
-
-    @Provides
-    @Singleton
-    fun provideFavoriteSongRepository(favoriteSongDao: FavoriteSongDao): FavoriteSongRepository {
-        return FavoriteSongRepository(favoriteSongDao)
+    fun provideRadioRepository(
+        radioDao: RadioDao,
+        radioBrowserApi: RadioBrowserApi
+    ): RadioRepository {
+        return RadioRepository(radioDao, radioBrowserApi)
     }
 } 

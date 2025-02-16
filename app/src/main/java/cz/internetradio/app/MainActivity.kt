@@ -46,16 +46,9 @@ import androidx.navigation.NavType
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.navigation.Screen
-<<<<<<< HEAD
 import cz.internetradio.app.screens.*
-=======
-import cz.internetradio.app.screens.AllStationsScreen
-import cz.internetradio.app.screens.FavoritesScreen
-import cz.internetradio.app.screens.SettingsScreen
-import cz.internetradio.app.screens.EqualizerScreen
-import cz.internetradio.app.screens.FavoriteSongsScreen
->>>>>>> feature/favorite-songs
 import cz.internetradio.app.viewmodel.RadioViewModel
+import cz.internetradio.app.screens.AddRadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
 import android.view.View
@@ -64,16 +57,11 @@ import androidx.compose.animation.*
 import cz.internetradio.app.components.AudioVisualizer
 import androidx.compose.ui.draw.alpha
 import android.util.Log
-<<<<<<< HEAD
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import cz.internetradio.app.model.RadioCategory
-=======
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
->>>>>>> feature/favorite-songs
+import androidx.compose.ui.res.painterResource
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -140,8 +128,6 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = Screen.AllStations.route
                         ) {
-<<<<<<< HEAD
-=======
                             composable(Screen.Favorites.route) {
                                 FavoritesScreen(
                                     viewModel = viewModel,
@@ -153,10 +139,22 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToFavoriteSongs = {
                                         navController.navigate(Screen.FavoriteSongs.route)
+                                    },
+                                    onNavigateToBrowseStations = {
+                                        navController.navigate(Screen.BrowseStations.route)
+                                    },
+                                    onNavigateToPopularStations = {
+                                        navController.navigate(Screen.PopularStations.route)
+                                    },
+                                    onNavigateToAddRadio = { 
+                                        navController.navigate(Screen.AddRadio.route) 
+                                    },
+                                    onNavigateToEdit = { radioId ->
+                                        navController.navigate(Screen.EditRadio.createRoute(radioId))
                                     }
                                 )
                             }
->>>>>>> feature/favorite-songs
+                            
                             composable(Screen.AllStations.route) {
                                 AllStationsScreen(
                                     viewModel = viewModel,
@@ -174,9 +172,13 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToEdit = { radioId ->
                                         navController.navigate(Screen.EditRadio.createRoute(radioId))
+                                    },
+                                    onNavigateToFavoriteSongs = {
+                                        navController.navigate(Screen.FavoriteSongs.route)
                                     }
                                 )
                             }
+                            
                             composable(Screen.BrowseStations.route) {
                                 BrowseStationsScreen(
                                     viewModel = viewModel,
@@ -188,15 +190,20 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+                            
                             composable(Screen.PopularStations.route) {
                                 PopularStationsScreen(
                                     viewModel = viewModel,
                                     onNavigateBack = { navController.popBackStack() },
                                     onNavigateToEdit = { radioId ->
                                         navController.navigate(Screen.EditRadio.createRoute(radioId))
+                                    },
+                                    onNavigateToFavoriteSongs = {
+                                        navController.navigate(Screen.FavoriteSongs.route)
                                     }
                                 )
                             }
+                            
                             composable(Screen.Settings.route) {
                                 SettingsScreen(
                                     viewModel = viewModel,
@@ -205,6 +212,7 @@ class MainActivity : ComponentActivity() {
                                     onNavigateToAddRadio = { navController.navigate(Screen.AddRadio.route) }
                                 )
                             }
+                            
                             composable(Screen.Equalizer.route) {
                                 EqualizerScreen(
                                     viewModel = viewModel,
@@ -213,33 +221,36 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-<<<<<<< HEAD
-                            composable(Screen.AddRadio.route) {
-                                AddRadioScreen(
-=======
+                            
                             composable(Screen.FavoriteSongs.route) {
                                 FavoriteSongsScreen(
                                     viewModel = viewModel,
->>>>>>> feature/favorite-songs
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }
                                 )
                             }
-<<<<<<< HEAD
+                            
+                            composable(Screen.AddRadio.route) {
+                                AddRadioScreen(
+                                    viewModel = hiltViewModel<AddRadioViewModel>(),
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            
                             composable(
                                 route = Screen.EditRadio.route,
                                 arguments = listOf(navArgument("radioId") { type = NavType.StringType })
                             ) { backStackEntry ->
                                 val radioId = backStackEntry.arguments?.getString("radioId") ?: return@composable
                                 AddRadioScreen(
-                                    viewModel = hiltViewModel(),
+                                    viewModel = hiltViewModel<AddRadioViewModel>(),
                                     onNavigateBack = { navController.popBackStack() },
                                     radioToEdit = radioId
                                 )
                             }
-=======
->>>>>>> feature/favorite-songs
                         }
                     }
                 }
@@ -392,14 +403,8 @@ fun RadioItem(
 @Composable
 fun PlayerControls(
     radio: Radio,
-<<<<<<< HEAD
-    viewModel: RadioViewModel
-=======
-    isPlaying: Boolean,
-    onPlayPauseClick: () -> Unit,
     viewModel: RadioViewModel,
-    onNavigateToFavoriteSongs: () -> Unit = {}
->>>>>>> feature/favorite-songs
+    onNavigateToFavoriteSongs: () -> Unit
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()

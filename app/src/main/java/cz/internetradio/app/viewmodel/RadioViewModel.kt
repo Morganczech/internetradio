@@ -25,7 +25,6 @@ import androidx.media3.common.C
 import cz.internetradio.app.audio.AudioSpectrumProcessor
 import android.util.Log
 import com.google.android.gms.wearable.*
-<<<<<<< HEAD
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
@@ -39,6 +38,8 @@ import android.content.Intent
 import cz.internetradio.app.service.RadioService
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
+import android.content.ClipboardManager
+import android.content.ClipData
 
 private data class Country(
     val name: String,
@@ -52,20 +53,13 @@ private data class PopularStation(
     val imageUrl: String,
     val description: String
 )
-=======
-import android.content.ClipboardManager
-import android.content.ClipData
->>>>>>> feature/favorite-songs
 
 @OptIn(UnstableApi::class)
 @HiltViewModel
 class RadioViewModel @Inject constructor(
     private val radioRepository: RadioRepository,
-<<<<<<< HEAD
-=======
     private val favoriteSongRepository: FavoriteSongRepository,
     private val exoPlayer: ExoPlayer,
->>>>>>> feature/favorite-songs
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
     @ApplicationContext private val context: Context,
@@ -562,7 +556,6 @@ class RadioViewModel @Inject constructor(
         }
     }
 
-<<<<<<< HEAD
     fun searchStations(query: String, onResult: (List<RadioStation>?) -> Unit) {
         viewModelScope.launch {
             Log.d("RadioViewModel", "Začínám vyhledávat stanice pro dotaz: $query")
@@ -629,22 +622,20 @@ class RadioViewModel @Inject constructor(
                 stopPlayback()
             }
         }
-=======
+    }
+
     fun saveSongToFavorites() {
         viewModelScope.launch {
+            val currentMetadata = _currentMetadata.value ?: return@launch
             val currentRadio = _currentRadio.value ?: return@launch
-            val metadata = _currentMetadata.value ?: return@launch
 
-            // Rozdělení metadat na interpreta a název skladby
-            val (artist, title) = parseMetadata(metadata)
-
-            // Kontrola, zda skladba již existuje
-            if (favoriteSongRepository.songExists(title, artist, currentRadio.id)) {
-                _showSongSavedMessage.value = "Tato skladba je již v oblíbených"
-                return@launch
+            // Rozdělení metadat na umělce a název skladby
+            val parts = currentMetadata.split(" - ", limit = 2)
+            val (artist, title) = when {
+                parts.size == 2 -> parts[0] to parts[1]
+                else -> null to currentMetadata
             }
 
-            // Vytvoření nové oblíbené skladby
             val favoriteSong = FavoriteSong(
                 title = title,
                 artist = artist,
@@ -652,19 +643,9 @@ class RadioViewModel @Inject constructor(
                 radioId = currentRadio.id
             )
 
-            // Uložení skladby
             favoriteSongRepository.addSong(favoriteSong)
             _currentSongSaved.value = true
-            _showSongSavedMessage.value = "Skladba byla přidána do oblíbených"
-        }
-    }
-
-    private fun parseMetadata(metadata: String): Pair<String?, String> {
-        return if (metadata.contains(" - ")) {
-            val parts = metadata.split(" - ", limit = 2)
-            Pair(parts[0].trim(), parts[1].trim())
-        } else {
-            Pair(null, metadata.trim())
+            _showSongSavedMessage.value = "Skladba byla uložena do oblíbených"
         }
     }
 
@@ -694,7 +675,6 @@ class RadioViewModel @Inject constructor(
         val clip = ClipData.newPlainText("Skladba", text)
         clipboard.setPrimaryClip(clip)
         _showSongSavedMessage.value = "Zkopírováno do schránky"
->>>>>>> feature/favorite-songs
     }
 
     override fun onCleared() {

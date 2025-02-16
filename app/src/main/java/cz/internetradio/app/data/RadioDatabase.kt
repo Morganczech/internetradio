@@ -7,12 +7,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import cz.internetradio.app.data.dao.RadioDao
 import cz.internetradio.app.data.entity.RadioEntity
 import cz.internetradio.app.model.RadioCategory
-<<<<<<< HEAD
 import javax.inject.Singleton
-=======
 import cz.internetradio.app.data.entity.FavoriteSong
 import cz.internetradio.app.data.dao.FavoriteSongDao
->>>>>>> feature/favorite-songs
 
 @Database(
     entities = [RadioEntity::class, FavoriteSong::class], 

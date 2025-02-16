@@ -6,6 +6,5 @@ data class FavoriteSong(
     val artist: String?,
     val radioName: String,
     val radioId: String,
-    val addedAt: Long = System.currentTimeMillis(),
-    val category: String? = null
+    val addedAt: Long = System.currentTimeMillis()
 ) 

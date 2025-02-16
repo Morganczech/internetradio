@@ -88,30 +88,10 @@ object AppModule {
                 addAnalyticsListener(EventLogger("RadioPlayer"))
             }
     }
-<<<<<<< HEAD
-
-    @Provides
-    @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): RadioDatabase {
-        return Room.databaseBuilder(
-            context,
-            RadioDatabase::class.java,
-            "radio_database"
-        )
-        .addMigrations(RadioDatabase.MIGRATION_1_2)
-        .build()
-    }
-
-    @Provides
-    fun provideRadioDao(database: RadioDatabase): RadioDao {
-        return database.radioDao()
-    }
 
     @Provides
     @Singleton
     fun provideRadioBrowserApi(): RadioBrowserApi {
         return RadioBrowserApi()
     }
-=======
->>>>>>> feature/favorite-songs
 } 

@@ -19,17 +19,23 @@ import cz.internetradio.app.model.RadioStation
 import cz.internetradio.app.viewmodel.RadioViewModel
 import cz.internetradio.app.model.RadioCategory
 import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import cz.internetradio.app.PlayerControls
 
 @Composable
 fun BrowseStationsScreen(
     viewModel: RadioViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToFavoriteSongs: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
     var showCategoryDialog by remember { mutableStateOf(false) }
+    val currentRadio by viewModel.currentRadio.collectAsState()
 
     // Načtení místních stanic při zobrazení obrazovky
     LaunchedEffect(Unit) {
@@ -139,6 +145,21 @@ fun BrowseStationsScreen(
                         }
                     )
                 }
+            }
+        }
+
+        // Přehrávač
+        AnimatedVisibility(
+            visible = currentRadio != null,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
+        ) {
+            currentRadio?.let { radio ->
+                PlayerControls(
+                    radio = radio,
+                    viewModel = viewModel,
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
+                )
             }
         }
     }
