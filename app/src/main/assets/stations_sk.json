@@ -5,7 +5,7 @@
       "id": "expres",
       "name": "Rádio Expres",
       "streamUrl": "https://stream.expres.sk/128.mp3",
-      "imageUrl": "https://www.expres.sk/content/images/logo_expres.png",
+      "imageUrl": "android.resource://cz.internetradio.app/drawable/logo_expres",
       "description": "Najväčšie slovenské rádio",
       "listeners": 80000
     },
@@ -13,9 +13,30 @@
       "id": "fun",
       "name": "Fun rádio",
       "streamUrl": "https://stream.funradio.sk:8000/fun128.mp3",
-      "imageUrl": "https://www.funradio.sk/content/images/logo_fun.png",
+      "imageUrl": "android.resource://cz.internetradio.app/drawable/logo_fun",
       "description": "Najviac hudby na Slovensku",
       "listeners": 75000
+    },
+    {
+      "id": "slovensko",
+      "name": "Rádio Slovensko",
+      "streamUrl": "https://icecast.stv.livebox.sk/slovensko_128.mp3",
+      "imageUrl": "android.resource://cz.internetradio.app/drawable/logo_slovensko",
+      "description": "Spravodajské rádio"
+    },
+    {
+      "id": "jemne",
+      "name": "Jemné",
+      "streamUrl": "https://stream.jemne.sk/jemne-hi.mp3",
+      "imageUrl": "android.resource://cz.internetradio.app/drawable/logo_jemne",
+      "description": "Najpríjemnejšie rádio"
+    },
+    {
+      "id": "europa2",
+      "name": "Europa 2",
+      "streamUrl": "https://stream.radioservices.sk/europa2.mp3",
+      "imageUrl": "android.resource://cz.internetradio.app/drawable/logo_europa2",
+      "description": "Najlepšia hudba"
     }
   ]
 } 

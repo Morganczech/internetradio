@@ -7,16 +7,16 @@
     
     <!-- Pozadí -->
     <path
-        android:fillColor="#E4002B"
+        android:fillColor="#009A44"
         android:pathData="M0,0h200v200h-200z"/>
     
-    <!-- Bílý text "RÁDIO" -->
+    <!-- Bílý text "RADIO" -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M40,60h120v30h-15v-15h-90v15h-15z"/>
     
-    <!-- Bílý text "IMPULS" -->
+    <!-- Bílý text "BLANÍK" -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M40,100h120v40h-15l-15,-20l-15,20h-15l-15,-20l-15,20h-15l-15,-20v20h-15v-40h15l15,20l15,-20h15l15,20l15,-20z"/>
+        android:pathData="M40,100h120v40h-15l-90,-25v25h-15v-40h15l90,25v-25h15z"/>
 </vector> 

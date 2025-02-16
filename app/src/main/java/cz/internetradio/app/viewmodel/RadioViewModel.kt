@@ -268,10 +268,13 @@ class RadioViewModel @Inject constructor(
             if (radio.isFavorite) {
                 radioRepository.removeFavorite(radio.id)
             } else {
-                val favoriteCount = radioRepository.getFavoriteRadios().first().size
-                if (favoriteCount >= maxFavorites.value) {
-                    _showMaxFavoritesError.value = true
-                    return@launch
+                // Kontrola limitu pouze pro kategorii VLASTNI
+                if (radio.category == RadioCategory.VLASTNI) {
+                    val favoriteCount = radioRepository.getFavoriteRadios().first().size
+                    if (favoriteCount >= maxFavorites.value) {
+                        _showMaxFavoritesError.value = true
+                        return@launch
+                    }
                 }
                 radioRepository.toggleFavorite(radio.id)
             }
@@ -623,10 +626,13 @@ class RadioViewModel @Inject constructor(
 
     fun addStationToFavorites(station: RadioStation, category: RadioCategory) {
         viewModelScope.launch {
-            val favoriteCount = radioRepository.getFavoriteRadios().first().size
-            if (favoriteCount >= maxFavorites.value) {
-                _showMaxFavoritesError.value = true
-                return@launch
+            // Kontrola limitu pouze pro kategorii VLASTNI
+            if (category == RadioCategory.VLASTNI) {
+                val favoriteCount = radioRepository.getFavoriteRadios().first().size
+                if (favoriteCount >= maxFavorites.value) {
+                    _showMaxFavoritesError.value = true
+                    return@launch
+                }
             }
             
             Log.d("RadioViewModel", "Ukládám stanici: ${station.name}")

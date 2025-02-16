@@ -108,7 +108,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Maximální počet oblíbených stanic",
+                text = "Maximální počet stanic v kategorii Moje stanice",
                 style = MaterialTheme.typography.subtitle1,
                 color = Color.White
             )
@@ -119,8 +119,8 @@ fun SettingsScreen(
             Slider(
                 value = maxFavorites.toFloat(),
                 onValueChange = { viewModel.setMaxFavorites(it.toInt()) },
-                valueRange = 10f..20f,
-                steps = 9,
+                valueRange = 10f..50f,
+                steps = 39,
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -133,8 +133,8 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Poznámka: Pokud snížíte limit pod aktuální počet oblíbených stanic, " +
-                      "nebudete moci přidat další, dokud některé neodeberete.",
+                text = "Poznámka: Tento limit se týká pouze kategorie Moje stanice. " +
+                      "Ostatní kategorie nemají žádné omezení počtu stanic.",
                 style = MaterialTheme.typography.caption,
                 color = Color.White.copy(alpha = 0.7f)
             )
