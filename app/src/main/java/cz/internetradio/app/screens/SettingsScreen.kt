@@ -2,6 +2,8 @@ package cz.internetradio.app.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -10,14 +12,18 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import cz.internetradio.app.R
 import cz.internetradio.app.viewmodel.RadioViewModel
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import cz.internetradio.app.model.Language
 
 @Composable
 fun SettingsScreen(
@@ -30,6 +36,9 @@ fun SettingsScreen(
     val equalizerEnabled by viewModel.equalizerEnabled.collectAsState()
     val fadeOutDuration by viewModel.fadeOutDuration.collectAsState()
     var showFadeOutDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val currentLanguage by viewModel.currentLanguage.collectAsState()
+    val scrollState = rememberScrollState()
     
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -51,12 +60,12 @@ fun SettingsScreen(
     ) {
         // Top App Bar
         TopAppBar(
-            title = { Text("Nastavení") },
+            title = { Text(stringResource(R.string.settings_title)) },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Zpět",
+                        contentDescription = stringResource(R.string.nav_back),
                         tint = Color.White
                     )
                 }
@@ -69,8 +78,53 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .weight(1f)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp)
         ) {
+            // Výběr jazyka
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showLanguageDialog = true }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = stringResource(R.string.settings_language),
+                            style = MaterialTheme.typography.subtitle1,
+                            color = Color.White
+                        )
+                        Text(
+                            text = stringResource(currentLanguage.nameRes),
+                            style = MaterialTheme.typography.caption,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Přidat stanici
             Row(
                 modifier = Modifier
@@ -91,14 +145,14 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Přidat stanici",
+                        text = stringResource(R.string.settings_add_station),
                         style = MaterialTheme.typography.subtitle1,
                         color = Color.White
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Přejít na přidání stanice",
+                    contentDescription = null,
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -108,7 +162,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Maximální počet stanic v kategorii Moje stanice",
+                text = stringResource(R.string.settings_max_favorites),
                 style = MaterialTheme.typography.subtitle1,
                 color = Color.White
             )
@@ -125,7 +179,7 @@ fun SettingsScreen(
             )
             
             Text(
-                text = "Aktuální limit: $maxFavorites stanic",
+                text = stringResource(R.string.settings_current_limit, maxFavorites),
                 style = MaterialTheme.typography.caption,
                 color = Color.White.copy(alpha = 0.7f)
             )
@@ -133,8 +187,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Poznámka: Tento limit se týká pouze kategorie Moje stanice. " +
-                      "Ostatní kategorie nemají žádné omezení počtu stanic.",
+                text = stringResource(R.string.settings_favorites_note),
                 style = MaterialTheme.typography.caption,
                 color = Color.White.copy(alpha = 0.7f)
             )
@@ -154,24 +207,24 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Doba zeslabení zvuku",
+                        text = stringResource(R.string.settings_fade_duration),
                         style = MaterialTheme.typography.subtitle1,
                         color = Color.White
                     )
                     Text(
-                        text = "$fadeOutDuration sekund",
+                        text = stringResource(R.string.settings_seconds_format, fadeOutDuration),
                         style = MaterialTheme.typography.caption,
                         color = Color.White.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "Před vypnutím časovače spánku",
+                        text = stringResource(R.string.settings_fade_note),
                         style = MaterialTheme.typography.caption,
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Změnit dobu zeslabení",
+                    contentDescription = null,
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -200,14 +253,14 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Equalizer",
+                        text = stringResource(R.string.nav_equalizer),
                         style = MaterialTheme.typography.subtitle1,
                         color = Color.White
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Přejít na equalizer",
+                    contentDescription = null,
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -239,20 +292,15 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
-                            text = "Exportovat nastavení",
+                            text = stringResource(R.string.settings_export),
                             style = MaterialTheme.typography.subtitle1,
                             color = Color.White
-                        )
-                        Text(
-                            text = "Uložit nastavení a oblíbené stanice do souboru",
-                            style = MaterialTheme.typography.caption,
-                            color = Color.White.copy(alpha = 0.7f)
                         )
                     }
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Exportovat",
+                    contentDescription = null,
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -284,20 +332,15 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
-                            text = "Importovat nastavení",
+                            text = stringResource(R.string.settings_import),
                             style = MaterialTheme.typography.subtitle1,
                             color = Color.White
-                        )
-                        Text(
-                            text = "Načíst nastavení a oblíbené stanice ze souboru",
-                            style = MaterialTheme.typography.caption,
-                            color = Color.White.copy(alpha = 0.7f)
                         )
                     }
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Importovat",
+                    contentDescription = null,
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -344,6 +387,49 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showFadeOutDialog = false }) {
                     Text("Zavřít")
+                }
+            }
+        )
+    }
+
+    // Dialog pro výběr jazyka
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.settings_language)) },
+            text = {
+                Column {
+                    Language.values().forEach { language ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setLanguage(language)
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = language == currentLanguage,
+                                onClick = {
+                                    viewModel.setLanguage(language)
+                                    showLanguageDialog = false
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = stringResource(language.nameRes),
+                                style = MaterialTheme.typography.body1,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.action_close))
                 }
             }
         )
