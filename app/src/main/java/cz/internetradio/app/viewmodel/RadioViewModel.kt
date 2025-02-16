@@ -552,10 +552,22 @@ class RadioViewModel @Inject constructor(
         }
     }
 
-    fun searchStations(query: String, onResult: (List<RadioStation>?) -> Unit) {
+    fun searchStations(
+        query: String,
+        country: String? = null,
+        minBitrate: Int? = null,
+        orderBy: String = "votes",
+        onResult: (List<RadioStation>?) -> Unit
+    ) {
         viewModelScope.launch {
             Log.d("RadioViewModel", "Začínám vyhledávat stanice pro dotaz: $query")
-            val result = radioRepository.searchStationsByName(query)
+            val searchParams = SearchParams(
+                name = query,
+                country = country,
+                minBitrate = minBitrate,
+                orderBy = orderBy
+            )
+            val result = radioRepository.searchStations(searchParams)
             Log.d("RadioViewModel", "Výsledek vyhledávání: ${result?.size ?: 0} stanic")
             
             // Získání všech uložených stanic pro kontrolu

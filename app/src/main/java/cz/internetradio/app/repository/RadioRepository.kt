@@ -24,8 +24,8 @@ class RadioRepository @Inject constructor(
         }
     }
 
-    suspend fun searchStationsByName(name: String): List<RadioStation>? {
-        return radioBrowserApi.searchStationsByName(name)
+    suspend fun searchStations(params: SearchParams): List<RadioStation>? {
+        return radioBrowserApi.searchStations(params)
     }
 
     suspend fun getStationsByTag(tag: String): List<RadioStation>? {

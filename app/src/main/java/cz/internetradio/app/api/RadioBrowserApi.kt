@@ -12,18 +12,41 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import android.util.Log
 
+data class SearchParams(
+    val name: String,
+    val country: String? = null,
+    val minBitrate: Int? = null,
+    val orderBy: String = "votes", // votes, name, bitrate, clickcount
+    val reverse: Boolean = true,
+    val limit: Int = 100
+)
+
 @Singleton
 class RadioBrowserApi @Inject constructor() {
     private val baseUrl = "https://de1.api.radio-browser.info/json"
     private val client = OkHttpClient()
     private val gson = Gson()
 
-    suspend fun searchStationsByName(name: String): List<RadioStation>? {
+    suspend fun searchStations(params: SearchParams): List<RadioStation>? {
         return withContext(Dispatchers.IO) {
             try {
-                val encodedName = java.net.URLEncoder.encode(name.trim(), "UTF-8")
-                    .replace("+", "%20")
-                val url = "$baseUrl/stations/search?name=$encodedName&limit=100&order=votes&reverse=true"
+                val queryParams = mutableListOf<String>()
+                
+                // Přidání parametrů do URL
+                if (params.name.isNotBlank()) {
+                    queryParams.add("name=${java.net.URLEncoder.encode(params.name.trim(), "UTF-8").replace("+", "%20")}")
+                }
+                params.country?.let { 
+                    queryParams.add("country=${java.net.URLEncoder.encode(it, "UTF-8")}")
+                }
+                params.minBitrate?.let {
+                    queryParams.add("minBitrate=$it")
+                }
+                queryParams.add("order=${params.orderBy}")
+                queryParams.add("reverse=${params.reverse}")
+                queryParams.add("limit=${params.limit}")
+
+                val url = "$baseUrl/stations/search?${queryParams.joinToString("&")}"
                 Log.d("RadioBrowserApi", "Volám API: $url")
                 
                 val request = Request.Builder()

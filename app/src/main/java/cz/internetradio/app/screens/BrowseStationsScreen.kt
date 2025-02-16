@@ -6,8 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import cz.internetradio.app.PlayerControls
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun BrowseStationsScreen(
@@ -36,6 +38,10 @@ fun BrowseStationsScreen(
     var selectedCategory by remember { mutableStateOf<RadioCategory?>(null) }
     var showCategoryDialog by remember { mutableStateOf(false) }
     var selectedStation by remember { mutableStateOf<RadioStation?>(null) }
+    var showFilters by remember { mutableStateOf(false) }
+    var selectedCountry by remember { mutableStateOf<String?>(null) }
+    var selectedOrder by remember { mutableStateOf("votes") }
+    var minBitrate by remember { mutableStateOf<Int?>(null) }
     val currentRadio by viewModel.currentRadio.collectAsState()
 
     // Načtení místních stanic při zobrazení obrazovky
@@ -49,7 +55,7 @@ fun BrowseStationsScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        // TopAppBar s tlačítkem zpět
+        // TopAppBar s tlačítkem zpět a filtrem
         TopAppBar(
             title = { Text("Vyhledat stanice") },
             navigationIcon = {
@@ -57,8 +63,106 @@ fun BrowseStationsScreen(
                     Icon(Icons.Default.ArrowBack, contentDescription = "Zpět")
                 }
             },
+            actions = {
+                IconButton(onClick = { showFilters = !showFilters }) {
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = "Filtry",
+                        tint = if (showFilters) MaterialTheme.colors.primary else Color.White
+                    )
+                }
+            },
             backgroundColor = MaterialTheme.colors.surface
         )
+
+        // Filtry
+        AnimatedVisibility(visible = showFilters) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Řazení
+                Text(
+                    text = "Řadit podle:",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = selectedOrder == "votes",
+                        onClick = { selectedOrder = "votes" },
+                        text = "Oblíbenosti"
+                    )
+                    FilterChip(
+                        selected = selectedOrder == "name",
+                        onClick = { selectedOrder = "name" },
+                        text = "Názvu"
+                    )
+                    FilterChip(
+                        selected = selectedOrder == "bitrate",
+                        onClick = { selectedOrder = "bitrate" },
+                        text = "Kvality"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Země
+                Text(
+                    text = "Země:",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = selectedCountry == "Czech Republic",
+                        onClick = { selectedCountry = if (selectedCountry != "Czech Republic") "Czech Republic" else null },
+                        text = "Česká republika"
+                    )
+                    FilterChip(
+                        selected = selectedCountry == "Slovakia",
+                        onClick = { selectedCountry = if (selectedCountry != "Slovakia") "Slovakia" else null },
+                        text = "Slovensko"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Minimální bitrate
+                Text(
+                    text = "Minimální kvalita:",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = minBitrate == 64,
+                        onClick = { minBitrate = if (minBitrate != 64) 64 else null },
+                        text = "64 kbps"
+                    )
+                    FilterChip(
+                        selected = minBitrate == 128,
+                        onClick = { minBitrate = if (minBitrate != 128) 128 else null },
+                        text = "128 kbps"
+                    )
+                    FilterChip(
+                        selected = minBitrate == 256,
+                        onClick = { minBitrate = if (minBitrate != 256) 256 else null },
+                        text = "256 kbps"
+                    )
+                }
+            }
+        }
 
         // Vyhledávací pole
         OutlinedTextField(
@@ -68,7 +172,12 @@ fun BrowseStationsScreen(
                 if (query.length >= 3) {
                     Log.d("BrowseStationsScreen", "Vyhledávám stanice pro dotaz: $query")
                     isLoading = true
-                    viewModel.searchStations(query) { result: List<RadioStation>? ->
+                    viewModel.searchStations(
+                        query = query,
+                        country = selectedCountry,
+                        minBitrate = minBitrate,
+                        orderBy = selectedOrder
+                    ) { result: List<RadioStation>? ->
                         Log.d("BrowseStationsScreen", "Nalezeno stanic: ${result?.size ?: 0}")
                         stations = result ?: emptyList()
                         isLoading = false
@@ -295,6 +404,35 @@ private fun StationItem(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun FilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    text: String
+) {
+    Surface(
+        modifier = Modifier
+            .height(32.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) MaterialTheme.colors.primary else Color.Transparent,
+        border = if (!selected) ButtonDefaults.outlinedBorder else null,
+        elevation = 0.dp
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body2,
+                color = if (selected) Color.White else Color.White.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
         }
     }
 } 
