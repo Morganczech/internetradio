@@ -37,7 +37,16 @@ class AddRadioViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _validationError = MutableStateFlow<ValidationError?>(null)
+    val validationError: StateFlow<ValidationError?> = _validationError
+
     private var radioToEdit: Radio? = null
+
+    sealed class ValidationError {
+        data class DuplicateStreamUrl(val url: String) : ValidationError()
+        data class DuplicateName(val name: String) : ValidationError()
+        data class StreamError(val message: String) : ValidationError()
+    }
 
     fun setName(name: String) {
         _name.value = name
@@ -59,7 +68,7 @@ class AddRadioViewModel @Inject constructor(
         _category.value = category
     }
 
-    fun loadRadio(radioId: String) {
+    fun loadRadioForEdit(radioId: String) {
         viewModelScope.launch {
             radioRepository.getRadioById(radioId)?.let { radio ->
                 radioToEdit = radio
@@ -72,48 +81,97 @@ class AddRadioViewModel @Inject constructor(
         }
     }
 
-    fun saveRadio(onSuccess: () -> Unit) {
+    fun updateRadio(
+        radioId: String,
+        name: String,
+        streamUrl: String,
+        imageUrl: String?,
+        description: String?,
+        category: RadioCategory,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (_name.value.isBlank()) {
-                    _showError.value = "Zadejte název rádia"
+                if (name.isBlank()) {
+                    _validationError.value = ValidationError.StreamError("Zadejte název rádia")
                     return@launch
                 }
-                if (_streamUrl.value.isBlank()) {
-                    _showError.value = "Zadejte URL streamu"
+                if (streamUrl.isBlank()) {
+                    _validationError.value = ValidationError.StreamError("Zadejte URL streamu")
                     return@launch
-                }
-
-                // Kontrola duplicity
-                if (radioToEdit == null) {
-                    if (radioRepository.existsByName(_name.value)) {
-                        _showError.value = "Rádio s tímto názvem již existuje"
-                        return@launch
-                    }
-                    if (radioRepository.existsByStreamUrl(_streamUrl.value)) {
-                        _showError.value = "Rádio s touto URL již existuje"
-                        return@launch
-                    }
                 }
 
                 val radio = Radio(
-                    id = radioToEdit?.id ?: _streamUrl.value,
-                    name = _name.value,
-                    streamUrl = _streamUrl.value,
-                    imageUrl = _imageUrl.value.ifBlank { "android.resource://cz.internetradio.app/drawable/ic_radio_default" },
-                    description = _description.value,
-                    category = _category.value,
-                    originalCategory = _category.value,
-                    startColor = _category.value.startColor,
-                    endColor = _category.value.endColor,
+                    id = radioId,
+                    name = name,
+                    streamUrl = streamUrl,
+                    imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                    description = description ?: "",
+                    category = category,
+                    originalCategory = radioToEdit?.originalCategory ?: category,
+                    startColor = category.startColor,
+                    endColor = category.endColor,
                     isFavorite = radioToEdit?.isFavorite ?: false
                 )
 
                 radioRepository.insertRadio(radio)
                 onSuccess()
             } catch (e: Exception) {
-                _showError.value = "Chyba při ukládání: ${e.message}"
+                _validationError.value = ValidationError.StreamError("Chyba při ukládání: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun addRadio(
+        name: String,
+        streamUrl: String,
+        imageUrl: String?,
+        description: String?,
+        category: RadioCategory,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                if (name.isBlank()) {
+                    _validationError.value = ValidationError.StreamError("Zadejte název rádia")
+                    return@launch
+                }
+                if (streamUrl.isBlank()) {
+                    _validationError.value = ValidationError.StreamError("Zadejte URL streamu")
+                    return@launch
+                }
+
+                // Kontrola duplicity
+                if (radioRepository.existsByName(name)) {
+                    _validationError.value = ValidationError.DuplicateName(name)
+                    return@launch
+                }
+                if (radioRepository.existsByStreamUrl(streamUrl)) {
+                    _validationError.value = ValidationError.DuplicateStreamUrl(streamUrl)
+                    return@launch
+                }
+
+                val radio = Radio(
+                    id = streamUrl,
+                    name = name,
+                    streamUrl = streamUrl,
+                    imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                    description = description ?: "",
+                    category = category,
+                    originalCategory = category,
+                    startColor = category.startColor,
+                    endColor = category.endColor,
+                    isFavorite = false
+                )
+
+                radioRepository.insertRadio(radio)
+                onSuccess()
+            } catch (e: Exception) {
+                _validationError.value = ValidationError.StreamError("Chyba při ukládání: ${e.message}")
             } finally {
                 _isLoading.value = false
             }
@@ -121,6 +179,6 @@ class AddRadioViewModel @Inject constructor(
     }
 
     fun dismissError() {
-        _showError.value = null
+        _validationError.value = null
     }
 } 
