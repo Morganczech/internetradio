@@ -93,7 +93,7 @@
       "name": "Radio Beat",
       "streamUrl": "http://icecast2.play.cz/radiobeat128.mp3",
       "alternativeUrls": ["https://icecast2.play.cz/beat128aac"],
-      "imageUrl": "https://www.radiobeat.cz/favicon.ico",
+      "imageUrl": "http://api.play.cz/static/radio_logo/t200/beat.png",
       "description": "classic rock,heavy metal,metal,rock",
       "homepage": "http://www.radiobeat.cz/",
       "country": "Czechia",
