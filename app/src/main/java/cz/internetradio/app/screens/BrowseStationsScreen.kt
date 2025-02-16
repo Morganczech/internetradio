@@ -385,12 +385,26 @@ private fun StationItem(
                     )
                 }
                 
-                // Dočasné zobrazení URL streamu
-                Text(
-                    text = "Stream URL: ${station.url_resolved ?: station.url}",
-                    style = MaterialTheme.typography.caption,
-                    color = Color.White.copy(alpha = 0.7f)
-                )
+                // Zobrazení země a bitrate
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    station.countrycode?.let { countryCode ->
+                        Text(
+                            text = countryCode.uppercase(),
+                            style = MaterialTheme.typography.caption,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                    station.bitrate?.let { bitrate ->
+                        Text(
+                            text = "$bitrate kbps",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
                 
                 if (station.isFromRadioBrowser) {
                     TextButton(
