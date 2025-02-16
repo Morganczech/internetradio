@@ -36,7 +36,7 @@ fun AddRadioScreen(
     var streamUrl by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(RadioCategory.VLASTNI) }
+    var selectedCategory by remember { mutableStateOf(RadioCategory.MISTNI) }
     val validationError by viewModel.validationError.collectAsState()
 
     // Načtení existujícího rádia pro úpravu
@@ -125,16 +125,22 @@ fun AddRadioScreen(
                 expanded = showCategoryPicker,
                 onDismissRequest = { showCategoryPicker = false }
             ) {
-                RadioCategory.values().forEach { category ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedCategory = category
-                            showCategoryPicker = false
-                        }
-                    ) {
-                        Text(category.title)
+                // Filtrujeme kategorie - odstraníme OSTATNI a VLASTNI
+                RadioCategory.values()
+                    .filter { category -> 
+                        category != RadioCategory.OSTATNI && 
+                        category != RadioCategory.VLASTNI 
                     }
-                }
+                    .forEach { category ->
+                        DropdownMenuItem(
+                            onClick = {
+                                selectedCategory = category
+                                showCategoryPicker = false
+                            }
+                        ) {
+                            Text(category.title)
+                        }
+                    }
             }
 
             // Výběr gradientu

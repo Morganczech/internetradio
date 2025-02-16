@@ -102,6 +102,15 @@ class AddRadioViewModel @Inject constructor(
                     return@launch
                 }
 
+                // Určíme originalCategory podle toho, zda je stanice oblíbená
+                val originalCategory = if (radioToEdit?.isFavorite == true) {
+                    // Pokud je stanice oblíbená, zachováme původní kategorii
+                    radioToEdit?.originalCategory ?: category
+                } else {
+                    // Pokud není oblíbená, aktualizujeme původní kategorii
+                    category
+                }
+
                 val radio = Radio(
                     id = radioId,
                     name = name,
@@ -109,7 +118,7 @@ class AddRadioViewModel @Inject constructor(
                     imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
                     description = description ?: "",
                     category = category,
-                    originalCategory = radioToEdit?.originalCategory ?: category,
+                    originalCategory = originalCategory,
                     startColor = category.startColor,
                     endColor = category.endColor,
                     isFavorite = radioToEdit?.isFavorite ?: false

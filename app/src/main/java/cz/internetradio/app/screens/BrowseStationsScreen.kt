@@ -171,38 +171,29 @@ fun BrowseStationsScreen(
             title = { Text("Vyberte kategorii") },
             text = {
                 Column {
-                    RadioCategory.values().dropLast(1).forEach { category ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = selectedCategory == category,
-                                onClick = { selectedCategory = category }
-                            )
-                            Text(
-                                text = when(category) {
-                                    RadioCategory.MISTNI -> "Místní stanice"
-                                    RadioCategory.POP -> "Pop"
-                                    RadioCategory.ROCK -> "Rock"
-                                    RadioCategory.JAZZ -> "Jazz"
-                                    RadioCategory.DANCE -> "Dance"
-                                    RadioCategory.ELEKTRONICKA -> "Elektronická"
-                                    RadioCategory.KLASICKA -> "Klasická"
-                                    RadioCategory.COUNTRY -> "Country"
-                                    RadioCategory.FOLK -> "Folk"
-                                    RadioCategory.MLUVENE_SLOVO -> "Mluvené slovo"
-                                    RadioCategory.DETSKE -> "Dětské"
-                                    RadioCategory.NABOZENSKE -> "Náboženské"
-                                    RadioCategory.ZPRAVODAJSKE -> "Zpravodajské"
-                                    else -> ""
-                                },
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
+                    // Filtrujeme kategorie - odstraníme OSTATNI a VLASTNI
+                    RadioCategory.values()
+                        .filter { category -> 
+                            category != RadioCategory.OSTATNI && 
+                            category != RadioCategory.VLASTNI 
                         }
-                    }
+                        .forEach { category ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = selectedCategory == category,
+                                    onClick = { selectedCategory = category }
+                                )
+                                Text(
+                                    text = category.title,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
                 }
             },
             confirmButton = {
@@ -215,7 +206,8 @@ fun BrowseStationsScreen(
                         }
                         showCategoryDialog = false
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = selectedCategory != null
                 ) {
                     Text("Přidat do oblíbených")
                 }
@@ -242,7 +234,7 @@ private fun StationItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         elevation = 4.dp,
         backgroundColor = Color.Transparent
     ) {
@@ -253,7 +245,10 @@ private fun StationItem(
                 )
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     text = station.name,
@@ -267,13 +262,14 @@ private fun StationItem(
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
+                
                 if (station.isFromRadioBrowser) {
                     TextButton(
                         onClick = onAddToFavorites,
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.End),
                         colors = ButtonDefaults.textButtonColors(
                             contentColor = Color.White
-                        )
+                        ),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
                         Text("Přidat do kategorie")
                     }
