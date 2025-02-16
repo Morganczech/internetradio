@@ -25,6 +25,7 @@ import cz.internetradio.app.PlayerControls
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun BrowseStationsScreen(
@@ -57,10 +58,10 @@ fun BrowseStationsScreen(
     ) {
         // TopAppBar s tlačítkem zpět a filtrem
         TopAppBar(
-            title = { Text("Vyhledat stanice") },
+            title = { Text(stringResource(R.string.nav_search)) },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Zpět")
+                    Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.nav_back))
                 }
             },
             actions = {
@@ -84,7 +85,7 @@ fun BrowseStationsScreen(
             ) {
                 // Řazení
                 Text(
-                    text = "Řadit podle:",
+                    text = stringResource(R.string.filter_sort_by),
                     style = MaterialTheme.typography.subtitle1,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -95,17 +96,17 @@ fun BrowseStationsScreen(
                     FilterChip(
                         selected = selectedOrder == "votes",
                         onClick = { selectedOrder = "votes" },
-                        text = "Oblíbenosti"
+                        text = stringResource(R.string.filter_sort_by_popularity)
                     )
                     FilterChip(
                         selected = selectedOrder == "name",
                         onClick = { selectedOrder = "name" },
-                        text = "Názvu"
+                        text = stringResource(R.string.filter_sort_by_name)
                     )
                     FilterChip(
                         selected = selectedOrder == "bitrate",
                         onClick = { selectedOrder = "bitrate" },
-                        text = "Kvality"
+                        text = stringResource(R.string.filter_sort_by_quality)
                     )
                 }
 
@@ -113,7 +114,7 @@ fun BrowseStationsScreen(
 
                 // Země
                 Text(
-                    text = "Země:",
+                    text = stringResource(R.string.filter_country),
                     style = MaterialTheme.typography.subtitle1,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -124,12 +125,12 @@ fun BrowseStationsScreen(
                     FilterChip(
                         selected = selectedCountry == "Czech Republic",
                         onClick = { selectedCountry = if (selectedCountry != "Czech Republic") "Czech Republic" else null },
-                        text = "Česká republika"
+                        text = stringResource(R.string.filter_country_czech)
                     )
                     FilterChip(
                         selected = selectedCountry == "Slovakia",
                         onClick = { selectedCountry = if (selectedCountry != "Slovakia") "Slovakia" else null },
-                        text = "Slovensko"
+                        text = stringResource(R.string.filter_country_slovak)
                     )
                 }
 
@@ -137,7 +138,7 @@ fun BrowseStationsScreen(
 
                 // Minimální bitrate
                 Text(
-                    text = "Minimální kvalita:",
+                    text = stringResource(R.string.filter_quality),
                     style = MaterialTheme.typography.subtitle1,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -148,17 +149,17 @@ fun BrowseStationsScreen(
                     FilterChip(
                         selected = minBitrate == 64,
                         onClick = { minBitrate = if (minBitrate != 64) 64 else null },
-                        text = "64 kbps"
+                        text = stringResource(R.string.filter_quality_64)
                     )
                     FilterChip(
                         selected = minBitrate == 128,
                         onClick = { minBitrate = if (minBitrate != 128) 128 else null },
-                        text = "128 kbps"
+                        text = stringResource(R.string.filter_quality_128)
                     )
                     FilterChip(
                         selected = minBitrate == 256,
                         onClick = { minBitrate = if (minBitrate != 256) 256 else null },
-                        text = "256 kbps"
+                        text = stringResource(R.string.filter_quality_256)
                     )
                 }
             }
@@ -189,8 +190,8 @@ fun BrowseStationsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            label = { Text("Vyhledat stanici online...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Vyhledat") }
+            label = { Text(stringResource(R.string.search_hint)) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -208,7 +209,7 @@ fun BrowseStationsScreen(
             localStations?.let { stations ->
                 if (stations.isNotEmpty()) {
                     Text(
-                        text = countryCode?.let { RadioCategory.getLocalizedTitle(it) } ?: "Místní stanice",
+                        text = countryCode?.let { RadioCategory.getLocalizedTitle(it) } ?: stringResource(R.string.category_local),
                         style = MaterialTheme.typography.h6,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
@@ -229,7 +230,7 @@ fun BrowseStationsScreen(
                     }
                 } else {
                     Text(
-                        text = "Zadejte název stanice pro vyhledávání",
+                        text = stringResource(R.string.search_min_chars),
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier
                             .padding(16.dp)
@@ -238,7 +239,7 @@ fun BrowseStationsScreen(
                 }
             } ?: run {
                 Text(
-                    text = "Zadejte název stanice pro vyhledávání",
+                    text = stringResource(R.string.search_min_chars),
                     style = MaterialTheme.typography.body1,
                     modifier = Modifier
                         .padding(16.dp)
@@ -283,7 +284,7 @@ fun BrowseStationsScreen(
                 showCategoryDialog = false
                 selectedStation = null
             },
-            title = { Text("Vyberte kategorii") },
+            title = { Text(stringResource(R.string.settings_add_station)) },
             text = {
                 LazyColumn {
                     // Filtrujeme kategorie - odstraníme OSTATNI a VLASTNI
@@ -326,7 +327,7 @@ fun BrowseStationsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = selectedCategory != null
                 ) {
-                    Text("Přidat do kategorie")
+                    Text(stringResource(R.string.action_add_favorite))
                 }
             },
             dismissButton = {
@@ -334,7 +335,7 @@ fun BrowseStationsScreen(
                     showCategoryDialog = false 
                     selectedStation = null
                 }) {
-                    Text("Zrušit")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
