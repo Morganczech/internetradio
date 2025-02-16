@@ -4,6 +4,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     kotlin("kapt")
+    kotlin("plugin.serialization") version "1.9.20"
 }
 
 android {
@@ -134,6 +135,9 @@ dependencies {
 
     // Gson pro práci s JSON
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

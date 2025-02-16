@@ -175,4 +175,65 @@ class RadioRepository @Inject constructor(
     suspend fun existsByName(name: String): Boolean {
         return radioDao.existsByName(name)
     }
+
+    suspend fun getRadioEntityById(id: String): RadioEntity? {
+        return radioDao.getRadioById(id)
+    }
+
+    suspend fun insertRadioEntity(entity: RadioEntity) {
+        try {
+            // Kontrola existence stanice podle ID nebo URL
+            val existingById = radioDao.getRadioById(entity.id)
+            val existingByUrl = radioDao.getAllRadios().first().find { 
+                it.streamUrl == entity.streamUrl 
+            }
+            
+            when {
+                // Pokud existuje stanice se stejným ID, aktualizujeme ji
+                existingById != null -> {
+                    val updatedEntity = existingById.copy(
+                        name = entity.name,
+                        streamUrl = entity.streamUrl,
+                        imageUrl = entity.imageUrl,
+                        description = entity.description,
+                        category = entity.category,
+                        originalCategory = existingById.originalCategory ?: entity.originalCategory,
+                        startColor = entity.startColor,
+                        endColor = entity.endColor,
+                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
+                        gradientId = entity.gradientId,
+                        bitrate = entity.bitrate
+                    )
+                    radioDao.insertRadio(updatedEntity)
+                    Log.d("RadioRepository", "Aktualizována existující stanice podle ID: ${entity.name}")
+                }
+                // Pokud existuje stanice se stejnou URL, aktualizujeme ji
+                existingByUrl != null -> {
+                    val updatedEntity = existingByUrl.copy(
+                        name = entity.name,
+                        imageUrl = entity.imageUrl,
+                        description = entity.description,
+                        category = entity.category,
+                        originalCategory = existingByUrl.originalCategory ?: entity.originalCategory,
+                        startColor = entity.startColor,
+                        endColor = entity.endColor,
+                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
+                        gradientId = entity.gradientId,
+                        bitrate = entity.bitrate
+                    )
+                    radioDao.insertRadio(updatedEntity)
+                    Log.d("RadioRepository", "Aktualizována existující stanice podle URL: ${entity.name}")
+                }
+                // Pokud stanice neexistuje, vložíme ji jako novou
+                else -> {
+                    val newEntity = entity.copy(isFavorite = true)  // Zajistíme, že nová stanice bude oblíbená
+                    radioDao.insertRadio(newEntity)
+                    Log.d("RadioRepository", "Vložena nová stanice: ${entity.name}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("RadioRepository", "Chyba při vkládání stanice: ${entity.name}", e)
+            throw e
+        }
+    }
 } 

@@ -8,12 +8,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cz.internetradio.app.viewmodel.RadioViewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun SettingsScreen(
@@ -27,6 +31,18 @@ fun SettingsScreen(
     val fadeOutDuration by viewModel.fadeOutDuration.collectAsState()
     var showFadeOutDialog by remember { mutableStateOf(false) }
     
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { viewModel.exportSettings(it) }
+    }
+    
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importSettings(it) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -192,6 +208,96 @@ fun SettingsScreen(
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = "Přejít na equalizer",
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Export nastavení
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { 
+                        exportLauncher.launch("touchradio_settings.json")
+                    }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Upload,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Exportovat nastavení",
+                            style = MaterialTheme.typography.subtitle1,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Uložit nastavení a oblíbené stanice do souboru",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Exportovat",
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Import nastavení
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { 
+                        importLauncher.launch(arrayOf("application/json"))
+                    }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Importovat nastavení",
+                            style = MaterialTheme.typography.subtitle1,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Načíst nastavení a oblíbené stanice ze souboru",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Importovat",
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }

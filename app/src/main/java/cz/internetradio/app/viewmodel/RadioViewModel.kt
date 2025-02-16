@@ -1,5 +1,6 @@
 package cz.internetradio.app.viewmodel
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
@@ -41,6 +42,14 @@ import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.content.ClipboardManager
 import android.content.ClipData
+import android.net.Uri
+import kotlinx.serialization.json.Json
+import cz.internetradio.app.model.AppSettings
+import cz.internetradio.app.model.SerializableRadio
+import cz.internetradio.app.model.SerializableSong
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.compose.ui.graphics.Color
 
 private data class Country(
     val name: String,
@@ -729,5 +738,116 @@ class RadioViewModel @Inject constructor(
         equalizerManager.release()
         Wearable.getDataClient(context).removeListener(this)
         context.unregisterReceiver(serviceReceiver)
+    }
+
+    fun exportSettings(uri: Uri) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    // Získáme všechny stanice místo pouze oblíbených
+                    val allRadios = radioRepository.getAllRadios().first()
+                    val stations = allRadios.map { radio ->
+                        SerializableRadio(
+                            id = radio.id,
+                            name = radio.name,
+                            streamUrl = radio.streamUrl,
+                            imageUrl = radio.imageUrl,
+                            description = radio.description,
+                            category = radio.category.name,
+                            originalCategory = radio.originalCategory?.name,
+                            startColor = radio.startColor.value.toInt(),
+                            endColor = radio.endColor.value.toInt(),
+                            isFavorite = radio.isFavorite,
+                            gradientId = radio.gradientId,
+                            bitrate = radio.bitrate
+                        )
+                    }
+
+                    // Získáme všechny oblíbené skladby
+                    val favoriteSongs = favoriteSongRepository.getAllSongs().first().map { song ->
+                        SerializableSong(
+                            title = song.title,
+                            artist = song.artist,
+                            radioName = song.radioName,
+                            radioId = song.radioId
+                        )
+                    }
+
+                    val settings = AppSettings(
+                        maxFavorites = maxFavorites.value,
+                        equalizerEnabled = equalizerEnabled.value,
+                        fadeOutDuration = fadeOutDuration.value,
+                        favoriteStations = stations,  // Použijeme všechny stanice
+                        favoriteSongs = favoriteSongs
+                    )
+                    
+                    val json = Json { 
+                        prettyPrint = true 
+                        encodeDefaults = true
+                    }.encodeToString(AppSettings.serializer(), settings)
+                    
+                    context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        outputStream.write(json.toByteArray())
+                    }
+
+                    Log.d("RadioViewModel", "Export dokončen, exportováno ${stations.size} stanic a ${favoriteSongs.size} skladeb")
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "Chyba při exportu nastavení", e)
+                }
+            }
+        }
+    }
+
+    fun importSettings(uri: Uri) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        inputStream.bufferedReader().use { it.readText() }
+                    } ?: return@withContext
+
+                    val settings = Json.decodeFromString<AppSettings>(jsonString)
+                    
+                    // Aktualizace nastavení
+                    setMaxFavorites(settings.maxFavorites)
+                    setEqualizerEnabled(settings.equalizerEnabled)
+                    setFadeOutDuration(settings.fadeOutDuration)
+                    
+                    // Import stanic
+                    settings.favoriteStations.forEach { serializable ->
+                        val entity = SerializableRadio.toRadioEntity(serializable)
+                        val category = entity.category // Získáme kategorii
+                        radioRepository.insertRadio(Radio(
+                            id = entity.id,
+                            name = entity.name,
+                            streamUrl = entity.streamUrl,
+                            imageUrl = entity.imageUrl,
+                            description = entity.description,
+                            category = category,
+                            originalCategory = entity.originalCategory,
+                            startColor = category.startColor, // Použijeme barvy z kategorie
+                            endColor = category.endColor,     // místo hodnot ze souboru
+                            isFavorite = entity.isFavorite,
+                            gradientId = entity.gradientId,
+                            bitrate = entity.bitrate
+                        ))
+                    }
+
+                    // Import oblíbených skladeb
+                    settings.favoriteSongs.forEach { song ->
+                        favoriteSongRepository.addSong(FavoriteSong(
+                            title = song.title,
+                            artist = song.artist,
+                            radioName = song.radioName,
+                            radioId = song.radioId
+                        ))
+                    }
+
+                    Log.d("RadioViewModel", "Import dokončen, importováno ${settings.favoriteStations.size} stanic a ${settings.favoriteSongs.size} skladeb")
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "Chyba při importu nastavení", e)
+                }
+            }
+        }
     }
 } 
