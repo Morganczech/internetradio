@@ -538,6 +538,10 @@ class RadioService : Service() {
         
         _currentRadio.value = radio
         
+        // Reset přehrávače před přehráním nové stanice
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
+        
         // Nastavení MediaItem s metadaty pro ExoPlayer
         val mediaItem = MediaItem.Builder()
             .setUri(radio.streamUrl)
@@ -602,10 +606,13 @@ class RadioService : Service() {
 
     private fun playNextRadio() {
         serviceScope.launch {
-            val favoriteRadios = radioRepository.getFavoriteRadios().first()
-            val currentIndex = favoriteRadios.indexOfFirst { it.id == _currentRadio.value?.id }
-            if (currentIndex < favoriteRadios.size - 1) {
-                val nextRadio = favoriteRadios[currentIndex + 1]
+            val currentRadio = _currentRadio.value ?: return@launch
+            val allRadios = radioRepository.getRadiosByCategory(currentRadio.category).first()
+            val sortedRadios = allRadios.sortedBy { it.name.lowercase() }
+            val currentIndex = sortedRadios.indexOfFirst { it.id == currentRadio.id }
+            
+            if (currentIndex < sortedRadios.size - 1) {
+                val nextRadio = sortedRadios[currentIndex + 1]
                 Log.d("RadioService", "Přepínám na další rádio: ${nextRadio.name}")
                 playRadio(nextRadio)
                 broadcastPlaybackState()
@@ -615,10 +622,13 @@ class RadioService : Service() {
 
     private fun playPreviousRadio() {
         serviceScope.launch {
-            val favoriteRadios = radioRepository.getFavoriteRadios().first()
-            val currentIndex = favoriteRadios.indexOfFirst { it.id == _currentRadio.value?.id }
+            val currentRadio = _currentRadio.value ?: return@launch
+            val allRadios = radioRepository.getRadiosByCategory(currentRadio.category).first()
+            val sortedRadios = allRadios.sortedBy { it.name.lowercase() }
+            val currentIndex = sortedRadios.indexOfFirst { it.id == currentRadio.id }
+            
             if (currentIndex > 0) {
-                val previousRadio = favoriteRadios[currentIndex - 1]
+                val previousRadio = sortedRadios[currentIndex - 1]
                 Log.d("RadioService", "Přepínám na předchozí rádio: ${previousRadio.name}")
                 playRadio(previousRadio)
                 broadcastPlaybackState()

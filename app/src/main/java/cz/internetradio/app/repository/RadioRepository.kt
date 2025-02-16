@@ -58,6 +58,12 @@ class RadioRepository @Inject constructor(
         }
     }
 
+    fun getRadiosByCategory(category: RadioCategory): Flow<List<Radio>> {
+        return radioDao.getRadiosByCategory(category).map { entities ->
+            entities.map { it.toRadio() }
+        }
+    }
+
     suspend fun toggleFavorite(radioId: String) {
         val radio = radioDao.getRadioById(radioId)
         radio?.let {

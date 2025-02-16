@@ -530,7 +530,7 @@ fun PlayerControls(
                             )
                         }
                         
-                        // Ovládací tlačítka
+                        // Ovládací tlačítka přehrávání
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -539,7 +539,7 @@ fun PlayerControls(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
-                                onClick = { viewModel.playPreviousFavorite() }
+                                onClick = { viewModel.playPreviousStation() }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SkipPrevious,
@@ -559,7 +559,7 @@ fun PlayerControls(
                             }
 
                             IconButton(
-                                onClick = { viewModel.playNextFavorite() }
+                                onClick = { viewModel.playNextStation() }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SkipNext,
@@ -567,28 +567,64 @@ fun PlayerControls(
                                     tint = Color.White
                                 )
                             }
+                        }
 
-                            // Tlačítka pro práci se skladbami
-                            Row {
-                                if (currentMetadata != null) {
-                                    IconButton(
-                                        onClick = { viewModel.saveSongToFavorites() }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.PlaylistAdd,
-                                            contentDescription = "Uložit skladbu",
-                                            tint = Color.White
-                                        )
-                                    }
-                                }
+                        // Řádek s ikonami pro správu skladeb a časovač
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            if (currentMetadata != null) {
                                 IconButton(
-                                    onClick = onNavigateToFavoriteSongs
+                                    onClick = { viewModel.saveSongToFavorites() }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.QueueMusic,
-                                        contentDescription = "Zobrazit oblíbené skladby",
+                                        imageVector = Icons.Default.PlaylistAdd,
+                                        contentDescription = "Uložit skladbu",
                                         tint = Color.White
                                     )
+                                }
+                            }
+                            
+                            IconButton(
+                                onClick = onNavigateToFavoriteSongs
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.QueueMusic,
+                                    contentDescription = "Zobrazit oblíbené skladby",
+                                    tint = Color.White
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { showTimerDropdown = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Timer,
+                                    contentDescription = "Časovač vypnutí",
+                                    tint = Color.White
+                                )
+                            }
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showTimerDropdown,
+                            onDismissRequest = { showTimerDropdown = false }
+                        ) {
+                            DropdownMenuItem(onClick = {
+                                viewModel.setSleepTimer(0)
+                                showTimerDropdown = false
+                            }) {
+                                Text("Vypnout časovač")
+                            }
+                            (5..60 step 5).forEach { minutes ->
+                                DropdownMenuItem(onClick = {
+                                    viewModel.setSleepTimer(minutes)
+                                    showTimerDropdown = false
+                                }) {
+                                    Text("$minutes minut")
                                 }
                             }
                         }
@@ -614,44 +650,6 @@ fun PlayerControls(
                             }
                         }
 
-                        // Timer
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            IconButton(
-                                onClick = { showTimerDropdown = true }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = "Časovač vypnutí",
-                                    tint = Color.White
-                                )
-                            }
-                            
-                            DropdownMenu(
-                                expanded = showTimerDropdown,
-                                onDismissRequest = { showTimerDropdown = false }
-                            ) {
-                                DropdownMenuItem(onClick = {
-                                    viewModel.setSleepTimer(0)
-                                    showTimerDropdown = false
-                                }) {
-                                    Text("Vypnout časovač")
-                                }
-                                (5..60 step 5).forEach { minutes ->
-                                    DropdownMenuItem(onClick = {
-                                        viewModel.setSleepTimer(minutes)
-                                        showTimerDropdown = false
-                                    }) {
-                                        Text("$minutes minut")
-                                    }
-                                }
-                            }
-                        }
-                        
                         // Zobrazení zbývajícího času časovače
                         val minutes = remainingMinutes ?: 0
                         val seconds = remainingSeconds ?: 0

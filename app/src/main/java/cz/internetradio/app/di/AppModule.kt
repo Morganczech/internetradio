@@ -63,11 +63,12 @@ object AppModule {
 
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * 2,
-                DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * 2,
-                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS * 2,
-                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * 2
+                1000, // minimální buffer 1s
+                3000, // maximální buffer 3s
+                500,  // buffer pro začátek přehrávání 500ms
+                500   // buffer pro pokračování po rebufferingu 500ms
             )
+            .setPrioritizeTimeOverSizeThresholds(true)
             .build()
 
         return ExoPlayer.Builder(context)

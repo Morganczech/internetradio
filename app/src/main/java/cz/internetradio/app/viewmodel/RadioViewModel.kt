@@ -124,6 +124,9 @@ class RadioViewModel @Inject constructor(
     private val _fadeOutDuration = MutableStateFlow(60)
     val fadeOutDuration: StateFlow<Int> = _fadeOutDuration
 
+    private val _currentCategory = MutableStateFlow<RadioCategory?>(null)
+    val currentCategory: StateFlow<RadioCategory?> = _currentCategory
+
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d("RadioViewModel", "Přijat broadcast: ${intent.action}")
@@ -337,23 +340,16 @@ class RadioViewModel @Inject constructor(
 
     fun playRadio(radio: Radio) {
         viewModelScope.launch {
-            try {
-                Log.d("RadioViewModel", "Spouštím rádio: ${radio.name}")
-                _currentRadio.value = radio
-                prefs.edit().putString("last_radio_id", radio.id).apply()
-                updateWearableState()
-                
-                // Spuštění služby
-                val intent = Intent(context, RadioService::class.java).apply {
-                    action = RadioService.ACTION_PLAY
-                    putExtra(RadioService.EXTRA_RADIO_ID, radio.id)
-                }
-                context.startForegroundService(intent)
-            } catch (e: Exception) {
-                Log.e("RadioViewModel", "Chyba při spouštění rádia: ${e.message}")
-                _isPlaying.value = false
-                updateWearableState()
+            _currentRadio.value = radio
+            _currentCategory.value = radio.category
+            // Uložení posledního přehrávaného rádia
+            prefs.edit().putString("last_radio_id", radio.id).apply()
+            // Spuštění služby pro přehrávání
+            val intent = Intent(context, RadioService::class.java).apply {
+                action = RadioService.ACTION_PLAY
+                putExtra(RadioService.EXTRA_RADIO_ID, radio.id)
             }
+            context.startForegroundService(intent)
         }
     }
 
@@ -675,6 +671,42 @@ class RadioViewModel @Inject constructor(
         val clip = ClipData.newPlainText("Skladba", text)
         clipboard.setPrimaryClip(clip)
         _showSongSavedMessage.value = "Zkopírováno do schránky"
+    }
+
+    fun playNextStation() {
+        viewModelScope.launch {
+            val currentCategory = _currentCategory.value
+            val allRadios = if (currentCategory != null) {
+                radioRepository.getRadiosByCategory(currentCategory).first()
+            } else {
+                radioRepository.getAllRadios().first()
+            }
+            
+            val sortedRadios = allRadios.sortedBy { it.name.lowercase() }
+            val currentIndex = sortedRadios.indexOfFirst { it.id == _currentRadio.value?.id }
+            
+            if (currentIndex < sortedRadios.size - 1) {
+                playRadio(sortedRadios[currentIndex + 1])
+            }
+        }
+    }
+
+    fun playPreviousStation() {
+        viewModelScope.launch {
+            val currentCategory = _currentCategory.value
+            val allRadios = if (currentCategory != null) {
+                radioRepository.getRadiosByCategory(currentCategory).first()
+            } else {
+                radioRepository.getAllRadios().first()
+            }
+            
+            val sortedRadios = allRadios.sortedBy { it.name.lowercase() }
+            val currentIndex = sortedRadios.indexOfFirst { it.id == _currentRadio.value?.id }
+            
+            if (currentIndex > 0) {
+                playRadio(sortedRadios[currentIndex - 1])
+            }
+        }
     }
 
     override fun onCleared() {
