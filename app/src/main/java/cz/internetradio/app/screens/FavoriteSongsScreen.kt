@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import cz.internetradio.app.R
 import cz.internetradio.app.viewmodel.RadioViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,12 +49,12 @@ fun FavoriteSongsScreen(
         ) {
             // Top App Bar
             TopAppBar(
-                title = { Text("Oblíbené skladby") },
+                title = { Text(stringResource(R.string.nav_favorite_songs)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Zpět",
+                            contentDescription = stringResource(R.string.nav_back),
                             tint = Color.White
                         )
                     }
@@ -80,7 +82,7 @@ fun FavoriteSongsScreen(
                             tint = Color.White.copy(alpha = 0.6f)
                         )
                         Text(
-                            text = "Zatím nemáte žádné oblíbené skladby",
+                            text = stringResource(R.string.list_no_favorite_songs),
                             style = MaterialTheme.typography.body1,
                             color = Color.White.copy(alpha = 0.6f)
                         )
@@ -145,7 +147,7 @@ fun FavoriteSongsScreen(
                                     IconButton(onClick = { showOptionsMenu = song.id }) {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
-                                            contentDescription = "Více možností",
+                                            contentDescription = stringResource(R.string.action_more_options),
                                             tint = Color.White
                                         )
                                     }
@@ -163,7 +165,7 @@ fun FavoriteSongsScreen(
                                                 contentDescription = null
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Kopírovat do schránky")
+                                            Text(stringResource(R.string.action_copy_to_clipboard))
                                         }
                                         DropdownMenuItem(onClick = {
                                             viewModel.deleteFavoriteSong(song)
@@ -176,7 +178,7 @@ fun FavoriteSongsScreen(
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
-                                                "Odstranit",
+                                                stringResource(R.string.action_delete),
                                                 color = Color.Red
                                             )
                                         }

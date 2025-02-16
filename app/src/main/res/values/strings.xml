@@ -1,4 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App -->
     <string name="app_name">Touch Radio</string>
+    
+    <!-- Main Categories -->
+    <string name="category_local">Local stations</string>
+    <string name="category_favorites">My stations</string>
+    <string name="category_pop">Pop</string>
+    <string name="category_rock">Rock</string>
+    <string name="category_jazz">Jazz</string>
+    <string name="category_dance">Dance</string>
+    <string name="category_electronic">Electronic</string>
+    <string name="category_classical">Classical</string>
+    <string name="category_country">Country</string>
+    <string name="category_folk">Folk</string>
+    <string name="category_spoken_word">Spoken word</string>
+    <string name="category_children">Children</string>
+    <string name="category_religious">Religious</string>
+    <string name="category_news">News</string>
+    <string name="category_other">Other</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Search</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_favorite_songs">Favorite songs</string>
+    <string name="nav_equalizer">Equalizer</string>
+    <string name="nav_back">Back</string>
+
+    <!-- Player -->
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_stop">Stop</string>
+    <string name="player_next">Next station</string>
+    <string name="player_previous">Previous station</string>
+    <string name="player_volume">Volume</string>
+    <string name="player_bitrate_format">%d kbps</string>
+    <string name="player_time_remaining">Remaining: %d:%02d</string>
+    <string name="player_app_name">Internet Radio</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System language</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_cs">Czech</string>
+    <string name="settings_language_sk">Slovak</string>
+    <string name="settings_language_pl">Polish</string>
+    <string name="settings_language_de">German</string>
+    <string name="settings_language_fr">French</string>
+    <string name="settings_language_es">Spanish</string>
+    <string name="settings_max_favorites">Maximum number of favorites</string>
+    <string name="settings_fade_duration">Fade duration</string>
+    <string name="settings_equalizer_enabled">Enable equalizer</string>
+    <string name="settings_export">Export settings</string>
+    <string name="settings_import">Import settings</string>
+    <string name="settings_sleep_timer">Sleep timer</string>
+    <string name="settings_add_station">Add station</string>
+
+    <!-- Search -->
+    <string name="search_hint">Search stations online...</string>
+    <string name="search_no_results">No stations found</string>
+    <string name="search_error">Error searching for stations</string>
+    <string name="search_min_chars">Enter at least 3 characters</string>
+
+    <!-- Filter -->
+    <string name="filter_sort_by">Sort by:</string>
+    <string name="filter_sort_by_popularity">Popularity</string>
+    <string name="filter_sort_by_name">Name</string>
+    <string name="filter_sort_by_quality">Quality</string>
+    <string name="filter_country">Country:</string>
+    <string name="filter_country_czech">Czech Republic</string>
+    <string name="filter_country_slovak">Slovakia</string>
+    <string name="filter_quality">Minimum quality:</string>
+    <string name="filter_quality_64">64 kbps</string>
+    <string name="filter_quality_128">128 kbps</string>
+    <string name="filter_quality_256">256 kbps</string>
+
+    <!-- Actions -->
+    <string name="action_add_favorite">Add to favorites</string>
+    <string name="action_remove_favorite">Remove from favorites</string>
+    <string name="action_save_song">Save song</string>
+    <string name="action_share">Share</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_close">Close</string>
+    <string name="action_more_options">More options</string>
+    <string name="action_copy_to_clipboard">Copy to clipboard</string>
+
+    <!-- Messages -->
+    <string name="msg_favorites_limit">Maximum number of favorites reached</string>
+    <string name="msg_song_saved">Song has been saved to favorites</string>
+    <string name="msg_station_added">Station has been added to favorites</string>
+    <string name="msg_station_removed">Station has been removed from favorites</string>
+    <string name="msg_settings_exported">Settings have been exported</string>
+    <string name="msg_settings_imported">Settings have been imported</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_title">Equalizer</string>
+    <string name="equalizer_enable">Enable equalizer</string>
+    <string name="equalizer_presets">Presets</string>
+    <string name="equalizer_bands">Band settings</string>
+    <string name="equalizer_db_format">%d dB</string>
+    <string name="equalizer_band_60hz">60Hz</string>
+    <string name="equalizer_band_230hz">230Hz</string>
+    <string name="equalizer_band_910hz">910Hz</string>
+    <string name="equalizer_band_3_6khz">3.6kHz</string>
+    <string name="equalizer_band_14khz">14kHz</string>
+
+    <!-- Lists -->
+    <string name="list_all">All</string>
+    <string name="list_no_favorite_songs">You don\'t have any favorite songs yet</string>
+    <string name="list_no_favorite_stations">You don\'t have any favorite stations yet</string>
+
+    <!-- Settings Notes -->
+    <string name="settings_favorites_note">Note: This limit only applies to the My Stations category. Other categories have no station limit.</string>
+    <string name="settings_fade_note">Set the time during which the volume will gradually decrease before the sleep timer turns off.</string>
+    <string name="settings_current_limit">Current limit: %d stations</string>
+    <string name="settings_seconds_format">%d seconds</string>
+
+    <!-- Radio Player -->
+    <string name="radio_logo_description">Logo of %s</string>
+    <string name="radio_default_description">Internet Radio</string>
+    <string name="sleep_timer_off">Turn off timer</string>
+    <string name="sleep_timer_minutes">%d minutes</string>
+    <string name="sleep_timer_remaining">Remaining: %d:%s</string>
+
+    <!-- Add Radio Screen -->
+    <string name="add_station_name">Station name</string>
+    <string name="add_station_stream_url">Stream URL</string>
+    <string name="add_station_image_url">Image URL (optional)</string>
+    <string name="add_station_description">Description (optional)</string>
+    <string name="add_station_category">Category</string>
+    <string name="add_station_expand">Expand</string>
+    <string name="add_station_save_changes">Save changes</string>
+    <string name="add_station_add">Add station</string>
+    <string name="add_station_error_duplicate_url">A station with this URL already exists</string>
+    <string name="add_station_error_duplicate_name">A station with this name already exists</string>
 </resources> 

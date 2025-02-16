@@ -13,10 +13,12 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import cz.internetradio.app.R
 import cz.internetradio.app.ui.theme.Gradients
 import cz.internetradio.app.screens.AddRadioViewModel
 import cz.internetradio.app.model.RadioCategory
@@ -81,28 +83,28 @@ fun AddRadioScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Název stanice") },
+                label = { Text(stringResource(R.string.add_station_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = streamUrl,
                 onValueChange = { streamUrl = it },
-                label = { Text("URL streamu") },
+                label = { Text(stringResource(R.string.add_station_stream_url)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = imageUrl,
                 onValueChange = { imageUrl = it },
-                label = { Text("URL obrázku (volitelné)") },
+                label = { Text(stringResource(R.string.add_station_image_url)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Popis (volitelné)") },
+                label = { Text(stringResource(R.string.add_station_description)) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3
             )
@@ -112,10 +114,10 @@ fun AddRadioScreen(
                 value = selectedCategory.title,
                 onValueChange = { },
                 readOnly = true,
-                label = { Text("Kategorie") },
+                label = { Text(stringResource(R.string.add_station_category)) },
                 trailingIcon = {
                     IconButton(onClick = { showCategoryPicker = !showCategoryPicker }) {
-                        Icon(Icons.Default.ArrowDropDown, "Rozbalit")
+                        Icon(Icons.Default.ArrowDropDown, stringResource(R.string.add_station_expand))
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -214,7 +216,7 @@ fun AddRadioScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = name.isNotBlank() && streamUrl.isNotBlank()
             ) {
-                Text(if (radioToEdit != null) "Uložit změny" else "Přidat stanici")
+                Text(if (radioToEdit != null) stringResource(R.string.add_station_save_changes) else stringResource(R.string.add_station_add))
             }
         }
 
@@ -222,8 +224,8 @@ fun AddRadioScreen(
         validationError?.let { error ->
             Text(
                 text = when (error) {
-                    is AddRadioViewModel.ValidationError.DuplicateStreamUrl -> "Stanice s touto URL již existuje"
-                    is AddRadioViewModel.ValidationError.DuplicateName -> "Stanice s tímto názvem již existuje"
+                    is AddRadioViewModel.ValidationError.DuplicateStreamUrl -> stringResource(R.string.add_station_error_duplicate_url)
+                    is AddRadioViewModel.ValidationError.DuplicateName -> stringResource(R.string.add_station_error_duplicate_name)
                     is AddRadioViewModel.ValidationError.StreamError -> error.message
                 },
                 color = MaterialTheme.colors.error,

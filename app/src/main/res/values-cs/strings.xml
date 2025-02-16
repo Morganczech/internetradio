@@ -83,6 +83,8 @@
     <string name="action_cancel">Zrušit</string>
     <string name="action_save">Uložit</string>
     <string name="action_close">Zavřít</string>
+    <string name="action_more_options">Více možností</string>
+    <string name="action_copy_to_clipboard">Kopírovat do schránky</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Dosažen maximální počet oblíbených</string>
@@ -91,4 +93,51 @@
     <string name="msg_station_removed">Stanice byla odebrána z oblíbených</string>
     <string name="msg_settings_exported">Nastavení bylo úspěšně exportováno</string>
     <string name="msg_settings_imported">Nastavení bylo úspěšně importováno</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_title">Ekvalizér</string>
+    <string name="equalizer_enable">Povolit ekvalizér</string>
+    <string name="equalizer_presets">Předvolby</string>
+    <string name="equalizer_bands">Nastavení pásem</string>
+    <string name="equalizer_db_format">%d dB</string>
+    <string name="equalizer_band_60hz">60Hz</string>
+    <string name="equalizer_band_230hz">230Hz</string>
+    <string name="equalizer_band_910hz">910Hz</string>
+    <string name="equalizer_band_3_6khz">3.6kHz</string>
+    <string name="equalizer_band_14khz">14kHz</string>
+
+    <!-- Player -->
+    <string name="player_bitrate_format">%d kbps</string>
+    <string name="player_time_remaining">Zbývá: %d:%02d</string>
+    <string name="player_app_name">Internetové rádio</string>
+
+    <!-- Lists -->
+    <string name="list_all">Vše</string>
+    <string name="list_no_favorite_songs">Zatím nemáte žádné oblíbené skladby</string>
+    <string name="list_no_favorite_stations">Zatím nemáte žádné oblíbené stanice</string>
+
+    <!-- Settings Notes -->
+    <string name="settings_favorites_note">Poznámka: Tento limit se týká pouze kategorie Moje stanice. Ostatní kategorie nemají žádné omezení počtu stanic.</string>
+    <string name="settings_fade_note">Nastavte dobu, po kterou se bude postupně snižovat hlasitost před vypnutím časovače spánku.</string>
+    <string name="settings_current_limit">Aktuální limit: %d stanic</string>
+    <string name="settings_seconds_format">%d sekund</string>
+
+    <!-- Add Radio Screen -->
+    <string name="add_station_name">Název stanice</string>
+    <string name="add_station_stream_url">URL streamu</string>
+    <string name="add_station_image_url">URL obrázku (volitelné)</string>
+    <string name="add_station_description">Popis (volitelné)</string>
+    <string name="add_station_category">Kategorie</string>
+    <string name="add_station_expand">Rozbalit</string>
+    <string name="add_station_save_changes">Uložit změny</string>
+    <string name="add_station_add">Přidat stanici</string>
+    <string name="add_station_error_duplicate_url">Stanice s touto URL již existuje</string>
+    <string name="add_station_error_duplicate_name">Stanice s tímto názvem již existuje</string>
+
+    <!-- Radio Player -->
+    <string name="radio_logo_description">Logo %s</string>
+    <string name="radio_default_description">Internetové rádio</string>
+    <string name="sleep_timer_off">Vypnout časovač</string>
+    <string name="sleep_timer_minutes">%d minut</string>
+    <string name="sleep_timer_remaining">Zbývá: %d:%s</string>
 </resources> 

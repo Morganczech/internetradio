@@ -83,4 +83,53 @@
     <string name="msg_station_removed">Stanica bola odobratá z obľúbených</string>
     <string name="msg_settings_exported">Nastavenia boli úspešne exportované</string>
     <string name="msg_settings_imported">Nastavenia boli úspešne importované</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_title">Ekvalizér</string>
+    <string name="equalizer_enable">Povoliť ekvalizér</string>
+    <string name="equalizer_presets">Predvoľby</string>
+    <string name="equalizer_bands">Nastavenie pásiem</string>
+    <string name="equalizer_db_format">%d dB</string>
+
+    <!-- Player -->
+    <string name="player_bitrate_format">%d kbps</string>
+    <string name="player_time_remaining">Zostáva: %d:%02d</string>
+    <string name="player_app_name">Internetové rádio</string>
+
+    <!-- Lists -->
+    <string name="list_all">Všetko</string>
+    <string name="list_no_favorite_songs">Zatiaľ nemáte žiadne obľúbené skladby</string>
+    <string name="list_no_favorite_stations">Zatiaľ nemáte žiadne obľúbené stanice</string>
+
+    <!-- Settings Notes -->
+    <string name="settings_favorites_note">Poznámka: Tento limit sa týka iba kategórie Moje stanice. Ostatné kategórie nemajú žiadne obmedzenie počtu staníc.</string>
+    <string name="settings_fade_note">Nastavte dobu, počas ktorej sa bude postupne znižovať hlasitosť pred vypnutím časovača spánku.</string>
+    <string name="settings_current_limit">Aktuálny limit: %d staníc</string>
+    <string name="settings_seconds_format">%d sekúnd</string>
+
+    <!-- Add Radio Screen -->
+    <string name="add_station_name">Názov stanice</string>
+    <string name="add_station_stream_url">URL streamu</string>
+    <string name="add_station_image_url">URL obrázka (voliteľné)</string>
+    <string name="add_station_description">Popis (voliteľné)</string>
+    <string name="add_station_category">Kategória</string>
+    <string name="add_station_expand">Rozbaliť</string>
+    <string name="add_station_save_changes">Uložiť zmeny</string>
+    <string name="add_station_add">Pridať stanicu</string>
+    <string name="add_station_error_duplicate_url">Stanica s touto URL už existuje</string>
+    <string name="add_station_error_duplicate_name">Stanica s týmto názvom už existuje</string>
+
+    <!-- Radio Player -->
+    <string name="radio_logo_description">Logo %s</string>
+    <string name="radio_default_description">Internetové rádio</string>
+    <string name="sleep_timer_off">Vypnúť časovač</string>
+    <string name="sleep_timer_minutes">%d minút</string>
+    <string name="sleep_timer_remaining">Zostáva: %d:%s</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_band_60hz">60Hz</string>
+    <string name="equalizer_band_230hz">230Hz</string>
+    <string name="equalizer_band_910hz">910Hz</string>
+    <string name="equalizer_band_3_6khz">3.6kHz</string>
+    <string name="equalizer_band_14khz">14kHz</string>
 </resources> 

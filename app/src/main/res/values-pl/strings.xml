@@ -91,4 +91,53 @@
     <string name="msg_station_removed">Stacja została usunięta z ulubionych</string>
     <string name="msg_settings_exported">Ustawienia zostały wyeksportowane</string>
     <string name="msg_settings_imported">Ustawienia zostały zaimportowane</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_title">Korektor</string>
+    <string name="equalizer_enable">Włącz korektor</string>
+    <string name="equalizer_presets">Presety</string>
+    <string name="equalizer_bands">Ustawienia pasm</string>
+    <string name="equalizer_db_format">%d dB</string>
+
+    <!-- Player -->
+    <string name="player_bitrate_format">%d kbps</string>
+    <string name="player_time_remaining">Pozostało: %d:%02d</string>
+    <string name="player_app_name">Radio internetowe</string>
+
+    <!-- Lists -->
+    <string name="list_all">Wszystko</string>
+    <string name="list_no_favorite_songs">Nie masz jeszcze żadnych ulubionych utworów</string>
+    <string name="list_no_favorite_stations">Nie masz jeszcze żadnych ulubionych stacji</string>
+
+    <!-- Settings Notes -->
+    <string name="settings_favorites_note">Uwaga: Ten limit dotyczy tylko kategorii Moje stacje. Pozostałe kategorie nie mają ograniczeń liczby stacji.</string>
+    <string name="settings_fade_note">Ustaw czas, przez który głośność będzie stopniowo zmniejszana przed wyłączeniem timera.</string>
+    <string name="settings_current_limit">Aktualny limit: %d stacji</string>
+    <string name="settings_seconds_format">%d sekund</string>
+
+    <!-- Add Radio Screen -->
+    <string name="add_station_name">Nazwa stacji</string>
+    <string name="add_station_stream_url">URL strumienia</string>
+    <string name="add_station_image_url">URL obrazu (opcjonalnie)</string>
+    <string name="add_station_description">Opis (opcjonalnie)</string>
+    <string name="add_station_category">Kategoria</string>
+    <string name="add_station_expand">Rozwiń</string>
+    <string name="add_station_save_changes">Zapisz zmiany</string>
+    <string name="add_station_add">Dodaj stację</string>
+    <string name="add_station_error_duplicate_url">Stacja z tym URL już istnieje</string>
+    <string name="add_station_error_duplicate_name">Stacja o tej nazwie już istnieje</string>
+
+    <!-- Radio Player -->
+    <string name="radio_logo_description">Logo %s</string>
+    <string name="radio_default_description">Radio internetowe</string>
+    <string name="sleep_timer_off">Wyłącz wyłącznik czasowy</string>
+    <string name="sleep_timer_minutes">%d minut</string>
+    <string name="sleep_timer_remaining">Pozostało: %d:%s</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_band_60hz">60Hz</string>
+    <string name="equalizer_band_230hz">230Hz</string>
+    <string name="equalizer_band_910hz">910Hz</string>
+    <string name="equalizer_band_3_6khz">3.6kHz</string>
+    <string name="equalizer_band_14khz">14kHz</string>
 </resources> 

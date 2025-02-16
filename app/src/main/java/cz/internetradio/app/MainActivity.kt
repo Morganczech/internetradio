@@ -62,6 +62,11 @@ import kotlinx.coroutines.delay
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import java.util.Locale
+import android.content.res.Configuration
+import cz.internetradio.app.model.Language
+import androidx.lifecycle.lifecycleScope
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -71,10 +76,10 @@ class MainActivity : ComponentActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 Intent.ACTION_POWER_CONNECTED -> {
-                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    Log.d("MainActivity", "Napájení připojeno")
                 }
                 Intent.ACTION_POWER_DISCONNECTED -> {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    Log.d("MainActivity", "Napájení odpojeno")
                 }
             }
         }
@@ -83,14 +88,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Kontrola, zda je zařízení již připojeno k nabíječce
-        val batteryStatus = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val status = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || 
-                        status == BatteryManager.BATTERY_STATUS_FULL
-
-        if (isCharging) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Nastavení jazyka
+        lifecycleScope.launch {
+            viewModel.currentLanguage.collect { language ->
+                updateLocale(language)
+            }
         }
         
         // Registrace přijímače pro sledování stavu nabíjení
@@ -101,13 +103,11 @@ class MainActivity : ComponentActivity() {
         registerReceiver(powerConnectionReceiver, filter)
         
         // Nastavení tmavé systémové lišty
-        window.statusBarColor = Color.Black.toArgb()
-        window.navigationBarColor = Color.Black.toArgb()
-        
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 
         // Skrytí systémových pruhů při dotyku
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -258,6 +258,19 @@ class MainActivity : ComponentActivity() {
         }
     }
     
+    private fun updateLocale(language: Language) {
+        val locale = when (language) {
+            Language.SYSTEM -> resources.configuration.locales[0]
+            else -> Locale(language.code)
+        }
+        
+        val config = Configuration(resources.configuration).apply {
+            setLocale(locale)
+        }
+        
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(powerConnectionReceiver)
@@ -310,7 +323,7 @@ fun RadioItem(
                     ) {
                         AsyncImage(
                             model = radio.imageUrl,
-                            contentDescription = "Logo ${radio.name}",
+                            contentDescription = stringResource(R.string.radio_logo_description, radio.name),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit,
                             fallback = painterResource(id = R.drawable.ic_radio_default),
@@ -326,7 +339,7 @@ fun RadioItem(
                         )
                         radio.description?.let { description ->
                             Text(
-                                text = if (description.isBlank()) "Internetové rádio" 
+                                text = if (description.isBlank()) stringResource(R.string.radio_default_description) 
                                       else if (description.length > 50) description.take(50) + "..." 
                                       else description,
                                 style = MaterialTheme.typography.body2,
@@ -334,7 +347,7 @@ fun RadioItem(
                                 color = Color.White.copy(alpha = 0.7f)
                             )
                         } ?: Text(
-                            text = "Internetové rádio",
+                            text = stringResource(R.string.radio_default_description),
                             style = MaterialTheme.typography.body2,
                             modifier = Modifier.padding(top = 4.dp),
                             color = Color.White.copy(alpha = 0.7f)
@@ -626,14 +639,14 @@ fun PlayerControls(
                                 viewModel.setSleepTimer(0)
                                 showTimerDropdown = false
                             }) {
-                                Text("Vypnout časovač")
+                                Text(stringResource(R.string.sleep_timer_off))
                             }
                             (5..60 step 5).forEach { minutes ->
                                 DropdownMenuItem(onClick = {
                                     viewModel.setSleepTimer(minutes)
                                     showTimerDropdown = false
                                 }) {
-                                    Text("$minutes minut")
+                                    Text(stringResource(R.string.sleep_timer_minutes, minutes))
                                 }
                             }
                         }
@@ -664,7 +677,7 @@ fun PlayerControls(
                         val seconds = remainingSeconds ?: 0
                         if (minutes > 0 || seconds > 0) {
                             Text(
-                                text = "Zbývá: $minutes:${String.format("%02d", seconds)}",
+                                text = stringResource(R.string.sleep_timer_remaining, minutes, String.format("%02d", seconds)),
                                 style = MaterialTheme.typography.caption,
                                 modifier = Modifier.padding(top = 4.dp),
                                 color = Color.White

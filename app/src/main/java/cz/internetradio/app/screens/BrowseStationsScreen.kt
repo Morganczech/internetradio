@@ -26,6 +26,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.stringResource
+import cz.internetradio.app.R
 
 @Composable
 fun BrowseStationsScreen(

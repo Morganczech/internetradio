@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.res.stringResource
+import cz.internetradio.app.R
 
 @Composable
 fun EqualizerScreen(
@@ -124,7 +126,7 @@ fun EqualizerScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "Nastavení pásem",
+                    text = stringResource(R.string.equalizer_bands),
                     style = MaterialTheme.typography.subtitle1,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -147,17 +149,17 @@ fun EqualizerScreen(
                             ) {
                                 Text(
                                     text = when (index) {
-                                        0 -> "60Hz"
-                                        1 -> "230Hz"
-                                        2 -> "910Hz"
-                                        3 -> "3.6kHz"
-                                        else -> "14kHz"
+                                        0 -> stringResource(R.string.equalizer_band_60hz)
+                                        1 -> stringResource(R.string.equalizer_band_230hz)
+                                        2 -> stringResource(R.string.equalizer_band_910hz)
+                                        3 -> stringResource(R.string.equalizer_band_3_6khz)
+                                        else -> stringResource(R.string.equalizer_band_14khz)
                                     },
                                     style = MaterialTheme.typography.caption,
                                     color = Color.White.copy(alpha = 0.7f)
                                 )
                                 Text(
-                                    text = "${value.toInt()}dB",
+                                    text = stringResource(R.string.equalizer_db_format, value.toInt()),
                                     style = MaterialTheme.typography.caption,
                                     color = Color.White.copy(alpha = 0.7f)
                                 )

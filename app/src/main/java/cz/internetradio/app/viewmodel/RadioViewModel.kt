@@ -50,6 +50,7 @@ import cz.internetradio.app.model.SerializableSong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.Color
+import cz.internetradio.app.model.Language
 
 private data class Country(
     val name: String,
@@ -137,6 +138,9 @@ class RadioViewModel @Inject constructor(
     private val _currentCategory = MutableStateFlow<RadioCategory?>(null)
     val currentCategory: StateFlow<RadioCategory?> = _currentCategory
 
+    private val _currentLanguage = MutableStateFlow(Language.SYSTEM)
+    val currentLanguage: StateFlow<Language> = _currentLanguage
+
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d("RadioViewModel", "Přijat broadcast: ${intent.action}")
@@ -192,6 +196,7 @@ class RadioViewModel @Inject constructor(
         const val PREFS_MAX_FAVORITES = "max_favorites"
         const val PREFS_FADE_OUT_DURATION = "fade_out_duration"
         const val DEFAULT_FADE_OUT_DURATION = 60 // sekund
+        const val PREFS_LANGUAGE = "language"
     }
 
     val radioStations: StateFlow<List<Radio>> = if (_showOnlyFavorites.value) {
@@ -214,6 +219,7 @@ class RadioViewModel @Inject constructor(
         _fadeOutDuration.value = prefs.getInt(PREFS_FADE_OUT_DURATION, DEFAULT_FADE_OUT_DURATION)
         _bandValues.value = _currentPreset.value.bands
         loadEqualizerState()
+        loadLanguage()
         setupWearableListener()
         
         try {
@@ -855,5 +861,21 @@ class RadioViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun loadLanguage() {
+        val savedLanguage = prefs.getString(PREFS_LANGUAGE, Language.SYSTEM.code)
+        _currentLanguage.value = Language.values().find { it.code == savedLanguage } ?: Language.SYSTEM
+    }
+
+    fun setLanguage(language: Language) {
+        _currentLanguage.value = language
+        prefs.edit().putString(PREFS_LANGUAGE, language.code).apply()
+        // Restartování aktivity pro aplikování změny jazyka
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
     }
 } 

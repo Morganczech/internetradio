@@ -91,4 +91,53 @@
     <string name="msg_station_removed">Sender wurde aus Favoriten entfernt</string>
     <string name="msg_settings_exported">Einstellungen wurden exportiert</string>
     <string name="msg_settings_imported">Einstellungen wurden importiert</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_title">Equalizer</string>
+    <string name="equalizer_enable">Equalizer aktivieren</string>
+    <string name="equalizer_presets">Voreinstellungen</string>
+    <string name="equalizer_bands">Bandeinstellungen</string>
+    <string name="equalizer_db_format">%d dB</string>
+
+    <!-- Player -->
+    <string name="player_bitrate_format">%d kbps</string>
+    <string name="player_time_remaining">Verbleibend: %d:%02d</string>
+    <string name="player_app_name">Internetradio</string>
+
+    <!-- Lists -->
+    <string name="list_all">Alle</string>
+    <string name="list_no_favorite_songs">Noch keine Lieblingssongs vorhanden</string>
+    <string name="list_no_favorite_stations">Noch keine Lieblingssender vorhanden</string>
+
+    <!-- Settings Notes -->
+    <string name="settings_favorites_note">Hinweis: Dieses Limit gilt nur für die Kategorie Meine Sender. Andere Kategorien haben keine Beschränkung der Senderanzahl.</string>
+    <string name="settings_fade_note">Stellen Sie die Zeit ein, in der die Lautstärke vor dem Ausschalten des Sleep-Timers allmählich reduziert wird.</string>
+    <string name="settings_current_limit">Aktuelles Limit: %d Sender</string>
+    <string name="settings_seconds_format">%d Sekunden</string>
+
+    <!-- Add Radio Screen -->
+    <string name="add_station_name">Sendername</string>
+    <string name="add_station_stream_url">Stream-URL</string>
+    <string name="add_station_image_url">Bild-URL (optional)</string>
+    <string name="add_station_description">Beschreibung (optional)</string>
+    <string name="add_station_category">Kategorie</string>
+    <string name="add_station_expand">Ausklappen</string>
+    <string name="add_station_save_changes">Änderungen speichern</string>
+    <string name="add_station_add">Sender hinzufügen</string>
+    <string name="add_station_error_duplicate_url">Ein Sender mit dieser URL existiert bereits</string>
+    <string name="add_station_error_duplicate_name">Ein Sender mit diesem Namen existiert bereits</string>
+
+    <!-- Radio Player -->
+    <string name="radio_logo_description">Logo von %s</string>
+    <string name="radio_default_description">Internetradio</string>
+    <string name="sleep_timer_off">Sleep-Timer ausschalten</string>
+    <string name="sleep_timer_minutes">%d Minuten</string>
+    <string name="sleep_timer_remaining">Verbleibend: %d:%s</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_band_60hz">60Hz</string>
+    <string name="equalizer_band_230hz">230Hz</string>
+    <string name="equalizer_band_910hz">910Hz</string>
+    <string name="equalizer_band_3_6khz">3.6kHz</string>
+    <string name="equalizer_band_14khz">14kHz</string>
 </resources> 

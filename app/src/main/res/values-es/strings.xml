@@ -34,6 +34,9 @@
     <string name="player_next">Siguiente emisora</string>
     <string name="player_previous">Emisora anterior</string>
     <string name="player_volume">Volumen</string>
+    <string name="player_bitrate_format">%d kbps</string>
+    <string name="player_time_remaining">Restante: %d:%02d</string>
+    <string name="player_app_name">Radio Internet</string>
 
     <!-- Settings -->
     <string name="settings_title">Ajustes</string>
@@ -60,6 +63,19 @@
     <string name="search_error">Error al buscar emisoras</string>
     <string name="search_min_chars">Introduce al menos 3 caracteres</string>
 
+    <!-- Filter -->
+    <string name="filter_sort_by">Ordenar por:</string>
+    <string name="filter_sort_by_popularity">Popularidad</string>
+    <string name="filter_sort_by_name">Nombre</string>
+    <string name="filter_sort_by_quality">Calidad</string>
+    <string name="filter_country">País:</string>
+    <string name="filter_country_czech">República Checa</string>
+    <string name="filter_country_slovak">Eslovaquia</string>
+    <string name="filter_quality">Calidad mínima:</string>
+    <string name="filter_quality_64">64 kbps</string>
+    <string name="filter_quality_128">128 kbps</string>
+    <string name="filter_quality_256">256 kbps</string>
+
     <!-- Actions -->
     <string name="action_add_favorite">Añadir a favoritos</string>
     <string name="action_remove_favorite">Eliminar de favoritos</string>
@@ -70,6 +86,8 @@
     <string name="action_cancel">Cancelar</string>
     <string name="action_save">Guardar</string>
     <string name="action_close">Cerrar</string>
+    <string name="action_more_options">Más opciones</string>
+    <string name="action_copy_to_clipboard">Copiar al portapapeles</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Se alcanzó el límite de favoritos</string>
@@ -78,4 +96,48 @@
     <string name="msg_station_removed">La emisora se eliminó de favoritos</string>
     <string name="msg_settings_exported">Los ajustes se exportaron correctamente</string>
     <string name="msg_settings_imported">Los ajustes se importaron correctamente</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_title">Ecualizador</string>
+    <string name="equalizer_enable">Activar ecualizador</string>
+    <string name="equalizer_presets">Preajustes</string>
+    <string name="equalizer_bands">Ajuste de bandas</string>
+    <string name="equalizer_db_format">%d dB</string>
+
+    <!-- Lists -->
+    <string name="list_all">Todo</string>
+    <string name="list_no_favorite_songs">Aún no tienes canciones favoritas</string>
+    <string name="list_no_favorite_stations">Aún no tienes emisoras favoritas</string>
+
+    <!-- Settings Notes -->
+    <string name="settings_favorites_note">Nota: Este límite solo se aplica a la categoría Mis emisoras. Las otras categorías no tienen límite de emisoras.</string>
+    <string name="settings_fade_note">Establece el tiempo durante el cual el volumen disminuirá gradualmente antes de que se apague el temporizador.</string>
+    <string name="settings_current_limit">Límite actual: %d emisoras</string>
+    <string name="settings_seconds_format">%d segundos</string>
+
+    <!-- Add Radio Screen -->
+    <string name="add_station_name">Nombre de la emisora</string>
+    <string name="add_station_stream_url">URL del stream</string>
+    <string name="add_station_image_url">URL de la imagen (opcional)</string>
+    <string name="add_station_description">Descripción (opcional)</string>
+    <string name="add_station_category">Categoría</string>
+    <string name="add_station_expand">Expandir</string>
+    <string name="add_station_save_changes">Guardar cambios</string>
+    <string name="add_station_add">Añadir emisora</string>
+    <string name="add_station_error_duplicate_url">Ya existe una emisora con esta URL</string>
+    <string name="add_station_error_duplicate_name">Ya existe una emisora con este nombre</string>
+
+    <!-- Radio Player -->
+    <string name="radio_logo_description">Logo de %s</string>
+    <string name="radio_default_description">Radio por Internet</string>
+    <string name="sleep_timer_off">Desactivar temporizador</string>
+    <string name="sleep_timer_minutes">%d minutos</string>
+    <string name="sleep_timer_remaining">Restante: %d:%s</string>
+
+    <!-- Equalizer -->
+    <string name="equalizer_band_60hz">60Hz</string>
+    <string name="equalizer_band_230hz">230Hz</string>
+    <string name="equalizer_band_910hz">910Hz</string>
+    <string name="equalizer_band_3_6khz">3.6kHz</string>
+    <string name="equalizer_band_14khz">14kHz</string>
 </resources> 
