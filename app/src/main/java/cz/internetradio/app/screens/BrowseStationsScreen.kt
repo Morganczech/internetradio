@@ -80,7 +80,7 @@ fun BrowseStationsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            label = { Text("Vyhledat stanici") },
+            label = { Text("Vyhledat stanici online...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Vyhledat") }
         )
 
