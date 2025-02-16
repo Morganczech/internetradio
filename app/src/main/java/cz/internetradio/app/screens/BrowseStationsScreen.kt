@@ -285,30 +285,31 @@ fun BrowseStationsScreen(
             },
             title = { Text("Vyberte kategorii") },
             text = {
-                Column {
+                LazyColumn {
                     // Filtrujeme kategorie - odstraníme OSTATNI a VLASTNI
-                    RadioCategory.values()
-                        .filter { category -> 
-                            category != RadioCategory.OSTATNI && 
-                            category != RadioCategory.VLASTNI 
-                        }
-                        .forEach { category ->
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = selectedCategory == category,
-                                    onClick = { selectedCategory = category }
-                                )
-                                Text(
-                                    text = category.title,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
+                    items(
+                        RadioCategory.values()
+                            .filter { category -> 
+                                category != RadioCategory.OSTATNI && 
+                                category != RadioCategory.VLASTNI 
                             }
+                    ) { category ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedCategory == category,
+                                onClick = { selectedCategory = category }
+                            )
+                            Text(
+                                text = category.title,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
                         }
+                    }
                 }
             },
             confirmButton = {
