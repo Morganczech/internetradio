@@ -24,7 +24,6 @@ data class SerializableRadio(
     val startColor: Int,
     val endColor: Int,
     val isFavorite: Boolean,
-    val gradientId: Int?,
     val bitrate: Int?
 ) {
     companion object {
@@ -39,7 +38,6 @@ data class SerializableRadio(
             startColor = entity.startColor,
             endColor = entity.endColor,
             isFavorite = entity.isFavorite,
-            gradientId = entity.gradientId,
             bitrate = entity.bitrate
         )
 
@@ -54,7 +52,6 @@ data class SerializableRadio(
             startColor = serializable.startColor,
             endColor = serializable.endColor,
             isFavorite = serializable.isFavorite,
-            gradientId = serializable.gradientId,
             bitrate = serializable.bitrate
         )
     }

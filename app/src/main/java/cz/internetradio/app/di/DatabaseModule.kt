@@ -28,7 +28,8 @@ object DatabaseModule {
         .fallbackToDestructiveMigration()
         .addMigrations(
             RadioDatabase.MIGRATION_1_2,
-            RadioDatabase.MIGRATION_2_3
+            RadioDatabase.MIGRATION_2_3,
+            RadioDatabase.MIGRATION_3_4
         )
         .build()
     }

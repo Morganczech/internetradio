@@ -30,10 +30,8 @@ fun AddRadioScreen(
     viewModel: AddRadioViewModel = hiltViewModel(),
     radioToEdit: String? = null
 ) {
-    var showGradientPicker by remember { mutableStateOf(false) }
     var showCategoryPicker by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-    val selectedGradientId by viewModel.selectedGradientId.collectAsState()
     
     var name by remember { mutableStateOf("") }
     var streamUrl by remember { mutableStateOf("") }
@@ -51,7 +49,6 @@ fun AddRadioScreen(
                 imageUrl = radio.imageUrl
                 description = radio.description
                 selectedCategory = radio.category
-                radio.gradientId?.let { viewModel.setSelectedGradient(it) }
             }
         }
     }
@@ -149,50 +146,6 @@ fun AddRadioScreen(
                     }
             }
 
-            // Výběr gradientu
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showGradientPicker = true },
-                shape = RoundedCornerShape(8.dp),
-                elevation = 4.dp
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = selectedGradientId?.let { id ->
-                                    Gradients.availableGradients.find { it.id == id }?.colors?.let { 
-                                        listOf(it.first, it.second)
-                                    }
-                                } ?: listOf(Color.Gray, Color.DarkGray)
-                            )
-                        )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = selectedGradientId?.let { id ->
-                                Gradients.availableGradients.find { it.id == id }?.name
-                            } ?: "Vybrat gradient",
-                            color = Color.White
-                        )
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            contentDescription = "Vybrat",
-                            tint = Color.White
-                        )
-                    }
-                }
-            }
-
             // Tlačítko pro uložení
             Button(
                 onClick = {
@@ -236,56 +189,5 @@ fun AddRadioScreen(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-    }
-
-    if (showGradientPicker) {
-        AlertDialog(
-            onDismissRequest = { showGradientPicker = false },
-            title = { Text("Vyberte gradient") },
-            text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Gradients.availableGradients.forEach { gradient ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(60.dp)
-                                .clickable {
-                                    viewModel.setSelectedGradient(gradient.id)
-                                    showGradientPicker = false
-                                },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                gradient.colors.first,
-                                                gradient.colors.second
-                                            )
-                                        )
-                                    )
-                            ) {
-                                Text(
-                                    text = gradient.name,
-                                    color = Color.White,
-                                    modifier = Modifier
-                                        .align(Alignment.CenterStart)
-                                        .padding(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showGradientPicker = false }) {
-                    Text("Zrušit")
-                }
-            }
-        )
     }
 } 

@@ -20,7 +20,6 @@ data class RadioEntity(
     val startColor: Int,
     val endColor: Int,
     val isFavorite: Boolean,
-    val gradientId: Int?,
     val bitrate: Int?
 ) {
     fun toRadio(): Radio = Radio(
@@ -34,7 +33,6 @@ data class RadioEntity(
         startColor = Color(startColor),
         endColor = Color(endColor),
         isFavorite = isFavorite,
-        gradientId = gradientId,
         bitrate = bitrate
     )
 
@@ -50,7 +48,6 @@ data class RadioEntity(
             startColor = radio.startColor.toArgb(),
             endColor = radio.endColor.toArgb(),
             isFavorite = radio.isFavorite,
-            gradientId = radio.gradientId,
             bitrate = radio.bitrate
         )
     }

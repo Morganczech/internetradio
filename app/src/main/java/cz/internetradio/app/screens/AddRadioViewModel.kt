@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.ui.graphics.Color
 import cz.internetradio.app.data.entity.RadioEntity
-import cz.internetradio.app.ui.theme.Gradients
 import cz.internetradio.app.utils.StreamUrlParser
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,9 +23,6 @@ class AddRadioViewModel @Inject constructor(
 
     private val _validationError = MutableStateFlow<ValidationError?>(null)
     val validationError: StateFlow<ValidationError?> = _validationError.asStateFlow()
-
-    private val _selectedGradientId = MutableStateFlow<Int?>(null)
-    val selectedGradientId: StateFlow<Int?> = _selectedGradientId.asStateFlow()
 
     sealed class ValidationError {
         object DuplicateStreamUrl : ValidationError()
@@ -62,8 +58,7 @@ class AddRadioViewModel @Inject constructor(
                 originalCategory = category,
                 startColor = category.startColor,
                 endColor = category.endColor,
-                isFavorite = false,
-                gradientId = _selectedGradientId.value
+                isFavorite = false
             )
 
             radioRepository.insertRadio(radio)
@@ -99,16 +94,11 @@ class AddRadioViewModel @Inject constructor(
                 category = category,
                 originalCategory = category,
                 startColor = category.startColor,
-                endColor = category.endColor,
-                gradientId = _selectedGradientId.value
+                endColor = category.endColor
             )
 
             radioRepository.insertRadio(radio)
             onSuccess()
         }
-    }
-
-    fun setSelectedGradient(id: Int) {
-        _selectedGradientId.value = id
     }
 } 

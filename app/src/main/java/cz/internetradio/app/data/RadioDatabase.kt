@@ -13,7 +13,7 @@ import cz.internetradio.app.data.dao.FavoriteSongDao
 
 @Database(
     entities = [RadioEntity::class, FavoriteSong::class], 
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @Singleton
@@ -47,6 +47,44 @@ abstract class RadioDatabase : RoomDatabase() {
                         category TEXT
                     )
                 """)
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Vytvoření nové tabulky bez sloupce gradientId
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS radios_new (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        name TEXT NOT NULL,
+                        streamUrl TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        originalCategory TEXT,
+                        startColor INTEGER NOT NULL,
+                        endColor INTEGER NOT NULL,
+                        isFavorite INTEGER NOT NULL,
+                        bitrate INTEGER
+                    )
+                """)
+
+                // Kopírování dat ze staré tabulky do nové
+                database.execSQL("""
+                    INSERT INTO radios_new (
+                        id, name, streamUrl, imageUrl, description, category, originalCategory,
+                        startColor, endColor, isFavorite, bitrate
+                    )
+                    SELECT id, name, streamUrl, imageUrl, description, category, originalCategory,
+                           startColor, endColor, isFavorite, bitrate
+                    FROM radios
+                """)
+
+                // Smazání staré tabulky
+                database.execSQL("DROP TABLE radios")
+
+                // Přejmenování nové tabulky
+                database.execSQL("ALTER TABLE radios_new RENAME TO radios")
             }
         }
     }

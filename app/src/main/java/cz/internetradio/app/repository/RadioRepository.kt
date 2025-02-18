@@ -201,7 +201,6 @@ class RadioRepository @Inject constructor(
                         startColor = entity.startColor,
                         endColor = entity.endColor,
                         isFavorite = true,  // Explicitně nastavíme jako oblíbenou
-                        gradientId = entity.gradientId,
                         bitrate = entity.bitrate
                     )
                     radioDao.insertRadio(updatedEntity)
@@ -218,7 +217,6 @@ class RadioRepository @Inject constructor(
                         startColor = entity.startColor,
                         endColor = entity.endColor,
                         isFavorite = true,  // Explicitně nastavíme jako oblíbenou
-                        gradientId = entity.gradientId,
                         bitrate = entity.bitrate
                     )
                     radioDao.insertRadio(updatedEntity)

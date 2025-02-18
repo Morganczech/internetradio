@@ -13,6 +13,5 @@ data class Radio(
     val startColor: Color,
     val endColor: Color,
     val isFavorite: Boolean = false,
-    val gradientId: Int? = null,  // ID vybraného gradientu, null = použít výchozí gradient kategorie
     val bitrate: Int? = null
 ) 

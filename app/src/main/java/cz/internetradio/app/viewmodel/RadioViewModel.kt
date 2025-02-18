@@ -828,7 +828,6 @@ class RadioViewModel @Inject constructor(
                             startColor = radio.startColor.value.toInt(),
                             endColor = radio.endColor.value.toInt(),
                             isFavorite = radio.isFavorite,
-                            gradientId = radio.gradientId,
                             bitrate = radio.bitrate
                         )
                     }
@@ -898,7 +897,6 @@ class RadioViewModel @Inject constructor(
                             startColor = category.startColor, // Použijeme barvy z kategorie
                             endColor = category.endColor,     // místo hodnot ze souboru
                             isFavorite = entity.isFavorite,
-                            gradientId = entity.gradientId,
                             bitrate = entity.bitrate
                         ))
                     }
