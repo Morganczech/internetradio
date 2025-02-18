@@ -41,6 +41,7 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import android.os.Bundle
 import androidx.media3.common.Metadata
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 
 @AndroidEntryPoint
 class RadioService : Service() {
@@ -219,44 +220,120 @@ class RadioService : Service() {
 
             override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
                 val radio = _currentRadio.value
-                val title = mediaMetadata.title?.toString()?.trim()
-                val artist = mediaMetadata.artist?.toString()?.trim()
+                val title = mediaMetadata.title?.toString()?.trim()?.takeIf { it.isNotEmpty() }
+                val artist = mediaMetadata.artist?.toString()?.trim()?.takeIf { it.isNotEmpty() }
 
-                Log.d("RadioService", "Původní metadata ze streamu:")
-                Log.d("RadioService", "- title: '$title'")
-                Log.d("RadioService", "- artist: '$artist'")
+                Log.d("RadioService", "📻 Přijata metadata:")
+                Log.d("RadioService", "- title: '${title ?: "null"}'")
+                Log.d("RadioService", "- artist: '${artist ?: "null"}'")
 
-                // Kontrola extras pro další metadata
+                // Hledání v `extras`
                 val extras = mediaMetadata.extras
-                var customMetadata: String? = null
-                extras?.let {
-                    for (key in it.keySet()) {
-                        Log.d("RadioService", "Extra metadata - $key: ${it.get(key)}")
-                        if (key.contains("icy_metadata", ignoreCase = true)) {
-                            customMetadata = it.getString(key)
-                        }
+                val icyMetadata = extras?.getString("icy_metadata")?.takeIf { it.isNotEmpty() }
+                val icyTitle = extras?.getString("icy_title")?.takeIf { it.isNotEmpty() }
+                val icyArtist = extras?.getString("icy_artist")?.takeIf { it.isNotEmpty() }
+
+                Log.d("RadioService", "🔹 icy_metadata: '${icyMetadata ?: "null"}'")
+                Log.d("RadioService", "🔹 icy_title: '${icyTitle ?: "null"}'")
+                Log.d("RadioService", "🔹 icy_artist: '${icyArtist ?: "null"}'")
+
+                // Regex pro extrakci názvu skladby z ICY metadat
+                val icyRawText = icyMetadata ?: icyTitle ?: title
+                val regexMatch = Regex("""title="([^"]+)"""").find(icyRawText ?: "")
+
+                var extractedTitle: String? = null
+                var extractedArtist: String? = null
+
+                if (regexMatch != null) {
+                    val fullTitle = regexMatch.groupValues[1] // Extrahovaný text mezi title="..."
+                    Log.d("RadioService", "🎵 Extrahovaná metadata: $fullTitle")
+
+                    // Pokud obsahuje "-", pokusíme se rozdělit na interpreta a název skladby
+                    val parts = fullTitle.split(" - ", limit = 2)
+                    if (parts.size == 2) {
+                        extractedArtist = parts[0].trim()
+                        extractedTitle = parts[1].trim()
+                    } else {
+                        extractedTitle = fullTitle
                     }
                 }
 
-                // Pokud title obsahuje jen název stanice, ignoruj ho
-                val isStationName = !title.isNullOrBlank() && title.equals(radio?.name, ignoreCase = true)
-                val extractedTitle = if (!isStationName) title else customMetadata ?: return
+                // Pokud interpret není nalezen, pokusíme se použít `icy_artist`
+                if (extractedArtist.isNullOrBlank()) {
+                    extractedArtist = icyArtist
+                }
 
-                if (extractedTitle.isNullOrBlank() && artist.isNullOrBlank()) {
-                    Log.d("RadioService", "Metadata neobsahují název skladby, zachovávám předchozí metadata.")
+                // Ošetření prázdných metadat
+                if (extractedTitle.isNullOrBlank() && extractedArtist.isNullOrBlank()) {
+                    Log.d("RadioService", "⚠ Metadata neobsahují žádné platné informace.")
                     return
                 }
 
+                Log.d("RadioService", "✅ Opravená metadata: '$extractedArtist - $extractedTitle'")
+
                 _currentMetadata.value = when {
-                    !extractedTitle.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $extractedTitle"
+                    !extractedArtist.isNullOrBlank() && !extractedTitle.isNullOrBlank() -> "$extractedArtist - $extractedTitle"
                     !extractedTitle.isNullOrBlank() -> extractedTitle
-                    !artist.isNullOrBlank() -> artist
+                    !extractedArtist.isNullOrBlank() -> extractedArtist
                     else -> null
                 }
 
-                updateMediaMetadata(artist, extractedTitle)
+                updateMediaMetadata(extractedArtist, extractedTitle)
                 updateNotification()
                 broadcastPlaybackState()
+            }
+        })
+
+        // Přidání AnalyticsListener pro zachycení metadat
+        exoPlayer.addAnalyticsListener(object : AnalyticsListener {
+            override fun onMetadata(eventTime: AnalyticsListener.EventTime, metadata: Metadata) {
+                Log.d("RadioService", "🎵 Přijata metadata")
+                
+                for (i in 0 until metadata.length()) {
+                    val entry = metadata.get(i)
+                    Log.d("RadioService", "📻 Metadata entry: ${entry?.javaClass?.simpleName}")
+                    
+                    val text = when (entry) {
+                        is Metadata.Entry -> entry.toString()
+                        else -> null
+                    }?.trim()
+                    
+                    if (!text.isNullOrBlank()) {
+                        Log.d("RadioService", "📻 Metadata text: '$text'")
+                        
+                        // Použití stejného regexu jako v onMediaMetadataChanged
+                        val regexMatch = Regex("""title="([^"]+)"""").find(text)
+                        
+                        var extractedTitle: String? = null
+                        var extractedArtist: String? = null
+                        
+                        if (regexMatch != null) {
+                            val fullTitle = regexMatch.groupValues[1]
+                            Log.d("RadioService", "🎵 Extrahovaná metadata: $fullTitle")
+                            
+                            val parts = fullTitle.split(" - ", limit = 2)
+                            if (parts.size == 2) {
+                                extractedArtist = parts[0].trim()
+                                extractedTitle = parts[1].trim()
+                            } else {
+                                extractedTitle = fullTitle
+                            }
+                            
+                            Log.d("RadioService", "✅ Opravená metadata: '$extractedArtist - $extractedTitle'")
+                            
+                            _currentMetadata.value = when {
+                                !extractedArtist.isNullOrBlank() && !extractedTitle.isNullOrBlank() -> "$extractedArtist - $extractedTitle"
+                                !extractedTitle.isNullOrBlank() -> extractedTitle
+                                !extractedArtist.isNullOrBlank() -> extractedArtist
+                                else -> null
+                            }
+                            
+                            updateMediaMetadata(extractedArtist, extractedTitle)
+                            updateNotification()
+                            broadcastPlaybackState()
+                        }
+                    }
+                }
             }
         })
     }
@@ -308,30 +385,27 @@ class RadioService : Service() {
         try {
             val radio = _currentRadio.value ?: return
             
-            Log.d("RadioService", "Aktualizuji metadata v MediaSession:")
-            Log.d("RadioService", "- artist: '$artist'")
-            Log.d("RadioService", "- title: '$title'")
-            
-            // Vytvoření metadat pro MediaSession
+            Log.d("RadioService", "📢 Aktualizuji metadata v MediaSession:")
+            Log.d("RadioService", "- artist: '${artist ?: "null"}'")
+            Log.d("RadioService", "- title: '${title ?: "null"}'")
+
             val metadataBuilder = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: "")  // Název skladby
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "")  // Interpret
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)  // Název rádia jako album
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)  // Název rádia pro zobrazení
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, if (!title.isNullOrBlank()) {
-                    if (!artist.isNullOrBlank()) "$artist - $title" else title
-                } else "")  // Metadata skladby pro zobrazení
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: radio.description)
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1)
                 .putString(MediaMetadataCompat.METADATA_KEY_GENRE, getString(radio.category.getTitleRes()))
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, radio.imageUrl)
-            
+
             mediaSession.setMetadata(metadataBuilder.build())
-            Log.d("RadioService", "Metadata úspěšně aktualizována")
+            Log.d("RadioService", "✅ Metadata v MediaSession úspěšně aktualizována")
         } catch (e: Exception) {
-            Log.e("RadioService", "Chyba při aktualizaci metadat: ${e.message}")
+            Log.e("RadioService", "❌ Chyba při aktualizaci metadat: ${e.message}")
         }
     }
 
