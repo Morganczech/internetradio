@@ -251,16 +251,16 @@ class RadioService : Service() {
                     // Pokud obsahuje "-", pokusíme se rozdělit na interpreta a název skladby
                     val parts = fullTitle.split(" - ", limit = 2)
                     if (parts.size == 2) {
-                        extractedArtist = parts[0].trim()
-                        extractedTitle = parts[1].trim()
+                        extractedArtist = decodeHtmlEntities(parts[0].trim())
+                        extractedTitle = decodeHtmlEntities(parts[1].trim())
                     } else {
-                        extractedTitle = fullTitle
+                        extractedTitle = decodeHtmlEntities(fullTitle)
                     }
                 }
 
                 // Pokud interpret není nalezen, pokusíme se použít `icy_artist`
                 if (extractedArtist.isNullOrBlank()) {
-                    extractedArtist = icyArtist
+                    extractedArtist = decodeHtmlEntities(icyArtist)
                 }
 
                 // Ošetření prázdných metadat
@@ -389,12 +389,18 @@ class RadioService : Service() {
             Log.d("RadioService", "- artist: '${artist ?: "null"}'")
             Log.d("RadioService", "- title: '${title ?: "null"}'")
 
+            val displaySubtitle = if (!artist.isNullOrBlank() && !title.isNullOrBlank()) {
+                "$artist - $title"
+            } else {
+                title ?: ""
+            }
+
             val metadataBuilder = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: "")
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "")
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: radio.description)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.name) // Název skladby
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "") // Interpret
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name) // Název stanice
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name) // 🔹 Název rádia musí být nahoře
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displaySubtitle) // 🔹 Interpret a skladba dolů
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1)
                 .putString(MediaMetadataCompat.METADATA_KEY_GENRE, getString(radio.category.getTitleRes()))
@@ -404,6 +410,7 @@ class RadioService : Service() {
 
             mediaSession.setMetadata(metadataBuilder.build())
             Log.d("RadioService", "✅ Metadata v MediaSession úspěšně aktualizována")
+            Log.d("RadioService", "🎵 Nastaveno: název='${radio.name}', metadata='$displaySubtitle'")
         } catch (e: Exception) {
             Log.e("RadioService", "❌ Chyba při aktualizaci metadat: ${e.message}")
         }
@@ -483,6 +490,11 @@ class RadioService : Service() {
         }
     }
 
+    private fun decodeHtmlEntities(input: String?): String {
+        if (input.isNullOrBlank()) return ""
+        return android.text.Html.fromHtml(input, android.text.Html.FROM_HTML_MODE_LEGACY).toString()
+    }
+
     private fun createNotification(): NotificationCompat.Builder {
         val radio = _currentRadio.value
         val isPlaying = _isPlaying.value
@@ -498,24 +510,24 @@ class RadioService : Service() {
             contentIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
+
         // Zpracování metadat pro zobrazení
-        val (displayTitle, displaySubtitle) = when {
-            metadata?.contains(" - ") == true -> {
-                val parts = metadata.split(" - ", limit = 2)
-                if (parts[0] == radio?.name) {
-                    parts[1] to ""  // Pokud první část je název rádia, zobrazíme jen druhou část
-                } else {
-                    parts[1] to parts[0]  // Jinak zobrazíme název skladby a interpreta
-                }
-            }
-            !metadata.isNullOrBlank() -> metadata to ""  // Pokud máme metadata bez pomlčky
-            else -> "" to ""  // Pokud nemáme žádná metadata
+        val displayTitle = radio?.name ?: "" // První řádek - název rádia
+        val displaySubtitle = if (metadata?.contains(" - ") == true) {
+            decodeHtmlEntities(metadata) // Druhý řádek - interpret a skladba
+        } else if (!metadata.isNullOrBlank()) {
+            decodeHtmlEntities(metadata)
+        } else {
+            "Internetové rádio"
         }
         
+        Log.d("RadioService", "🔔 Vytvářím notifikaci:")
+        Log.d("RadioService", "- název rádia: '$displayTitle'")
+        Log.d("RadioService", "- metadata: '$displaySubtitle'")
+        
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle(radio?.name ?: "")  // První řádek - název rádia
-            .setContentText(if (displaySubtitle.isNotBlank()) "$displaySubtitle - $displayTitle" else displayTitle)  // Druhý řádek - metadata skladby
+            .setContentTitle(displayTitle)  // První řádek - název rádia
+            .setContentText(displaySubtitle)  // Druhý řádek - metadata skladby
             .setSmallIcon(R.drawable.ic_notification_play)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
