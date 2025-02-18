@@ -226,13 +226,16 @@ class RadioService : Service() {
                 Log.d("RadioService", "- displayTitle: '${mediaMetadata.displayTitle}'")
                 Log.d("RadioService", "- description: '${mediaMetadata.description}'")
                 
-                // Sestavení metadat pro zobrazení
+                val radio = _currentRadio.value
+                val isDefaultMetadata = title == radio?.name || title == radio?.description ||
+                                      artist == radio?.name || artist == radio?.description
+                
                 val metadata = when {
-                    !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
-                    !title.isNullOrBlank() -> title
-                    !artist.isNullOrBlank() -> artist
-                    !mediaMetadata.displayTitle.isNullOrBlank() -> mediaMetadata.displayTitle.toString()
-                    else -> ""  // Prázdný řetězec místo null
+                    !isDefaultMetadata && !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
+                    !isDefaultMetadata && !title.isNullOrBlank() -> title
+                    !isDefaultMetadata && !artist.isNullOrBlank() -> artist
+                    !isDefaultMetadata && !mediaMetadata.displayTitle.isNullOrBlank() -> mediaMetadata.displayTitle.toString()
+                    else -> null
                 }
                 
                 Log.d("RadioService", "Zpracovaná metadata: '$metadata'")
@@ -298,25 +301,29 @@ class RadioService : Service() {
             Log.d("RadioService", "- title: '$title'")
             Log.d("RadioService", "- radio: '${radio.name}'")
             
+            // Kontrola, zda metadata nejsou výchozí
+            val isDefaultMetadata = title == radio.name || title == radio.description ||
+                                  artist == radio.name || artist == radio.description
+            
             // Sestavení textu metadat pro notifikaci
             val displayMetadata = when {
-                !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
-                !title.isNullOrBlank() -> title
-                !artist.isNullOrBlank() -> artist
-                else -> ""
+                !isDefaultMetadata && !title.isNullOrBlank() && !artist.isNullOrBlank() -> "$artist - $title"
+                !isDefaultMetadata && !title.isNullOrBlank() -> title
+                !isDefaultMetadata && !artist.isNullOrBlank() -> artist
+                else -> null
             }
             
             // Vytvoření metadat pro MediaSession
             val metadataBuilder = MediaMetadataCompat.Builder()
                 // Základní metadata
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: "")  // Název skladby
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "")  // Interpret
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)  // Název rádia
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, if (!isDefaultMetadata) title else radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, if (!isDefaultMetadata) artist else "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
                 
                 // Metadata pro zobrazení
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title ?: "")  // Název skladby
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: "")  // Interpret
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.name)  // Název rádia
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, if (!isDefaultMetadata) title else radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, if (!isDefaultMetadata) artist else "")
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
                 
                 // Metadata pro Bluetooth AVRCP
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1)
