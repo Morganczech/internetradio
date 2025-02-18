@@ -2,6 +2,9 @@ package cz.internetradio.app.model
 
 import kotlinx.serialization.Serializable
 import cz.internetradio.app.data.entity.RadioEntity
+import cz.internetradio.app.model.RadioCategory
+import cz.internetradio.app.ui.theme.Gradients
+import androidx.compose.ui.graphics.toArgb
 
 @Serializable
 data class AppSettings(
@@ -24,7 +27,8 @@ data class SerializableRadio(
     val startColor: Int,
     val endColor: Int,
     val isFavorite: Boolean,
-    val bitrate: Int?
+    val bitrate: Int?,
+    val gradientId: Int? = null
 ) {
     companion object {
         fun fromRadioEntity(entity: RadioEntity): SerializableRadio = SerializableRadio(
@@ -41,19 +45,25 @@ data class SerializableRadio(
             bitrate = entity.bitrate
         )
 
-        fun toRadioEntity(serializable: SerializableRadio): RadioEntity = RadioEntity(
-            id = serializable.id,
-            name = serializable.name,
-            streamUrl = serializable.streamUrl,
-            imageUrl = serializable.imageUrl,
-            description = serializable.description,
-            category = RadioCategory.valueOf(serializable.category),
-            originalCategory = serializable.originalCategory?.let { RadioCategory.valueOf(it) },
-            startColor = serializable.startColor,
-            endColor = serializable.endColor,
-            isFavorite = serializable.isFavorite,
-            bitrate = serializable.bitrate
-        )
+        fun toRadioEntity(serializable: SerializableRadio): RadioEntity {
+            val category = RadioCategory.valueOf(serializable.category)
+            // Vždy použijeme barvy z aktuální kategorie
+            val colors = Gradients.getGradientForCategory(category)
+            
+            return RadioEntity(
+                id = serializable.id,
+                name = serializable.name,
+                streamUrl = serializable.streamUrl,
+                imageUrl = serializable.imageUrl,
+                description = serializable.description,
+                category = category,
+                originalCategory = serializable.originalCategory?.let { RadioCategory.valueOf(it) },
+                startColor = colors.first.toArgb(),
+                endColor = colors.second.toArgb(),
+                isFavorite = serializable.isFavorite,
+                bitrate = serializable.bitrate
+            )
+        }
     }
 }
 

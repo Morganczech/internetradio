@@ -36,8 +36,8 @@ object Gradients {
             Color(0xFF6D4C41)
         ),
         RadioCategory.COUNTRY to Pair(
-            Color(0xFFFF9800), // Oranžová - country, western
-            Color(0xFFF57C00)
+            Color(0xFF8B4513), // Hnědá - saddlebrown - připomíná dřevo
+            Color(0xFF5D2A0C)  // Tmavší hnědá
         ),
         RadioCategory.FOLK to Pair(
             Color(0xFF689F38), // Zelená - folk, příroda
@@ -94,7 +94,7 @@ object Gradients {
         GradientOption(4, "Neonová - Dance", Pair(Color(0xFFE040FB), Color(0xFFAA00FF))),
         GradientOption(5, "Tyrkysová - Elektronická", Pair(Color(0xFF00BCD4), Color(0xFF0097A7))),
         GradientOption(6, "Hnědá - Klasická", Pair(Color(0xFF8D6E63), Color(0xFF6D4C41))),
-        GradientOption(7, "Oranžová - Country", Pair(Color(0xFFFF9800), Color(0xFFF57C00))),
+        GradientOption(7, "Hnědá - Country", Pair(Color(0xFF8B4513), Color(0xFF5D2A0C))),
         GradientOption(8, "Zelená - Folk", Pair(Color(0xFF689F38), Color(0xFF558B2F))),
         GradientOption(9, "Indigová - Mluvené slovo", Pair(Color(0xFF3F51B5), Color(0xFF303F9F))),
         GradientOption(10, "Růžová - Dětské", Pair(Color(0xFFFF4081), Color(0xFFF50057))),

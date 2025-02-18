@@ -395,6 +395,13 @@ class RadioService : Service() {
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displaySubtitle)
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, radio.imageUrl)
+                .putString("android.media.metadata.ARTIST", artist ?: "")
+                .putString("android.media.metadata.TITLE", title ?: radio.name)
+                .putString("android.media.metadata.DISPLAY_TITLE", radio.name)
+                .putString("android.media.metadata.DISPLAY_SUBTITLE", displaySubtitle)
 
             mediaSession.setMetadata(metadataBuilder.build())
             Log.d("RadioService", "✅ Metadata v MediaSession úspěšně aktualizována")
@@ -525,25 +532,32 @@ class RadioService : Service() {
         Log.d("RadioService", "- artist: '$artist'")
         Log.d("RadioService", "- title: '$title'")
 
-        // Vytvoření MediaStyle
+        // Vytvoření MediaStyle s podporou pro Samsung
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
             .setShowActionsInCompactView(1, 2)
             .setMediaSession(mediaSession.sessionToken)
 
-        // Vytvoření notifikace s metadaty
+        // Vytvoření notifikace s metadaty a vyšší prioritou
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle(displayTitle)  // Název rádia
-            .setContentText(displayText)    // Interpret + skladba
-            .setSubText(title)             // Název skladby zvlášť
-            .setTicker(displayText)        // Pro starší verze Androidu
+            .setContentTitle(displayTitle)
+            .setContentText(displayText)
+            .setSubText(title)
+            .setTicker(displayText)
             .setStyle(mediaStyle)
             .setSmallIcon(R.drawable.ic_notification_play)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
+            .addExtras(Bundle().apply {
+                putString("android.media.metadata.ARTIST", artist)
+                putString("android.media.metadata.TITLE", title)
+                putString("android.media.metadata.DISPLAY_TITLE", displayTitle)
+                putString("android.media.metadata.DISPLAY_SUBTITLE", displayText)
+            })
 
         // Načtení ikony rádia pomocí Coil
         radio?.imageUrl?.let { imageUrl ->
@@ -638,10 +652,17 @@ class RadioService : Service() {
         return builder
     }
 
-    private fun updateNotification() {
+    private fun updateNotification(loading: Boolean = false) {
         try {
-            val notification = createNotification().build()
-            Log.d("RadioService", "🔄 Aktualizuji notifikaci")
+            val notificationBuilder = createNotification()
+            
+            if (loading) {
+                notificationBuilder.setContentText("Čekejte chvíli...")
+                notificationBuilder.setSubText(null)
+            }
+
+            val notification = notificationBuilder.build()
+            Log.d("RadioService", "🔄 Aktualizuji notifikaci ${if (loading) "(Loading...)" else ""}")
             notificationManager.notify(NOTIFICATION_ID, notification)
         } catch (e: Exception) {
             Log.e("RadioService", "❌ Chyba při aktualizaci notifikace: ${e.message}")
@@ -658,7 +679,10 @@ class RadioService : Service() {
             initMediaSession()
             
             _currentRadio.value = radio
-            _currentMetadata.value = null  // Nastavíme prázdná metadata
+            _currentMetadata.value = null
+            
+            // Zobrazení "Čekejte chvíli..."
+            updateNotification(loading = true)
             
             // Vytvoření MediaItem s metadaty
             val mediaItem = MediaItem.Builder()
@@ -681,31 +705,31 @@ class RadioService : Service() {
             // Spuštění na hlavním vlákně
             serviceScope.launch(Dispatchers.Main.immediate) {
                 try {
+                    // Reset ExoPlayeru
+                    exoPlayer.stop()
+                    exoPlayer.clearMediaItems()
+                    
                     // Reinicializace ExoPlayeru
-                    exoPlayer.release()
                     exoPlayer = ExoPlayer.Builder(this@RadioService)
                         .setLoadControl(
                             DefaultLoadControl.Builder()
                                 .setBufferDurationsMs(
-                                    bufferSize,  // Minimální buffer
-                                    bufferSize * 2, // Maximální buffer
-                                    bufferSize / 2, // Buffer pro začátek přehrávání
-                                    bufferSize / 2  // Buffer pro pokračování po rebufferingu
+                                    bufferSize,
+                                    bufferSize * 2,
+                                    bufferSize / 2,
+                                    bufferSize / 2
                                 )
                                 .setPrioritizeTimeOverSizeThresholds(true)
                                 .build()
                         )
                         .build()
                     
-                    // Nastavení posluchačů
                     setupPlayer()
                     
                     // Nastavení a přehrání MediaItem
                     exoPlayer.apply {
                         setMediaItem(mediaItem)
-                        // Nastavení hlasitosti před přehráním
                         volume = 1.0f
-                        // Příprava a přehrání
                         prepare()
                         playWhenReady = true
                     }

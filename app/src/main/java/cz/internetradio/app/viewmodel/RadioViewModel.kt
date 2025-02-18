@@ -51,6 +51,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.Color
 import cz.internetradio.app.model.Language
+import cz.internetradio.app.R
+import cz.internetradio.app.data.entity.RadioEntity
 
 private data class Country(
     val name: String,
@@ -140,6 +142,9 @@ class RadioViewModel @Inject constructor(
 
     private val _currentLanguage = MutableStateFlow(Language.SYSTEM)
     val currentLanguage: StateFlow<Language> = _currentLanguage
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message
 
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -681,7 +686,7 @@ class RadioViewModel @Inject constructor(
                     
                     // Pokud máme více než jednu stanici v kategorii
                     if (stationsInCategory.size > 1) {
-                        // Vybereme následující stanici nebo první v seznamu, pokud jsme byli na konci
+                        // Vybereme následující stanici nebo první v seznamu, pokud jsme byli byli na konci
                         val nextStation = if (currentIndex < stationsInCategory.size - 1) {
                             stationsInCategory[currentIndex + 1]
                         } else {
@@ -857,11 +862,17 @@ class RadioViewModel @Inject constructor(
                     
                     context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                         outputStream.write(json.toByteArray())
+                    } ?: run {
+                        Log.e("RadioViewModel", "Nelze otevřít soubor pro zápis")
+                        _message.value = "Nelze otevřít soubor pro zápis"
+                        return@withContext
                     }
 
                     Log.d("RadioViewModel", "Export dokončen, exportováno ${stations.size} stanic a ${favoriteSongs.size} skladeb")
+                    _message.value = context.getString(R.string.msg_settings_exported)
                 } catch (e: Exception) {
                     Log.e("RadioViewModel", "Chyba při exportu nastavení", e)
+                    _message.value = "Chyba při exportu nastavení"
                 }
             }
         }
@@ -871,49 +882,124 @@ class RadioViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
-                    val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        inputStream.bufferedReader().use { it.readText() }
-                    } ?: return@withContext
+                    val settingsFile = context.contentResolver.openInputStream(uri)
+                    if (settingsFile == null) {
+                        Log.e("RadioViewModel", "Nelze načíst soubor s nastavením")
+                        _message.value = "Nelze načíst soubor s nastavením"
+                        return@withContext
+                    }
 
-                    val settings = Json.decodeFromString<AppSettings>(jsonString)
+                    val jsonString = settingsFile.bufferedReader().use { it.readText() }
+                    val settings = try {
+                        Json.decodeFromString<AppSettings>(jsonString)
+                    } catch (e: Exception) {
+                        Log.e("RadioViewModel", "Chyba při parsování souboru s nastavením", e)
+                        _message.value = "Chyba při parsování souboru s nastavením"
+                        return@withContext
+                    }
                     
                     // Aktualizace nastavení
                     setMaxFavorites(settings.maxFavorites)
                     setEqualizerEnabled(settings.equalizerEnabled)
                     setFadeOutDuration(settings.fadeOutDuration)
                     
+                    var importedStations = 0
+                    var importedSongs = 0
+                    
                     // Import stanic
                     settings.favoriteStations.forEach { serializable ->
-                        val entity = SerializableRadio.toRadioEntity(serializable)
-                        val category = entity.category // Získáme kategorii
-                        radioRepository.insertRadio(Radio(
-                            id = entity.id,
-                            name = entity.name,
-                            streamUrl = entity.streamUrl,
-                            imageUrl = entity.imageUrl,
-                            description = entity.description,
-                            category = category,
-                            originalCategory = entity.originalCategory,
-                            startColor = category.startColor, // Použijeme barvy z kategorie
-                            endColor = category.endColor,     // místo hodnot ze souboru
-                            isFavorite = entity.isFavorite,
-                            bitrate = entity.bitrate
-                        ))
+                        try {
+                            val entity = SerializableRadio.toRadioEntity(serializable)
+                            val existingById = radioRepository.getRadioById(entity.id)
+                            val existingByUrl = radioRepository.getAllRadios().first().find { 
+                                it.streamUrl == entity.streamUrl 
+                            }
+                            
+                            when {
+                                // Pokud existuje stanice se stejným ID, aktualizujeme ji
+                                existingById != null -> {
+                                    val updatedRadio = Radio(
+                                        id = entity.id,
+                                        name = entity.name,
+                                        streamUrl = entity.streamUrl,
+                                        imageUrl = entity.imageUrl,
+                                        description = entity.description,
+                                        category = entity.category,
+                                        originalCategory = existingById.originalCategory ?: entity.originalCategory,
+                                        startColor = Color(entity.startColor),
+                                        endColor = Color(entity.endColor),
+                                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
+                                        bitrate = entity.bitrate
+                                    )
+                                    radioRepository.insertRadio(updatedRadio)
+                                    Log.d("RadioViewModel", "Aktualizována existující stanice podle ID: ${entity.name}")
+                                }
+                                // Pokud existuje stanice se stejnou URL, aktualizujeme ji
+                                existingByUrl != null -> {
+                                    val updatedRadio = Radio(
+                                        id = existingByUrl.id,
+                                        name = entity.name,
+                                        streamUrl = entity.streamUrl,
+                                        imageUrl = entity.imageUrl,
+                                        description = entity.description,
+                                        category = entity.category,
+                                        originalCategory = existingByUrl.originalCategory ?: entity.originalCategory,
+                                        startColor = Color(entity.startColor),
+                                        endColor = Color(entity.endColor),
+                                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
+                                        bitrate = entity.bitrate
+                                    )
+                                    radioRepository.insertRadio(updatedRadio)
+                                    Log.d("RadioViewModel", "Aktualizována existující stanice podle URL: ${entity.name}")
+                                }
+                                // Pokud stanice neexistuje, vložíme ji jako novou
+                                else -> {
+                                    val newRadio = Radio(
+                                        id = entity.id,
+                                        name = entity.name,
+                                        streamUrl = entity.streamUrl,
+                                        imageUrl = entity.imageUrl,
+                                        description = entity.description,
+                                        category = entity.category,
+                                        originalCategory = entity.originalCategory,
+                                        startColor = Color(entity.startColor),
+                                        endColor = Color(entity.endColor),
+                                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
+                                        bitrate = entity.bitrate
+                                    )
+                                    radioRepository.insertRadio(newRadio)
+                                    Log.d("RadioViewModel", "Vložena nová stanice: ${entity.name}")
+                                }
+                            }
+                            importedStations++
+                        } catch (e: Exception) {
+                            Log.e("RadioViewModel", "Chyba při importu stanice ${serializable.name}: ${e.message}")
+                            // Pokračujeme s další stanicí
+                        }
                     }
 
                     // Import oblíbených skladeb
                     settings.favoriteSongs.forEach { song ->
-                        favoriteSongRepository.addSong(FavoriteSong(
-                            title = song.title,
-                            artist = song.artist,
-                            radioName = song.radioName,
-                            radioId = song.radioId
-                        ))
+                        try {
+                            favoriteSongRepository.addSong(FavoriteSong(
+                                title = song.title,
+                                artist = song.artist,
+                                radioName = song.radioName,
+                                radioId = song.radioId
+                            ))
+                            importedSongs++
+                            Log.d("RadioViewModel", "Importována skladba: ${song.title}")
+                        } catch (e: Exception) {
+                            Log.e("RadioViewModel", "Chyba při importu skladby ${song.title}: ${e.message}")
+                            // Pokračujeme s další skladbou
+                        }
                     }
 
-                    Log.d("RadioViewModel", "Import dokončen, importováno ${settings.favoriteStations.size} stanic a ${settings.favoriteSongs.size} skladeb")
+                    Log.d("RadioViewModel", "Import dokončen, importováno $importedStations stanic a $importedSongs skladeb")
+                    _message.value = context.getString(R.string.msg_settings_imported)
                 } catch (e: Exception) {
-                    Log.e("RadioViewModel", "Chyba při importu nastavení", e)
+                    Log.e("RadioViewModel", "Chyba při importu nastavení: ${e.message}", e)
+                    _message.value = "Chyba při importu nastavení"
                 }
             }
         }
