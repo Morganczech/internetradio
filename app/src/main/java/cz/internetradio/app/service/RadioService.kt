@@ -304,29 +304,21 @@ class RadioService : Service() {
                         // Použití stejného regexu jako v onMediaMetadataChanged
                         val regexMatch = Regex("""title="([^"]+)"""").find(text)
                         
-                        var extractedTitle: String? = null
-                        var extractedArtist: String? = null
-                        
                         if (regexMatch != null) {
                             val fullTitle = regexMatch.groupValues[1]
                             Log.d("RadioService", "🎵 Extrahovaná metadata: $fullTitle")
                             
+                            // Nastavení kompletních metadat do _currentMetadata
+                            _currentMetadata.value = fullTitle
+                            
                             val parts = fullTitle.split(" - ", limit = 2)
-                            if (parts.size == 2) {
-                                extractedArtist = parts[0].trim()
-                                extractedTitle = parts[1].trim()
+                            val (extractedArtist, extractedTitle) = if (parts.size == 2) {
+                                Pair(parts[0].trim(), parts[1].trim())
                             } else {
-                                extractedTitle = fullTitle
+                                Pair(null, fullTitle)
                             }
                             
                             Log.d("RadioService", "✅ Opravená metadata: '$extractedArtist - $extractedTitle'")
-                            
-                            _currentMetadata.value = when {
-                                !extractedArtist.isNullOrBlank() && !extractedTitle.isNullOrBlank() -> "$extractedArtist - $extractedTitle"
-                                !extractedTitle.isNullOrBlank() -> extractedTitle
-                                !extractedArtist.isNullOrBlank() -> extractedArtist
-                                else -> null
-                            }
                             
                             updateMediaMetadata(extractedArtist, extractedTitle)
                             updateNotification()
@@ -389,28 +381,27 @@ class RadioService : Service() {
             Log.d("RadioService", "- artist: '${artist ?: "null"}'")
             Log.d("RadioService", "- title: '${title ?: "null"}'")
 
-            val displaySubtitle = if (!artist.isNullOrBlank() && !title.isNullOrBlank()) {
-                "$artist - $title"
-            } else {
-                title ?: ""
+            val displaySubtitle = when {
+                !artist.isNullOrBlank() && !title.isNullOrBlank() -> "$artist - $title"
+                !title.isNullOrBlank() -> title
+                !artist.isNullOrBlank() -> artist
+                else -> ""
             }
 
             val metadataBuilder = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.name) // Název skladby
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "") // Interpret
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name) // Název stanice
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name) // 🔹 Název rádia musí být nahoře
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displaySubtitle) // 🔹 Interpret a skladba dolů
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title ?: radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displaySubtitle)
                 .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
-                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1)
-                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, getString(radio.category.getTitleRes()))
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, radio.imageUrl)
 
             mediaSession.setMetadata(metadataBuilder.build())
             Log.d("RadioService", "✅ Metadata v MediaSession úspěšně aktualizována")
             Log.d("RadioService", "🎵 Nastaveno: název='${radio.name}', metadata='$displaySubtitle'")
+
+            // Explicitní aktualizace notifikace po změně metadat
+            updateNotification()
         } catch (e: Exception) {
             Log.e("RadioService", "❌ Chyba při aktualizaci metadat: ${e.message}")
         }
@@ -511,33 +502,49 @@ class RadioService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Zpracování metadat pro zobrazení
-        val displayTitle = radio?.name ?: "" // První řádek - název rádia
-        val displaySubtitle = if (metadata?.contains(" - ") == true) {
-            decodeHtmlEntities(metadata) // Druhý řádek - interpret a skladba
-        } else if (!metadata.isNullOrBlank()) {
-            decodeHtmlEntities(metadata)
+        // Rozdělení metadat na interpreta a název skladby
+        val (artist, title) = if (metadata?.contains(" - ") == true) {
+            val parts = metadata.split(" - ", limit = 2)
+            Pair(parts[0].trim(), parts[1].trim())
         } else {
-            "Internetové rádio"
+            Pair(null, metadata)
+        }
+        
+        // Sestavení textu pro notifikaci
+        val displayTitle = radio?.name ?: "Internetové rádio"
+        val displayText = when {
+            !artist.isNullOrBlank() && !title.isNullOrBlank() -> "$artist - $title"
+            !title.isNullOrBlank() -> title
+            !artist.isNullOrBlank() -> artist
+            else -> "Internetové rádio"
         }
         
         Log.d("RadioService", "🔔 Vytvářím notifikaci:")
         Log.d("RadioService", "- název rádia: '$displayTitle'")
-        Log.d("RadioService", "- metadata: '$displaySubtitle'")
-        
+        Log.d("RadioService", "- text: '$displayText'")
+        Log.d("RadioService", "- artist: '$artist'")
+        Log.d("RadioService", "- title: '$title'")
+
+        // Vytvoření MediaStyle
+        val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
+            .setShowActionsInCompactView(1, 2)
+            .setMediaSession(mediaSession.sessionToken)
+
+        // Vytvoření notifikace s metadaty
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle(displayTitle)  // První řádek - název rádia
-            .setContentText(displaySubtitle)  // Druhý řádek - metadata skladby
+            .setContentTitle(displayTitle)  // Název rádia
+            .setContentText(displayText)    // Interpret + skladba
+            .setSubText(title)             // Název skladby zvlášť
+            .setTicker(displayText)        // Pro starší verze Androidu
+            .setStyle(mediaStyle)
             .setSmallIcon(R.drawable.ic_notification_play)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(1, 2)
-                .setMediaSession(mediaSession.sessionToken))
-                
+            .setAutoCancel(false)
+
         // Načtení ikony rádia pomocí Coil
         radio?.imageUrl?.let { imageUrl ->
             try {
@@ -547,7 +554,7 @@ class RadioService : Service() {
                         val bitmap = (drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
                         bitmap?.let {
                             builder.setLargeIcon(it)
-                            // Aktualizace notifikace s ikonou
+                            // Explicitní aktualizace notifikace s ikonou
                             notificationManager.notify(NOTIFICATION_ID, builder.build())
                         }
                     }
@@ -632,7 +639,13 @@ class RadioService : Service() {
     }
 
     private fun updateNotification() {
-        notificationManager.notify(NOTIFICATION_ID, createNotification().build())
+        try {
+            val notification = createNotification().build()
+            Log.d("RadioService", "🔄 Aktualizuji notifikaci")
+            notificationManager.notify(NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            Log.e("RadioService", "❌ Chyba při aktualizaci notifikace: ${e.message}")
+        }
     }
 
     private fun playRadio(radio: Radio) {
