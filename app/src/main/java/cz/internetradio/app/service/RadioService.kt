@@ -296,7 +296,7 @@ class RadioService : Service() {
             val metadataBuilder = MediaMetadataCompat.Builder()
                 // Základní metadata
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, radio.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, displayMetadata)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, displayMetadata ?: "") // Prázdný string místo popisu stanice
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
                 
                 // Metadata pro zobrazení
@@ -316,7 +316,7 @@ class RadioService : Service() {
             // Nastavení metadat do MediaSession
             mediaSession.setMetadata(metadataBuilder.build())
             
-            Log.d("RadioService", "Metadata aktualizována - title: ${title ?: radio.name}, artist: ${artist ?: radio.description}")
+            Log.d("RadioService", "Metadata aktualizována - title: ${radio.name}, metadata: $displayMetadata")
         } catch (e: Exception) {
             Log.e("RadioService", "Chyba při aktualizaci metadat: ${e.message}")
         }
@@ -413,9 +413,8 @@ class RadioService : Service() {
         )
 
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Tento telefon") // První řádek - kam se přehrává zvuk
-            .setContentText(radio?.name) // Druhý řádek - název rádia
-            .setSubText(metadata) // Třetí řádek - metadata (název písně)
+            .setContentTitle(radio?.name ?: "Internet Radio") // Název rádia jako hlavní titulek
+            .setContentText(metadata) // Metadata (název písně) jako druhý řádek
             .setSmallIcon(R.drawable.ic_notification_play)
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -530,78 +529,184 @@ class RadioService : Service() {
 
     private fun playRadio(radio: Radio) {
         Log.d("RadioService", "Spouštím rádio: ${radio.name}")
-        if (!wakeLock.isHeld) {
-            wakeLock.acquire(24 * 60 * 60 * 1000L)
-        }
-        
-        initMediaSession()
-        
-        _currentRadio.value = radio
-        
-        // Reset přehrávače před přehráním nové stanice
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        
-        // Nastavení MediaItem s metadaty pro ExoPlayer
-        val mediaItem = MediaItem.Builder()
-            .setUri(radio.streamUrl)
-            .setMediaMetadata(
-                androidx.media3.common.MediaMetadata.Builder()
-                    .setIsBrowsable(false)
-                    .setIsPlayable(true)
-                    .build()
-            )
-            .build()
+        try {
+            if (!wakeLock.isHeld) {
+                wakeLock.acquire(24 * 60 * 60 * 1000L)
+            }
             
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
-        
-        _isPlaying.value = true
-        mediaSession.isActive = true
-        
-        // Aktualizace notifikace bez výchozích metadat
-        updateNotification()
-        broadcastPlaybackState()
-        
-        RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
+            initMediaSession()
+            
+            _currentRadio.value = radio
+            
+            // Vytvoření MediaItem s metadaty
+            val mediaItem = MediaItem.Builder()
+                .setUri(radio.streamUrl)
+                .setMediaMetadata(
+                    androidx.media3.common.MediaMetadata.Builder()
+                        .setTitle(radio.name)
+                        .setDisplayTitle(radio.name)
+                        .setDescription(radio.description)
+                        .setIsBrowsable(false)
+                        .setIsPlayable(true)
+                        .build()
+                )
+                .build()
+            
+            // Spuštění na hlavním vlákně
+            serviceScope.launch(Dispatchers.Main.immediate) {
+                try {
+                    // Reinicializace ExoPlayeru
+                    exoPlayer.release()
+                    exoPlayer = ExoPlayer.Builder(this@RadioService)
+                        .setLoadControl(
+                            DefaultLoadControl.Builder()
+                                .setBufferDurationsMs(
+                                    bufferSize,  // Minimální buffer
+                                    bufferSize * 2, // Maximální buffer
+                                    bufferSize / 2, // Buffer pro začátek přehrávání
+                                    bufferSize / 2  // Buffer pro pokračování po rebufferingu
+                                )
+                                .setPrioritizeTimeOverSizeThresholds(true)
+                                .build()
+                        )
+                        .build()
+                    
+                    // Nastavení posluchačů
+                    setupPlayer()
+                    
+                    // Nastavení a přehrání MediaItem
+                    exoPlayer.apply {
+                        setMediaItem(mediaItem)
+                        // Nastavení hlasitosti před přehráním
+                        volume = 1.0f
+                        // Příprava a přehrání
+                        prepare()
+                        playWhenReady = true
+                    }
+                    
+                    _isPlaying.value = true
+                    mediaSession.isActive = true
+                    
+                    // Aktualizace MediaSession s novými metadaty
+                    val metadataBuilder = MediaMetadataCompat.Builder()
+                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, radio.name)
+                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, radio.description)
+                        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
+                        .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)
+                        .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, radio.description)
+                        .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, radio.id)
+                        .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, radio.streamUrl)
+                    mediaSession.setMetadata(metadataBuilder.build())
+                    
+                    // Aktualizace stavu přehrávání
+                    val playbackState = PlaybackStateCompat.Builder()
+                        .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                        .setActions(
+                            PlaybackStateCompat.ACTION_PLAY or
+                            PlaybackStateCompat.ACTION_PAUSE or
+                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                            PlaybackStateCompat.ACTION_STOP
+                        )
+                        .build()
+                    mediaSession.setPlaybackState(playbackState)
+                    
+                    // Aktualizace notifikace
+                    updateNotification()
+                    broadcastPlaybackState()
+                    
+                    RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
+                    
+                    Log.d("RadioService", "Rádio úspěšně spuštěno: ${radio.name}")
+                } catch (e: Exception) {
+                    Log.e("RadioService", "Chyba při spouštění rádia na hlavním vlákně: ${e.message}", e)
+                    stopPlayback()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("RadioService", "Chyba při spouštění rádia: ${e.message}", e)
+            stopPlayback()
+        }
     }
 
     private fun pausePlayback() {
         Log.d("RadioService", "Pozastavuji přehrávání")
-        exoPlayer.pause()
-        _isPlaying.value = false
-        updatePlaybackState()
-        updateNotification()
-        broadcastPlaybackState()
-        
-        if (wakeLock.isHeld) {
-            wakeLock.release()
+        serviceScope.launch(Dispatchers.Main.immediate) {
+            try {
+                exoPlayer.pause()
+                _isPlaying.value = false
+                updatePlaybackState()
+                updateNotification()
+                broadcastPlaybackState()
+                
+                if (wakeLock.isHeld) {
+                    wakeLock.release()
+                }
+                
+                // Aktualizace widgetu
+                RadioWidgetProvider.updateWidgets(
+                    applicationContext,
+                    false,
+                    _currentRadio.value?.id
+                )
+            } catch (e: Exception) {
+                Log.e("RadioService", "Chyba při pozastavování přehrávání: ${e.message}", e)
+            }
         }
-        
-        // Aktualizace widgetu
-        RadioWidgetProvider.updateWidgets(
-            applicationContext,
-            false,
-            _currentRadio.value?.id
-        )
     }
 
     private fun stopPlayback() {
         Log.d("RadioService", "Zastavuji přehrávání")
-        exoPlayer.stop()
-        _isPlaying.value = false
-        _currentRadio.value = null
-        _currentMetadata.value = null
-        mediaSession.isActive = false
-        broadcastPlaybackState()
-        
-        if (wakeLock.isHeld) {
-            wakeLock.release()
+        serviceScope.launch(Dispatchers.Main.immediate) {
+            try {
+                // Zastavení přehrávání
+                exoPlayer.stop()
+                exoPlayer.clearMediaItems()
+                exoPlayer.release()
+                
+                // Reinicializace ExoPlayeru pro další použití
+                exoPlayer = ExoPlayer.Builder(this@RadioService)
+                    .setLoadControl(
+                        DefaultLoadControl.Builder()
+                            .setBufferDurationsMs(
+                                bufferSize,  // Minimální buffer
+                                bufferSize * 2, // Maximální buffer
+                                bufferSize / 2, // Buffer pro začátek přehrávání
+                                bufferSize / 2  // Buffer pro pokračování po rebufferingu
+                            )
+                            .setPrioritizeTimeOverSizeThresholds(true)
+                            .build()
+                    )
+                    .build()
+                
+                // Nastavení posluchačů
+                setupPlayer()
+                
+                // Aktualizace stavů
+                _isPlaying.value = false
+                _currentRadio.value = null
+                _currentMetadata.value = null
+                
+                // Deaktivace MediaSession
+                mediaSession.isActive = false
+                
+                // Odeslání broadcastu o změně stavu
+                broadcastPlaybackState()
+                
+                // Uvolnění WakeLock
+                if (wakeLock.isHeld) {
+                    wakeLock.release()
+                }
+                
+                // Zastavení služby
+                stopForeground(true)
+                stopSelf()
+                
+                Log.d("RadioService", "Přehrávání úspěšně zastaveno")
+            } catch (e: Exception) {
+                Log.e("RadioService", "Chyba při zastavování přehrávání: ${e.message}", e)
+            }
         }
-        
-        stopForeground(true)
-        stopSelf()
     }
 
     private fun playNextRadio() {
@@ -683,13 +788,33 @@ class RadioService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(batteryReceiver)
-        if (wakeLock.isHeld) {
-            wakeLock.release()
+        Log.d("RadioService", "onDestroy - uvolňuji zdroje")
+        try {
+            // Zastavení přehrávání
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+            
+            // Uvolnění ExoPlayeru
+            exoPlayer.release()
+            
+            // Uvolnění MediaSession
+            mediaSession.release()
+            
+            // Uvolnění WakeLock
+            if (wakeLock.isHeld) {
+                wakeLock.release()
+            }
+            
+            // Odregistrace receiveru
+            unregisterReceiver(batteryReceiver)
+            
+            // Zrušení coroutine scope
+            serviceJob.cancel()
+            
+            Log.d("RadioService", "Zdroje úspěšně uvolněny")
+        } catch (e: Exception) {
+            Log.e("RadioService", "Chyba při uvolňování zdrojů: ${e.message}", e)
         }
-        exoPlayer.release()
-        mediaSession.release()
-        serviceJob.cancel()
+        super.onDestroy()
     }
 } 

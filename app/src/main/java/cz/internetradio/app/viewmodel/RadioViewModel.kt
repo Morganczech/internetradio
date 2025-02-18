@@ -648,10 +648,60 @@ class RadioViewModel @Inject constructor(
 
     fun removeStation(radioId: String) {
         viewModelScope.launch {
-            radioRepository.removeStation(radioId)
-            // Pokud je stanice právě přehrávána, zastavíme přehrávání
-            if (currentRadio.value?.id == radioId) {
-                stopPlayback()
+            try {
+                // Zjistíme, zda je mazaná stanice právě přehrávána
+                val isCurrentStation = currentRadio.value?.id == radioId
+                
+                // Získáme seznam všech stanic před smazáním
+                val allStations = radioRepository.getAllRadios().first()
+                val currentIndex = allStations.indexOfFirst { it.id == radioId }
+                
+                // Najdeme další stanici před smazáním aktuální
+                val nextStation = if (allStations.isNotEmpty()) {
+                    val nextIndex = if (currentIndex < allStations.size - 1) currentIndex + 1 else 0
+                    if (nextIndex < allStations.size && nextIndex != currentIndex) {
+                        allStations[nextIndex]
+                    } else null
+                } else null
+                
+                // Smažeme stanici
+                radioRepository.removeStation(radioId)
+                
+                // Pokud byla mazaná stanice právě přehrávána
+                if (isCurrentStation) {
+                    // Zastavíme službu
+                    val stopIntent = Intent(context, RadioService::class.java).apply {
+                        action = RadioService.ACTION_STOP
+                    }
+                    context.startForegroundService(stopIntent)
+                    
+                    // Vyčistíme stav
+                    _currentRadio.value = null
+                    _currentMetadata.value = null
+                    _isPlaying.value = false
+                    
+                    // Pokud máme další stanici, spustíme ji
+                    nextStation?.let { station ->
+                        // Krátká pauza před spuštěním další stanice
+                        delay(1000)
+                        
+                        // Spustíme přehrávání další stanice přes službu
+                        val playIntent = Intent(context, RadioService::class.java).apply {
+                            action = RadioService.ACTION_PLAY
+                            putExtra(RadioService.EXTRA_RADIO_ID, station.id)
+                        }
+                        context.startForegroundService(playIntent)
+                        
+                        // Aktualizujeme stav ve ViewModelu
+                        _currentRadio.value = station
+                        _currentCategory.value = station.category
+                        _isPlaying.value = true
+                        
+                        Log.d("RadioViewModel", "Přepnuto na další stanici: ${station.name}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "Chyba při mazání stanice: ${e.message}", e)
             }
         }
     }
