@@ -79,8 +79,8 @@
     {
       "id": "frekvence1",
       "name": "FREKVENCE 1",
-      "streamUrl": "https://playerservices.streamtheworld.com/api/livestream-redirect/FREKVENCE1.mp3",
-      "alternativeUrls": ["https://ice.actve.net/fm-frekvence1-128"],
+      "streamUrl": "https://ice.actve.net/fm-frekvence1-128",
+      "alternativeUrls": ["https://playerservices.streamtheworld.com/api/livestream-redirect/FREKVENCE1.mp3"],
       "imageUrl": "https://www.frekvence1.cz/img/favicons/apple-touch-icon.png?v138",
       "description": "Rádio pro dobrou náladu",
       "homepage": "https://www.frekvence1.cz/",
