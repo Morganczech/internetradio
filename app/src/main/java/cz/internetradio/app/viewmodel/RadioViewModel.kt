@@ -651,18 +651,17 @@ class RadioViewModel @Inject constructor(
             try {
                 // Zjistíme, zda je mazaná stanice právě přehrávána
                 val isCurrentStation = currentRadio.value?.id == radioId
+                val currentCategory = currentRadio.value?.category
                 
-                // Získáme seznam všech stanic před smazáním
-                val allStations = radioRepository.getAllRadios().first()
-                val currentIndex = allStations.indexOfFirst { it.id == radioId }
+                // Získáme seznam stanic v aktuální kategorii před smazáním
+                val stationsInCategory = if (currentCategory != null) {
+                    radioRepository.getRadiosByCategory(currentCategory).first()
+                        .sortedBy { it.name.lowercase() }
+                } else {
+                    emptyList()
+                }
                 
-                // Najdeme další stanici před smazáním aktuální
-                val nextStation = if (allStations.isNotEmpty()) {
-                    val nextIndex = if (currentIndex < allStations.size - 1) currentIndex + 1 else 0
-                    if (nextIndex < allStations.size && nextIndex != currentIndex) {
-                        allStations[nextIndex]
-                    } else null
-                } else null
+                val currentIndex = stationsInCategory.indexOfFirst { it.id == radioId }
                 
                 // Smažeme stanici
                 radioRepository.removeStation(radioId)
@@ -680,24 +679,33 @@ class RadioViewModel @Inject constructor(
                     _currentMetadata.value = null
                     _isPlaying.value = false
                     
-                    // Pokud máme další stanici, spustíme ji
-                    nextStation?.let { station ->
+                    // Pokud máme více než jednu stanici v kategorii
+                    if (stationsInCategory.size > 1) {
+                        // Vybereme následující stanici nebo první v seznamu, pokud jsme byli na konci
+                        val nextStation = if (currentIndex < stationsInCategory.size - 1) {
+                            stationsInCategory[currentIndex + 1]
+                        } else {
+                            stationsInCategory[0]
+                        }
+                        
                         // Krátká pauza před spuštěním další stanice
                         delay(1000)
                         
                         // Spustíme přehrávání další stanice přes službu
                         val playIntent = Intent(context, RadioService::class.java).apply {
                             action = RadioService.ACTION_PLAY
-                            putExtra(RadioService.EXTRA_RADIO_ID, station.id)
+                            putExtra(RadioService.EXTRA_RADIO_ID, nextStation.id)
                         }
                         context.startForegroundService(playIntent)
                         
                         // Aktualizujeme stav ve ViewModelu
-                        _currentRadio.value = station
-                        _currentCategory.value = station.category
+                        _currentRadio.value = nextStation
+                        _currentCategory.value = nextStation.category
                         _isPlaying.value = true
                         
-                        Log.d("RadioViewModel", "Přepnuto na další stanici: ${station.name}")
+                        Log.d("RadioViewModel", "Přepnuto na ${if (currentIndex == stationsInCategory.size - 1) "první" else "další"} stanici v kategorii ${nextStation.category}: ${nextStation.name}")
+                    } else {
+                        Log.d("RadioViewModel", "Byla smazána poslední stanice v kategorii $currentCategory, přehrávání zastaveno")
                     }
                 }
             } catch (e: Exception) {
