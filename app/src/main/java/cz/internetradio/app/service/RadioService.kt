@@ -367,11 +367,11 @@ class RadioService : Service() {
                 
                 // Vytvoření metadat pro MediaSession
                 val metadataBuilder = MediaMetadataCompat.Builder()
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, radio.name)
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)  // Název skladby jako hlavní titulek
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist ?: "")
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, radio.name)
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, radio.name)
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, displayMetadata)
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)  // Název skladby pro zobrazení
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artist ?: "")  // Interpret pro zobrazení
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, radio.description)
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1)
                     .putString(MediaMetadataCompat.METADATA_KEY_GENRE, getString(radio.category.getTitleRes()))
