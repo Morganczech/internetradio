@@ -33,6 +33,11 @@
     <string name="nav_favorite_songs">Chansons favorites</string>
     <string name="nav_equalizer">Égaliseur</string>
     <string name="nav_back">Retour</string>
+    <string name="nav_popular_stations">Stations populaires</string>
+    <string name="nav_search_stations">Rechercher des stations</string>
+    <string name="nav_settings_desc">Paramètres</string>
+    <string name="nav_all">Tout</string>
+    <string name="nav_my_stations">Mes stations</string>
 
     <!-- Player -->
     <string name="player_play">Lecture</string>
@@ -85,6 +90,7 @@
     <string name="msg_station_removed">La station a été retirée des favoris</string>
     <string name="msg_settings_exported">Les paramètres ont été exportés</string>
     <string name="msg_settings_imported">Les paramètres ont été importés</string>
+    <string name="msg_song_saved_to_favorites">La chanson a été ajoutée aux favoris</string>
 
     <!-- Equalizer -->
     <string name="equalizer_title">Égaliseur</string>

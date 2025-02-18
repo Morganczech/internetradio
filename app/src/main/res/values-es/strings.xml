@@ -33,6 +33,11 @@
     <string name="nav_favorite_songs">Canciones favoritas</string>
     <string name="nav_equalizer">Ecualizador</string>
     <string name="nav_back">Atrás</string>
+    <string name="nav_popular_stations">Emisoras populares</string>
+    <string name="nav_search_stations">Buscar emisoras</string>
+    <string name="nav_settings_desc">Ajustes</string>
+    <string name="nav_all">Todo</string>
+    <string name="nav_my_stations">Mis emisoras</string>
 
     <!-- Player -->
     <string name="player_play">Reproducir</string>
@@ -103,6 +108,7 @@
     <string name="msg_station_removed">La emisora se eliminó de favoritos</string>
     <string name="msg_settings_exported">Los ajustes se exportaron correctamente</string>
     <string name="msg_settings_imported">Los ajustes se importaron correctamente</string>
+    <string name="msg_song_saved_to_favorites">La canción se ha añadido a favoritos</string>
 
     <!-- Equalizer -->
     <string name="equalizer_title">Ecualizador</string>

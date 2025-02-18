@@ -33,6 +33,11 @@
     <string name="nav_favorite_songs">Ulubione utwory</string>
     <string name="nav_equalizer">Korektor</string>
     <string name="nav_back">Wstecz</string>
+    <string name="nav_popular_stations">Popularne stacje</string>
+    <string name="nav_search_stations">Wyszukaj stacje</string>
+    <string name="nav_settings_desc">Ustawienia</string>
+    <string name="nav_all">Wszystko</string>
+    <string name="nav_my_stations">Moje stacje</string>
 
     <!-- Player -->
     <string name="player_play">Odtwórz</string>
@@ -94,6 +99,7 @@
     <!-- Messages -->
     <string name="msg_favorites_limit">Osiągnięto maksymalną liczbę ulubionych</string>
     <string name="msg_song_saved">Utwór został zapisany w ulubionych</string>
+    <string name="msg_song_saved_to_favorites">Utwór został zapisany do ulubionych</string>
     <string name="msg_station_added">Stacja została dodana do ulubionych</string>
     <string name="msg_station_removed">Stacja została usunięta z ulubionych</string>
     <string name="msg_settings_exported">Ustawienia zostały wyeksportowane</string>

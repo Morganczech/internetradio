@@ -33,6 +33,11 @@
     <string name="nav_favorite_songs">Obľúbené skladby</string>
     <string name="nav_equalizer">Ekvalizér</string>
     <string name="nav_back">Späť</string>
+    <string name="nav_popular_stations">Populárne stanice</string>
+    <string name="nav_search_stations">Vyhľadať stanice</string>
+    <string name="nav_settings_desc">Nastavenia</string>
+    <string name="nav_all">Všetko</string>
+    <string name="nav_my_stations">Moje stanice</string>
 
     <!-- Player -->
     <string name="player_play">Prehrať</string>
@@ -90,6 +95,7 @@
     <string name="msg_station_removed">Stanica bola odobratá z obľúbených</string>
     <string name="msg_settings_exported">Nastavenia boli úspešne exportované</string>
     <string name="msg_settings_imported">Nastavenia boli úspešne importované</string>
+    <string name="msg_song_saved_to_favorites">Skladba bola uložená do obľúbených</string>
 
     <!-- Equalizer -->
     <string name="equalizer_title">Ekvalizér</string>
