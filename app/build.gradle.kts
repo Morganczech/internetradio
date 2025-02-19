@@ -176,4 +176,5 @@ private class HiltOptions : CommandLineArgumentProvider {
     override fun asArguments(): Iterable<String> = listOf(
         "-Adagger.fastInit=enabled",
         "-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true"
-    ) 
+    )
+} 
