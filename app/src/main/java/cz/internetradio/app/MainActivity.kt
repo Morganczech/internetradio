@@ -463,18 +463,6 @@ fun PlayerControls(
                         baseColor2 = Color.White.copy(alpha = 0.5f),
                         isPlaying = isPlaying
                     )
-                    
-                    // Zobrazení bitrate ve vlnách
-                    displayedRadio.bitrate?.let { bitrate ->
-                        Text(
-                            text = "$bitrate kbps",
-                            style = MaterialTheme.typography.caption,
-                            color = Color.White.copy(alpha = 0.15f),
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(8.dp)
-                        )
-                    }
                 }
 
                 Column(
@@ -501,25 +489,49 @@ fun PlayerControls(
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
                             }
-                            Card(
+                            Row(
                                 modifier = Modifier
                                     .padding(top = 8.dp)
-                                    .height(32.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                backgroundColor = Color.White.copy(alpha = 0.1f),
-                                elevation = 0.dp
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                TextButton(
-                                    onClick = { onNavigateToCategory(displayedRadio.category) },
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = Color.White.copy(alpha = 0.7f)
-                                    ),
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                                Card(
+                                    modifier = Modifier.height(32.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    backgroundColor = Color.White.copy(alpha = 0.1f),
+                                    elevation = 0.dp
                                 ) {
-                                    Text(
-                                        text = stringResource(displayedRadio.category.getTitleRes()),
-                                        style = MaterialTheme.typography.caption
-                                    )
+                                    TextButton(
+                                        onClick = { onNavigateToCategory(displayedRadio.category) },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = Color.White.copy(alpha = 0.7f)
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(displayedRadio.category.getTitleRes()),
+                                            style = MaterialTheme.typography.caption
+                                        )
+                                    }
+                                }
+                                displayedRadio.bitrate?.let { bitrate ->
+                                    Card(
+                                        modifier = Modifier.height(32.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        backgroundColor = Color.White.copy(alpha = 0.1f),
+                                        elevation = 0.dp
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(horizontal = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "$bitrate kbps",
+                                                style = MaterialTheme.typography.caption,
+                                                color = Color.White.copy(alpha = 0.7f)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
