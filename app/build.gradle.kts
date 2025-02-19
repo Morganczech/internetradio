@@ -27,6 +27,15 @@ android {
             arg("room.incremental", "true")
             arg("room.expandProjection", "true")
         }
+
+        // Potlačení varování o nerozpoznaných možnostech procesoru
+        javaCompileOptions {
+            annotationProcessorOptions {
+                compilerArgumentProviders(
+                    HiltOptions()
+                )
+            }
+        }
     }
 
     buildTypes {
@@ -160,4 +169,11 @@ dependencies {
     // Accompanist Pager
     implementation("com.google.accompanist:accompanist-pager:0.30.1")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.30.1")
-} 
+}
+
+// Přidání třídy pro Hilt možnosti
+private class HiltOptions : CommandLineArgumentProvider {
+    override fun asArguments(): Iterable<String> = listOf(
+        "-Adagger.fastInit=enabled",
+        "-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true"
+    ) 

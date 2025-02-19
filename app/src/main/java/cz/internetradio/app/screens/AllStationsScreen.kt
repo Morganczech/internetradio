@@ -210,7 +210,7 @@ fun AllStationsScreen(
             ) {
                 items(categories) { category ->
                     CategoryChip(
-                        text = stringResource(category.getTitleRes()),
+                        category = category,
                         isSelected = selectedCategory == category,
                         onClick = {
                             coroutineScope.launch {
@@ -352,16 +352,26 @@ fun AllStationsScreen(
 
 @Composable
 fun CategoryChip(
-    text: String,
+    category: RadioCategory,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    // Definice barev pro pozadí
+    val backgroundColor = if (isSelected) {
+        when (category) {
+            // Pro obecné kategorie použijeme výchozí primární barvu
+            RadioCategory.VSE,
+            RadioCategory.VLASTNI -> MaterialTheme.colors.primary
+            else -> category.startColor
+        }
+    } else Color.Transparent
+
     Card(
         modifier = Modifier
             .height(32.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = if (isSelected) MaterialTheme.colors.primary else Color.Transparent,
+        backgroundColor = backgroundColor,
         border = if (!isSelected) ButtonDefaults.outlinedBorder else null,
         elevation = 0.dp
     ) {
@@ -370,7 +380,7 @@ fun CategoryChip(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            if (text == stringResource(R.string.category_favorites)) {
+            if (category == RadioCategory.VLASTNI) {
                 Icon(
                     imageVector = Icons.Default.Favorite,
                     contentDescription = null,
@@ -379,7 +389,7 @@ fun CategoryChip(
                 )
             }
             Text(
-                text = text,
+                text = stringResource(category.getTitleRes()),
                 style = MaterialTheme.typography.body2.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                 ),

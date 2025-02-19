@@ -71,6 +71,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.core.*
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.isSystemInDarkTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -120,7 +121,24 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(
-                colors = darkColors(),
+                colors = when {
+                    isSystemInDarkTheme() -> darkColors(
+                        primary = Color(0xFF9C27B0),
+                        primaryVariant = Color(0xFF7B1FA2),
+                        secondary = Color(0xFFE040FB),
+                        background = Color(0xFF121212),
+                        surface = Color(0xFF1E1E1E),
+                        error = Color(0xFFCF6679)
+                    )
+                    else -> lightColors(
+                        primary = Color(0xFF9C27B0),
+                        primaryVariant = Color(0xFF7B1FA2),
+                        secondary = Color(0xFFE040FB),
+                        background = Color.White,
+                        surface = Color(0xFFF5F5F5),
+                        error = Color(0xFFB00020)
+                    )
+                },
                 content = {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
