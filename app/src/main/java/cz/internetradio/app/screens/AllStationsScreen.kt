@@ -82,8 +82,26 @@ fun AllStationsScreen(
     
     LaunchedEffect(pagerState.currentPage) {
         selectedCategory = categories[pagerState.currentPage]
-        // Scrollování LazyRow na vybranou kategorii
-        lazyRowState.animateScrollToItem(pagerState.currentPage)
+    }
+
+    // Sledování offsetu pro plynulý posun kategorií
+    LaunchedEffect(pagerState.currentPage, pagerState.currentPageOffset) {
+        // Vypočítáme cílový index pro scrollování
+        val currentIndex = pagerState.currentPage
+        val targetIndex = when {
+            pagerState.currentPageOffset > 0 -> currentIndex + 1
+            pagerState.currentPageOffset < 0 -> currentIndex - 1
+            else -> currentIndex
+        }
+        
+        // Plynulý posun na cílovou pozici
+        if (targetIndex in categories.indices) {
+            val offset = pagerState.currentPageOffset
+            lazyRowState.scrollToItem(
+                index = currentIndex,
+                scrollOffset = (offset * lazyRowState.layoutInfo.viewportEndOffset).toInt()
+            )
+        }
     }
 
     Column(
