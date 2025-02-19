@@ -9,6 +9,11 @@ enum class RadioCategory(
     val startColor: Color,
     val endColor: Color
 ) {
+    VSE(
+        R.string.category_all,
+        Color(0xFF2196F3),
+        Color(0xFF1976D2)
+    ),
     MISTNI(
         R.string.category_local,
         Color(0xFF4CAF50),

@@ -59,10 +59,12 @@ fun AllStationsScreen(
     // Seznam všech kategorií v požadovaném pořadí
     val categories = remember {
         listOf(
+            RadioCategory.VSE,
             RadioCategory.VLASTNI,
             RadioCategory.MISTNI,
             RadioCategory.OSTATNI
         ) + RadioCategory.values().filter { 
+            it != RadioCategory.VSE &&
             it != RadioCategory.VLASTNI && 
             it != RadioCategory.MISTNI &&
             it != RadioCategory.OSTATNI
@@ -200,16 +202,30 @@ fun AllStationsScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val filteredRadios = allRadios
-                    .filter { radio ->
+                val filteredRadios = if (searchQuery.isEmpty()) {
+                    allRadios.filter { radio ->
                         when {
+                            category == RadioCategory.VSE -> true
                             category == RadioCategory.VLASTNI -> radio.isFavorite
-                            category == RadioCategory.OSTATNI -> true
+                            category == RadioCategory.OSTATNI -> {
+                                // Stanice, které nejsou v žádné specifické kategorii
+                                val specificCategories = RadioCategory.values().filter { 
+                                    it != RadioCategory.VSE && 
+                                    it != RadioCategory.VLASTNI && 
+                                    it != RadioCategory.OSTATNI 
+                                }
+                                !specificCategories.contains(radio.category)
+                            }
                             else -> radio.category == category
-                        } &&
-                        (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
+                        }
                     }
-                    .sortedBy { it.name.lowercase() }
+                } else {
+                    // Při vyhledávání prohledáváme všechny kategorie
+                    allRadios.filter { radio ->
+                        radio.name.contains(searchQuery, ignoreCase = true)
+                    }
+                }
+                .sortedBy { it.name.lowercase() }
 
                 if (filteredRadios.isEmpty()) {
                     item {

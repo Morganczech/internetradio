@@ -26,6 +26,7 @@
     <string name="category_religious">Náboženské</string>
     <string name="category_news">Zpravodajské</string>
     <string name="category_other">Ostatní</string>
+    <string name="category_all">Všechny stanice</string>
 
     <!-- Navigation -->
     <string name="nav_search">Vyhledat</string>
