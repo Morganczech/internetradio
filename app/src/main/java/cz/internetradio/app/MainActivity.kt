@@ -67,6 +67,7 @@ import java.util.Locale
 import android.content.res.Configuration
 import cz.internetradio.app.model.Language
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -429,278 +430,287 @@ fun PlayerControls(
     var showTimerDropdown by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
+    val songSavedMessage by viewModel.showSongSavedMessage.collectAsState()
+    val scope = rememberCoroutineScope()
 
     // Použijeme aktuální rádio ze stavu místo parametru
     val displayedRadio = currentRadio ?: radio
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clickable { isExpanded = !isExpanded },
-        elevation = 8.dp
-    ) {
-        Box(
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Card(
             modifier = Modifier
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(displayedRadio.startColor, displayedRadio.endColor)
-                    )
-                )
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable { isExpanded = !isExpanded },
+            elevation = 8.dp
         ) {
-            AudioVisualizer(
+            Box(
                 modifier = Modifier
-                    .matchParentSize()
-                    .alpha(0.2f),
-                baseColor1 = Color.White,
-                baseColor2 = Color.White.copy(alpha = 0.5f),
-                isPlaying = isPlaying
-            )
-
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Základní informace
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = displayedRadio.name,
-                            style = MaterialTheme.typography.h6,
-                            color = Color.White
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(displayedRadio.startColor, displayedRadio.endColor)
                         )
-                        // Zobrazení kvality streamu
-                        displayedRadio.bitrate?.let { bitrate ->
-                            Text(
-                                text = "$bitrate kbps",
-                                style = MaterialTheme.typography.caption,
-                                color = Color.White.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(top = 2.dp)
-                            )
-                        }
-                        currentMetadata?.let { metadata ->
-                            Text(
-                                text = metadata,
-                                style = MaterialTheme.typography.body2,
-                                color = Color.White.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
-                        }
-                    }
+                    )
+            ) {
+                AudioVisualizer(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .alpha(0.2f),
+                    baseColor1 = Color.White,
+                    baseColor2 = Color.White.copy(alpha = 0.5f),
+                    isPlaying = isPlaying
+                )
+
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Základní informace
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!isExpanded) {
-                            IconButton(onClick = { viewModel.togglePlayPause() }) {
-                                Icon(
-                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
-                                    tint = Color.White
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = displayedRadio.name,
+                                style = MaterialTheme.typography.h6,
+                                color = Color.White
+                            )
+                            // Zobrazení kvality streamu
+                            displayedRadio.bitrate?.let { bitrate ->
+                                Text(
+                                    text = "$bitrate kbps",
+                                    style = MaterialTheme.typography.caption,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 2.dp)
+                                )
+                            }
+                            currentMetadata?.let { metadata ->
+                                Text(
+                                    text = metadata,
+                                    style = MaterialTheme.typography.body2,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 4.dp)
                                 )
                             }
                         }
-                        IconButton(onClick = { isExpanded = !isExpanded }) {
-                            Icon(
-                                imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
-                                tint = Color.White
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!isExpanded) {
+                                IconButton(onClick = { viewModel.togglePlayPause() }) {
+                                    Icon(
+                                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                        contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                            IconButton(onClick = { isExpanded = !isExpanded }) {
+                                Icon(
+                                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
-                }
 
-                // Rozšířená verze
-                if (isExpanded) {
-                    Column(
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        // Ovládání hlasitosti
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    // Rozšířená verze
+                    if (isExpanded) {
+                        Column(
+                            modifier = Modifier.padding(top = 16.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.VolumeDown,
-                                contentDescription = "Snížit hlasitost",
-                                tint = Color.White
-                            )
-                            
-                            Slider(
-                                value = volume,
-                                onValueChange = { viewModel.setVolume(it) },
+                            // Ovládání hlasitosti
+                            Row(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 8.dp),
-                                valueRange = 0f..1f,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = Color.White,
-                                    activeTrackColor = Color.White,
-                                    inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.VolumeDown,
+                                    contentDescription = "Snížit hlasitost",
+                                    tint = Color.White
                                 )
-                            )
+                                
+                                Slider(
+                                    value = volume,
+                                    onValueChange = { viewModel.setVolume(it) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = 8.dp),
+                                    valueRange = 0f..1f,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = Color.White,
+                                        activeTrackColor = Color.White,
+                                        inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                                    )
+                                )
+                                
+                                Icon(
+                                    imageVector = Icons.Default.VolumeUp,
+                                    contentDescription = "Zvýšit hlasitost",
+                                    tint = Color.White
+                                )
+                            }
                             
-                            Icon(
-                                imageVector = Icons.Default.VolumeUp,
-                                contentDescription = "Zvýšit hlasitost",
-                                tint = Color.White
-                            )
-                        }
-                        
-                        // Ovládací tlačítka přehrávání
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(
-                                onClick = { viewModel.playPreviousStation() }
+                            // Ovládací tlačítka přehrávání
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.SkipPrevious,
-                                    contentDescription = "Předchozí stanice",
-                                    tint = Color.White
-                                )
-                            }
-
-                            IconButton(
-                                onClick = { viewModel.togglePlayPause() }
-                            ) {
-                                Icon(
-                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
-                                    tint = Color.White
-                                )
-                            }
-
-                            IconButton(
-                                onClick = { viewModel.playNextStation() }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SkipNext,
-                                    contentDescription = "Další stanice",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-
-                        // Řádek s ikonami pro správu skladeb a časovač
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            // Tlačítko pro přidání/odebrání z oblíbených
-                            IconButton(
-                                onClick = { viewModel.toggleFavorite(displayedRadio) }
-                            ) {
-                                Icon(
-                                    imageVector = if (favoriteRadios.any { it.id == displayedRadio.id }) 
-                                        Icons.Default.Favorite 
-                                    else 
-                                        Icons.Default.FavoriteBorder,
-                                    contentDescription = if (favoriteRadios.any { it.id == displayedRadio.id })
-                                        "Odebrat z oblíbených"
-                                    else
-                                        "Přidat do oblíbených",
-                                    tint = Color.White
-                                )
-                            }
-
-                            if (currentMetadata != null) {
                                 IconButton(
-                                    onClick = { viewModel.saveSongToFavorites() }
+                                    onClick = { viewModel.playPreviousStation() }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.PlaylistAdd,
-                                        contentDescription = "Uložit skladbu",
+                                        imageVector = Icons.Default.SkipPrevious,
+                                        contentDescription = "Předchozí stanice",
+                                        tint = Color.White
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { viewModel.togglePlayPause() }
+                                ) {
+                                    Icon(
+                                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                        contentDescription = if (isPlaying) "Pozastavit" else "Přehrát",
+                                        tint = Color.White
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { viewModel.playNextStation() }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.SkipNext,
+                                        contentDescription = "Další stanice",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+
+                            // Řádek s ikonami pro správu skladeb a časovač
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                // Tlačítko pro přidání/odebrání z oblíbených
+                                IconButton(
+                                    onClick = { viewModel.toggleFavorite(displayedRadio) }
+                                ) {
+                                    Icon(
+                                        imageVector = if (favoriteRadios.any { it.id == displayedRadio.id }) 
+                                            Icons.Default.Favorite 
+                                        else 
+                                            Icons.Default.FavoriteBorder,
+                                        contentDescription = if (favoriteRadios.any { it.id == displayedRadio.id })
+                                            "Odebrat z oblíbených"
+                                        else
+                                            "Přidat do oblíbených",
+                                        tint = Color.White
+                                    )
+                                }
+
+                                if (currentMetadata != null) {
+                                    IconButton(
+                                        onClick = { viewModel.saveSongToFavorites() }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlaylistAdd,
+                                            contentDescription = "Uložit skladbu",
+                                            tint = Color.White
+                                        )
+                                    }
+                                }
+                                
+                                IconButton(
+                                    onClick = onNavigateToFavoriteSongs
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.QueueMusic,
+                                        contentDescription = "Zobrazit oblíbené skladby",
+                                        tint = Color.White
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { showTimerDropdown = true }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Timer,
+                                        contentDescription = "Časovač vypnutí",
                                         tint = Color.White
                                     )
                                 }
                             }
                             
-                            IconButton(
-                                onClick = onNavigateToFavoriteSongs
+                            DropdownMenu(
+                                expanded = showTimerDropdown,
+                                onDismissRequest = { showTimerDropdown = false }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.QueueMusic,
-                                    contentDescription = "Zobrazit oblíbené skladby",
-                                    tint = Color.White
-                                )
-                            }
-
-                            IconButton(
-                                onClick = { showTimerDropdown = true }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = "Časovač vypnutí",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                        
-                        DropdownMenu(
-                            expanded = showTimerDropdown,
-                            onDismissRequest = { showTimerDropdown = false }
-                        ) {
-                            DropdownMenuItem(onClick = {
-                                viewModel.setSleepTimer(0)
-                                showTimerDropdown = false
-                            }) {
-                                Text(stringResource(R.string.sleep_timer_off))
-                            }
-                            (5..60 step 5).forEach { minutes ->
                                 DropdownMenuItem(onClick = {
-                                    viewModel.setSleepTimer(minutes)
+                                    viewModel.setSleepTimer(0)
                                     showTimerDropdown = false
                                 }) {
-                                    Text(stringResource(R.string.sleep_timer_minutes, minutes))
+                                    Text(stringResource(R.string.sleep_timer_off))
+                                }
+                                (5..60 step 5).forEach { minutes ->
+                                    DropdownMenuItem(onClick = {
+                                        viewModel.setSleepTimer(minutes)
+                                        showTimerDropdown = false
+                                    }) {
+                                        Text(stringResource(R.string.sleep_timer_minutes, minutes))
+                                    }
                                 }
                             }
-                        }
-
-                        // Zobrazení zprávy o uložení skladby
-                        val songSavedMessage by viewModel.showSongSavedMessage.collectAsState()
-                        val scope = rememberCoroutineScope()
-                        
-                        songSavedMessage?.let { message ->
-                            Text(
-                                text = message,
-                                style = MaterialTheme.typography.caption,
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(top = 4.dp)
-                                    .align(Alignment.CenterHorizontally)
-                            )
-                            LaunchedEffect(message) {
-                                scope.launch {
-                                    delay(2000)
-                                    viewModel.dismissSongSavedMessage()
-                                }
-                            }
-                        }
-
-                        // Zobrazení zbývajícího času časovače
-                        val minutes = remainingMinutes ?: 0
-                        val seconds = remainingSeconds ?: 0
-                        if (minutes > 0 || seconds > 0) {
-                            Text(
-                                text = stringResource(R.string.sleep_timer_remaining, minutes, String.format("%02d", seconds)),
-                                style = MaterialTheme.typography.caption,
-                                modifier = Modifier.padding(top = 4.dp),
-                                color = Color.White
-                            )
                         }
                     }
+
+                    // Zobrazení zbývajícího času časovače
+                    val minutes = remainingMinutes ?: 0
+                    val seconds = remainingSeconds ?: 0
+                    if (minutes > 0 || seconds > 0) {
+                        Text(
+                            text = stringResource(R.string.sleep_timer_remaining, minutes, String.format("%02d", seconds)),
+                            style = MaterialTheme.typography.caption,
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+
+        // Překryvná zpráva o uložení skladby
+        songSavedMessage?.let { message ->
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.caption,
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+            LaunchedEffect(message) {
+                scope.launch {
+                    delay(2000)
+                    viewModel.dismissSongSavedMessage()
                 }
             }
         }

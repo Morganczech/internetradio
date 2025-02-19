@@ -731,6 +731,13 @@ class RadioViewModel @Inject constructor(
                 else -> null to currentMetadata
             }
 
+            // Kontrola, zda skladba již existuje
+            val exists = favoriteSongRepository.songExists(title, artist, currentRadio.id)
+            if (exists) {
+                _showSongSavedMessage.value = "Skladba je již v oblíbených"
+                return@launch
+            }
+
             val favoriteSong = FavoriteSong(
                 title = title,
                 artist = artist,
