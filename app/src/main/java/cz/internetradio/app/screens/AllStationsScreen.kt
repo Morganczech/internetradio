@@ -20,6 +20,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,8 +32,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.res.stringResource
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalPagerApi::class)
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
@@ -47,9 +52,37 @@ fun AllStationsScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
-    var selectedCategory by rememberSaveable { mutableStateOf<RadioCategory>(RadioCategory.MISTNI) }
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // Seznam všech kategorií v požadovaném pořadí
+    val categories = remember {
+        listOf(
+            RadioCategory.VLASTNI,
+            RadioCategory.MISTNI,
+            RadioCategory.OSTATNI
+        ) + RadioCategory.values().filter { 
+            it != RadioCategory.VLASTNI && 
+            it != RadioCategory.MISTNI &&
+            it != RadioCategory.OSTATNI
+        }
+    }
+
+    // Stav pro HorizontalPager
+    val pagerState = rememberPagerState()
+    
+    // Stav pro LazyRow s kategoriemi
+    val lazyRowState = rememberLazyListState()
+
+    // Synchronizace selectedCategory s pagerState
+    var selectedCategory by rememberSaveable { mutableStateOf(categories[0]) }
+    
+    LaunchedEffect(pagerState.currentPage) {
+        selectedCategory = categories[pagerState.currentPage]
+        // Scrollování LazyRow na vybranou kategorii
+        lazyRowState.animateScrollToItem(pagerState.currentPage)
+    }
 
     Column(
         modifier = Modifier
@@ -130,109 +163,94 @@ fun AllStationsScreen(
 
         // Kategorie
         LazyRow(
+            state = lazyRowState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-            // Prioritní kategorie
-            item {
-                CategoryChip(
-                    text = stringResource(RadioCategory.VLASTNI.getTitleRes()),
-                    isSelected = selectedCategory == RadioCategory.VLASTNI,
-                    onClick = { selectedCategory = RadioCategory.VLASTNI }
-                )
-            }
-            item {
-                CategoryChip(
-                    text = stringResource(RadioCategory.MISTNI.getTitleRes()),
-                    isSelected = selectedCategory == RadioCategory.MISTNI,
-                    onClick = { selectedCategory = RadioCategory.MISTNI }
-                )
-            }
-            item {
-                CategoryChip(
-                    text = "Vše",
-                    isSelected = selectedCategory == RadioCategory.OSTATNI,
-                    onClick = { selectedCategory = RadioCategory.OSTATNI }
-                )
-            }
-            // Ostatní kategorie (kromě již zobrazených a OSTATNI)
-            items(RadioCategory.values().filter { 
-                it != RadioCategory.VLASTNI && 
-                it != RadioCategory.MISTNI &&
-                it != RadioCategory.OSTATNI
-            }) { category ->
+            items(categories) { category ->
                 CategoryChip(
                     text = stringResource(category.getTitleRes()),
                     isSelected = selectedCategory == category,
-                    onClick = { selectedCategory = category }
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(categories.indexOf(category))
+                        }
+                    }
                 )
             }
         }
 
-        // Seznam stanic
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(
-                top = 8.dp,
-                bottom = if (currentRadio != null) 0.dp else 16.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val filteredRadios = allRadios
-                .filter { radio ->
-                    when {
-                        selectedCategory == RadioCategory.VLASTNI -> radio.isFavorite
-                        selectedCategory == RadioCategory.OSTATNI -> true
-                        else -> radio.category == selectedCategory
-                    } &&
-                    (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
-                }
-                .sortedBy { it.name.lowercase() }
+        // HorizontalPager pro přepínání mezi kategoriemi
+        HorizontalPager(
+            count = categories.size,
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) { page ->
+            val category = categories[page]
+            
+            // Seznam stanic pro aktuální kategorii
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = 8.dp,
+                    bottom = if (currentRadio != null) 0.dp else 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val filteredRadios = allRadios
+                    .filter { radio ->
+                        when {
+                            category == RadioCategory.VLASTNI -> radio.isFavorite
+                            category == RadioCategory.OSTATNI -> true
+                            else -> radio.category == category
+                        } &&
+                        (searchQuery.isEmpty() || radio.name.contains(searchQuery, ignoreCase = true))
+                    }
+                    .sortedBy { it.name.lowercase() }
 
-            if (filteredRadios.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                if (filteredRadios.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.MusicNote,
-                                contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.6f),
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Text(
-                                text = if (searchQuery.isEmpty()) 
-                                    "Žádné stanice v této kategorii" 
-                                else 
-                                    "Žádné stanice nenalezeny",
-                                style = MaterialTheme.typography.body1,
-                                color = Color.White.copy(alpha = 0.6f)
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Text(
+                                    text = if (searchQuery.isEmpty()) 
+                                        "Žádné stanice v této kategorii" 
+                                    else 
+                                        "Žádné stanice nenalezeny",
+                                    style = MaterialTheme.typography.body1,
+                                    color = Color.White.copy(alpha = 0.6f)
+                                )
+                            }
                         }
                     }
-                }
-            } else {
-                items(filteredRadios) { radio ->
-                    RadioItem(
-                        radio = radio,
-                        isSelected = radio.id == currentRadio?.id,
-                        onRadioClick = { viewModel.playRadio(radio) },
-                        onFavoriteClick = { viewModel.toggleFavorite(radio) },
-                        onEditClick = { onNavigateToEdit(radio.id) },
-                        onDeleteClick = { viewModel.removeStation(radio.id) }
-                    )
+                } else {
+                    items(filteredRadios) { radio ->
+                        RadioItem(
+                            radio = radio,
+                            isSelected = radio.id == currentRadio?.id,
+                            onRadioClick = { viewModel.playRadio(radio) },
+                            onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                            onEditClick = { onNavigateToEdit(radio.id) },
+                            onDeleteClick = { viewModel.removeStation(radio.id) }
+                        )
+                    }
                 }
             }
         }
