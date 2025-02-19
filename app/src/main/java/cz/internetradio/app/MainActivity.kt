@@ -598,6 +598,23 @@ fun PlayerControls(
                                 .padding(top = 8.dp),
                             horizontalArrangement = Arrangement.End
                         ) {
+                            // Tlačítko pro přidání/odebrání z oblíbených
+                            IconButton(
+                                onClick = { viewModel.toggleFavorite(displayedRadio) }
+                            ) {
+                                Icon(
+                                    imageVector = if (favoriteRadios.any { it.id == displayedRadio.id }) 
+                                        Icons.Default.Favorite 
+                                    else 
+                                        Icons.Default.FavoriteBorder,
+                                    contentDescription = if (favoriteRadios.any { it.id == displayedRadio.id })
+                                        "Odebrat z oblíbených"
+                                    else
+                                        "Přidat do oblíbených",
+                                    tint = Color.White
+                                )
+                            }
+
                             if (currentMetadata != null) {
                                 IconButton(
                                     onClick = { viewModel.saveSongToFavorites() }
