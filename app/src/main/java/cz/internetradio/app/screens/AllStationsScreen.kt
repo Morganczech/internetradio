@@ -36,6 +36,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import cz.internetradio.app.R
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalPagerApi::class)
 @Composable
@@ -59,16 +60,15 @@ fun AllStationsScreen(
     // Seznam všech kategorií v požadovaném pořadí
     val categories = remember {
         listOf(
-            RadioCategory.VSE,
             RadioCategory.VLASTNI,
             RadioCategory.MISTNI,
-            RadioCategory.OSTATNI
+            RadioCategory.VSE
         ) + RadioCategory.values().filter { 
             it != RadioCategory.VSE &&
             it != RadioCategory.VLASTNI && 
             it != RadioCategory.MISTNI &&
             it != RadioCategory.OSTATNI
-        }
+        } + listOf(RadioCategory.OSTATNI)
     }
 
     // Stav pro HorizontalPager
@@ -164,24 +164,28 @@ fun AllStationsScreen(
         )
 
         // Kategorie
-        LazyRow(
-            state = lazyRowState,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
+                .padding(top = 8.dp, bottom = 16.dp)
         ) {
-            items(categories) { category ->
-                CategoryChip(
-                    text = stringResource(category.getTitleRes()),
-                    isSelected = selectedCategory == category,
-                    onClick = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(categories.indexOf(category))
+            LazyRow(
+                state = lazyRowState,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(categories) { category ->
+                    CategoryChip(
+                        text = stringResource(category.getTitleRes()),
+                        isSelected = selectedCategory == category,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(categories.indexOf(category))
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
@@ -197,7 +201,6 @@ fun AllStationsScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    top = 8.dp,
                     bottom = if (currentRadio != null) 0.dp else 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -329,10 +332,19 @@ fun CategoryChip(
         border = if (!isSelected) ButtonDefaults.outlinedBorder else null,
         elevation = 0.dp
     ) {
-        Box(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            if (text == stringResource(R.string.category_favorites)) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
+                )
+            }
             Text(
                 text = text,
                 style = MaterialTheme.typography.body2.copy(
