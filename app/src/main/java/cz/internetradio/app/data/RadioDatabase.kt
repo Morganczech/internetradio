@@ -13,7 +13,7 @@ import cz.internetradio.app.data.dao.FavoriteSongDao
 
 @Database(
     entities = [RadioEntity::class, FavoriteSong::class], 
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @Singleton
@@ -85,6 +85,28 @@ abstract class RadioDatabase : RoomDatabase() {
 
                 // Přejmenování nové tabulky
                 database.execSQL("ALTER TABLE radios_new RENAME TO radios")
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Přidání sloupce orderIndex s výchozí hodnotou 0
+                database.execSQL("ALTER TABLE radios ADD COLUMN orderIndex INTEGER NOT NULL DEFAULT 0")
+                
+                // Nastavení počátečního pořadí podle abecedy pro každou kategorii
+                database.execSQL("""
+                    WITH RankedRadios AS (
+                        SELECT id, category,
+                        ROW_NUMBER() OVER (PARTITION BY category ORDER BY name) - 1 as new_order
+                        FROM radios
+                    )
+                    UPDATE radios
+                    SET orderIndex = (
+                        SELECT new_order
+                        FROM RankedRadios
+                        WHERE RankedRadios.id = radios.id
+                    )
+                """)
             }
         }
     }

@@ -39,8 +39,23 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import cz.internetradio.app.R
 import cz.internetradio.app.ui.theme.Gradients
+import androidx.compose.foundation.gestures.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.*
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.composed
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import cz.internetradio.app.components.DraggableRadioItem
+import android.util.Log
+import kotlin.math.roundToInt
+import cz.internetradio.app.model.Radio
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.foundation.lazy.LazyItemScope
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun AllStationsScreen(
     viewModel: RadioViewModel,
@@ -85,6 +100,49 @@ fun AllStationsScreen(
     LaunchedEffect(pagerState.currentPage) {
         selectedCategory = categories[pagerState.currentPage]
     }
+
+    // Implementace drag & drop s mutableStateListOf
+    val radiosList = remember {
+        mutableStateListOf<Radio>()
+    }
+
+    LaunchedEffect(allRadios, selectedCategory, searchQuery) {
+        radiosList.clear()
+        radiosList.addAll(
+            if (searchQuery.isEmpty()) {
+                allRadios.filter { radio ->
+                    when {
+                        selectedCategory == RadioCategory.VSE -> true
+                        selectedCategory == RadioCategory.VLASTNI -> radio.isFavorite
+                        selectedCategory == RadioCategory.OSTATNI -> {
+                            val specificCategories = RadioCategory.values().filter { 
+                                it != RadioCategory.VSE && 
+                                it != RadioCategory.VLASTNI && 
+                                it != RadioCategory.OSTATNI 
+                            }
+                            !specificCategories.contains(radio.category)
+                        }
+                        else -> radio.category == selectedCategory
+                    }
+                }
+            } else {
+                allRadios.filter { radio ->
+                    radio.name.contains(searchQuery, ignoreCase = true)
+                }
+            }.sortedBy { it.name.lowercase() }
+        )
+    }
+
+    val dragDropState = rememberDragDropState(
+        onMove = { fromIndex, toIndex ->
+            if (fromIndex != toIndex && fromIndex in radiosList.indices && toIndex in radiosList.indices) {
+                val item = radiosList.removeAt(fromIndex)
+                radiosList.add(toIndex, item)
+                // Aktualizujeme pořadí v ViewModel
+                viewModel.updateStationOrder(selectedCategory, fromIndex, toIndex)
+            }
+        }
+    )
 
     // Sledování offsetu pro plynulý posun kategorií
     LaunchedEffect(pagerState.currentPage, pagerState.currentPageOffset) {
@@ -234,38 +292,16 @@ fun AllStationsScreen(
             
             // Seznam stanic pro aktuální kategorii
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
                 contentPadding = PaddingValues(
+                    top = 8.dp,
                     bottom = if (currentRadio != null) 0.dp else 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val filteredRadios = if (searchQuery.isEmpty()) {
-                    allRadios.filter { radio ->
-                        when {
-                            category == RadioCategory.VSE -> true
-                            category == RadioCategory.VLASTNI -> radio.isFavorite
-                            category == RadioCategory.OSTATNI -> {
-                                // Stanice, které nejsou v žádné specifické kategorii
-                                val specificCategories = RadioCategory.values().filter { 
-                                    it != RadioCategory.VSE && 
-                                    it != RadioCategory.VLASTNI && 
-                                    it != RadioCategory.OSTATNI 
-                                }
-                                !specificCategories.contains(radio.category)
-                            }
-                            else -> radio.category == category
-                        }
-                    }
-                } else {
-                    // Při vyhledávání prohledáváme všechny kategorie
-                    allRadios.filter { radio ->
-                        radio.name.contains(searchQuery, ignoreCase = true)
-                    }
-                }
-                .sortedBy { it.name.lowercase() }
-
-                if (filteredRadios.isEmpty()) {
+                if (radiosList.isEmpty()) {
                     item {
                         Box(
                             modifier = Modifier
@@ -295,19 +331,29 @@ fun AllStationsScreen(
                         }
                     }
                 } else {
-                    items(filteredRadios) { radio ->
-                        RadioItem(
-                            radio = radio,
-                            isSelected = radio.id == currentRadio?.id,
-                            onRadioClick = { viewModel.playRadio(radio) },
-                            onFavoriteClick = { viewModel.toggleFavorite(radio) },
-                            onEditClick = { onNavigateToEdit(radio.id) },
-                            onDeleteClick = { viewModel.removeStation(radio.id) }
-                        )
+                    itemsIndexed(
+                        items = radiosList,
+                        key = { _, radio -> radio.id }
+                    ) { index, radio ->
+                        DraggableRadioItem(
+                            dragDropState = dragDropState,
+                            index = index,
+                            listSize = radiosList.size,
+                            itemModifier = Modifier.animateItemPlacement()
+                        ) { isDragging ->
+                            RadioItem(
+                                radio = radio,
+                                isSelected = radio.id == currentRadio?.id,
+                                onRadioClick = { viewModel.playRadio(radio) },
+                                onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                                onEditClick = { onNavigateToEdit(radio.id) },
+                                onDeleteClick = { viewModel.removeStation(radio.id) }
+                            )
+                        }
                     }
 
                     // Přidání tlačítka "Zobrazit další" pro kategorii MISTNI
-                    if (category == RadioCategory.MISTNI && !searchQuery.isNotEmpty()) {
+                    if (selectedCategory == RadioCategory.MISTNI && searchQuery.isEmpty()) {
                         item {
                             Button(
                                 onClick = { viewModel.loadMoreStations() },
@@ -422,6 +468,97 @@ fun CategoryChip(
                     color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun rememberDragDropState(
+    onMove: (Int, Int) -> Unit
+): DragDropState {
+    val state = remember {
+        DragDropState(
+            onMove = onMove
+        )
+    }
+    return state
+}
+
+class DragDropState(
+    val onMove: (Int, Int) -> Unit
+) {
+    var draggingItemIndex by mutableStateOf<Int?>(null)
+        private set
+    var draggedOverItemIndex by mutableStateOf<Int?>(null)
+        private set
+    var draggedOffset by mutableStateOf(0f)
+        private set
+    private var lastTargetIndex: Int? = null
+    private val itemHeight = 150f // Výška karty v pixelech
+
+    private fun calculateTargetIndex(
+        draggedIndex: Int,
+        draggedOffset: Float,
+        listSize: Int
+    ): Int? {
+        // Výpočet relativní pozice vzhledem k výšce karty
+        val relativePosition = draggedOffset / itemHeight
+        
+        // Určení směru pohybu
+        val direction = when {
+            relativePosition > 0.3f -> 1  // Pohyb dolů
+            relativePosition < -0.3f -> -1 // Pohyb nahoru
+            else -> 0 // Žádný pohyb
+        }
+        
+        // Výpočet nového indexu s omezením na jednu pozici
+        return when {
+            direction != 0 -> (draggedIndex + direction).coerceIn(0, listSize - 1)
+            else -> null
+        }
+    }
+
+    fun onDragStart(index: Int) {
+        Log.d("DragDropState", "Starting drag for index $index")
+        draggingItemIndex = index
+        draggedOverItemIndex = null
+        draggedOffset = 0f
+        lastTargetIndex = null
+    }
+
+    fun onDragEnd() {
+        Log.d("DragDropState", "Ending drag")
+        // Provedeme finální přesun pouze pokud máme platný cílový index
+        if (lastTargetIndex != null && draggingItemIndex != null && lastTargetIndex != draggingItemIndex) {
+            onMove(draggingItemIndex!!, lastTargetIndex!!)
+        }
+        draggingItemIndex = null
+        draggedOverItemIndex = null
+        draggedOffset = 0f
+        lastTargetIndex = null
+    }
+
+    fun onDraggedOver(index: Int, offsetY: Float, listSize: Int) {
+        if (draggingItemIndex == null) return
+
+        // Akumulujeme offset pro plynulejší pohyb
+        draggedOffset += offsetY
+        
+        Log.d("DragDropState", "Dragging item $index, dragAmount: $offsetY")
+        
+        // Výpočet nového cílového indexu
+        val targetIndex = calculateTargetIndex(draggingItemIndex!!, draggedOffset, listSize)
+        
+        // Aktualizujeme pouze pokud:
+        // 1. Máme platný cílový index
+        // 2. Je jiný než aktuální
+        // 3. Nepřeskakujeme více než jednu pozici
+        if (targetIndex != null && targetIndex != lastTargetIndex) {
+            lastTargetIndex = targetIndex
+            draggedOverItemIndex = targetIndex
+            // Resetujeme offset po přesunu
+            draggedOffset = 0f
+            Log.d("DragDropState", "Target index updated to: $targetIndex")
         }
     }
 } 

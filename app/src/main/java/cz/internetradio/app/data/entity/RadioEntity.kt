@@ -20,7 +20,8 @@ data class RadioEntity(
     val startColor: Int,
     val endColor: Int,
     val isFavorite: Boolean,
-    val bitrate: Int?
+    val bitrate: Int?,
+    val orderIndex: Int = 0
 ) {
     fun toRadio(): Radio = Radio(
         id = id,

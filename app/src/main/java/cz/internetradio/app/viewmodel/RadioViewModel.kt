@@ -1142,4 +1142,23 @@ class RadioViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateStationOrder(category: RadioCategory, fromPosition: Int, toPosition: Int) {
+        viewModelScope.launch {
+            radioRepository.updateStationOrder(category, fromPosition, toPosition)
+        }
+    }
+
+    fun getNextOrderIndex(category: RadioCategory, onResult: (Int) -> Unit) {
+        viewModelScope.launch {
+            val nextIndex = radioRepository.getNextOrderIndex(category)
+            onResult(nextIndex)
+        }
+    }
+
+    fun updateStationOrderIndex(radioId: String, newOrder: Int) {
+        viewModelScope.launch {
+            radioRepository.updateStationOrderIndex(radioId, newOrder)
+        }
+    }
 } 

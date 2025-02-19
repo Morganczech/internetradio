@@ -248,4 +248,16 @@ class RadioRepository @Inject constructor(
     suspend fun deleteAllStations() {
         radioDao.deleteAllRadios()
     }
+
+    suspend fun updateStationOrder(category: RadioCategory, fromPosition: Int, toPosition: Int) {
+        radioDao.reorderStations(category, fromPosition, toPosition)
+    }
+
+    suspend fun getNextOrderIndex(category: RadioCategory): Int {
+        return radioDao.getNextOrderIndex(category) ?: 0
+    }
+
+    suspend fun updateStationOrderIndex(radioId: String, newOrder: Int) {
+        radioDao.updateOrder(radioId, newOrder)
+    }
 } 
