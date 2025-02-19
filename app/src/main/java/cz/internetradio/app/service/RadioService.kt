@@ -58,6 +58,7 @@ class RadioService : Service() {
     private lateinit var radioRepository: RadioRepository
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var screenWakeLock: PowerManager.WakeLock
     private lateinit var notificationManager: NotificationManager
     private lateinit var imageLoader: ImageLoader
 
@@ -99,16 +100,16 @@ class RadioService : Service() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 Intent.ACTION_POWER_CONNECTED -> {
-                    bufferSize = 2000
-                    recreatePlayer()
+                    // Při připojení nabíječky udržujeme obrazovku zapnutou
+                    if (!screenWakeLock.isHeld) {
+                        screenWakeLock.acquire()
+                    }
                 }
                 Intent.ACTION_POWER_DISCONNECTED -> {
-                    bufferSize = 4000
-                    recreatePlayer()
-                }
-                Intent.ACTION_BATTERY_LOW -> {
-                    bufferSize = 6000
-                    recreatePlayer()
+                    // Při odpojení nabíječky uvolníme WakeLock pro obrazovku
+                    if (screenWakeLock.isHeld) {
+                        screenWakeLock.release()
+                    }
                 }
             }
         }
@@ -148,23 +149,31 @@ class RadioService : Service() {
             })
         }
         
-        // Detekce připojení k nabíječce
+        // Inicializace WakeLock pro přehrávání
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            WAKELOCK_TAG
+        ).apply {
+            setReferenceCounted(false)
+        }
+        
+        // Inicializace WakeLock pro obrazovku
+        screenWakeLock = powerManager.newWakeLock(
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ON_AFTER_RELEASE,
+            "RadioService::ScreenWakeLock"
+        ).apply {
+            setReferenceCounted(false)
+        }
+        
+        // Kontrola stavu nabíjení a nastavení WakeLock pro obrazovku
         val batteryStatus = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val status = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
         val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || 
                         status == BatteryManager.BATTERY_STATUS_FULL
         
-        // Nastavení velikosti bufferu podle stavu nabíjení
-        bufferSize = if (isCharging) 2000 else 4000
-        
-        // Inicializace WakeLock s vyšší prioritou
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK or
-            PowerManager.ON_AFTER_RELEASE,
-            WAKELOCK_TAG
-        ).apply {
-            setReferenceCounted(false)
+        if (isCharging && !screenWakeLock.isHeld) {
+            screenWakeLock.acquire()
         }
         
         // Inicializace repository s RadioDao a RadioBrowserApi
@@ -189,7 +198,6 @@ class RadioService : Service() {
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_POWER_CONNECTED)
             addAction(Intent.ACTION_POWER_DISCONNECTED)
-            addAction(Intent.ACTION_BATTERY_LOW)
         }
         registerReceiver(batteryReceiver, filter)
     }
@@ -822,9 +830,14 @@ class RadioService : Service() {
                 // Odeslání broadcastu o změně stavu
                 broadcastPlaybackState()
                 
-                // Uvolnění WakeLock
+                // Uvolnění WakeLock pro přehrávání
                 if (wakeLock.isHeld) {
                     wakeLock.release()
+                }
+                
+                // Uvolnění WakeLock pro obrazovku
+                if (screenWakeLock.isHeld) {
+                    screenWakeLock.release()
                 }
                 
                 // Zastavení služby
@@ -929,9 +942,14 @@ class RadioService : Service() {
             // Uvolnění MediaSession
             mediaSession.release()
             
-            // Uvolnění WakeLock
+            // Uvolnění WakeLock pro přehrávání
             if (wakeLock.isHeld) {
                 wakeLock.release()
+            }
+            
+            // Uvolnění WakeLock pro obrazovku
+            if (screenWakeLock.isHeld) {
+                screenWakeLock.release()
             }
             
             // Odregistrace receiveru
