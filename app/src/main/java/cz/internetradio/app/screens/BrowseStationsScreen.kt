@@ -272,7 +272,11 @@ fun BrowseStationsScreen(
                 PlayerControls(
                     radio = radio,
                     viewModel = viewModel,
-                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
+                    onNavigateToCategory = { category ->
+                        // Zavřeme obrazovku vyhledávání a přejdeme na kategorii
+                        onNavigateBack()
+                    }
                 )
             }
         }

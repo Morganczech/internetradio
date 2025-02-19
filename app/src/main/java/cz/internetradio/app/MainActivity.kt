@@ -45,6 +45,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import coil.compose.AsyncImage
 import cz.internetradio.app.model.Radio
+import cz.internetradio.app.model.RadioCategory
 import cz.internetradio.app.navigation.Screen
 import cz.internetradio.app.screens.*
 import cz.internetradio.app.viewmodel.RadioViewModel
@@ -418,7 +419,8 @@ fun RadioItem(
 fun PlayerControls(
     radio: Radio,
     viewModel: RadioViewModel,
-    onNavigateToFavoriteSongs: () -> Unit
+    onNavigateToFavoriteSongs: () -> Unit,
+    onNavigateToCategory: (RadioCategory) -> Unit
 ) {
     val volume by viewModel.volume.collectAsState()
     val sleepTimer by viewModel.sleepTimerMinutes.collectAsState()
@@ -452,14 +454,28 @@ fun PlayerControls(
                         )
                     )
             ) {
-                AudioVisualizer(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .alpha(0.2f),
-                    baseColor1 = Color.White,
-                    baseColor2 = Color.White.copy(alpha = 0.5f),
-                    isPlaying = isPlaying
-                )
+                Box(modifier = Modifier.matchParentSize()) {
+                    AudioVisualizer(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .alpha(0.2f),
+                        baseColor1 = Color.White,
+                        baseColor2 = Color.White.copy(alpha = 0.5f),
+                        isPlaying = isPlaying
+                    )
+                    
+                    // Zobrazení bitrate ve vlnách
+                    displayedRadio.bitrate?.let { bitrate ->
+                        Text(
+                            text = "$bitrate kbps",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.White.copy(alpha = 0.15f),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
+                        )
+                    }
+                }
 
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -477,15 +493,6 @@ fun PlayerControls(
                                 style = MaterialTheme.typography.h6,
                                 color = Color.White
                             )
-                            // Zobrazení kvality streamu
-                            displayedRadio.bitrate?.let { bitrate ->
-                                Text(
-                                    text = "$bitrate kbps",
-                                    style = MaterialTheme.typography.caption,
-                                    color = Color.White.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(top = 2.dp)
-                                )
-                            }
                             currentMetadata?.let { metadata ->
                                 Text(
                                     text = metadata,
@@ -493,6 +500,27 @@ fun PlayerControls(
                                     color = Color.White.copy(alpha = 0.7f),
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
+                            }
+                            Card(
+                                modifier = Modifier
+                                    .padding(top = 8.dp)
+                                    .height(32.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                backgroundColor = Color.White.copy(alpha = 0.1f),
+                                elevation = 0.dp
+                            ) {
+                                TextButton(
+                                    onClick = { onNavigateToCategory(displayedRadio.category) },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = Color.White.copy(alpha = 0.7f)
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(displayedRadio.category.getTitleRes()),
+                                        style = MaterialTheme.typography.caption
+                                    )
+                                }
                             }
                         }
                         Row(

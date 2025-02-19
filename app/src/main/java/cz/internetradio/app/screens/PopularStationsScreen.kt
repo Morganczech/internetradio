@@ -175,7 +175,11 @@ fun PopularStationsScreen(
                 PlayerControls(
                     radio = radio,
                     viewModel = viewModel,
-                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
+                    onNavigateToCategory = { category ->
+                        // Zavřeme obrazovku populárních stanic a přejdeme na kategorii
+                        onNavigateBack()
+                    }
                 )
             }
         }

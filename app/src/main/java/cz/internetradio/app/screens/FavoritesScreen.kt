@@ -185,7 +185,11 @@ fun FavoritesScreen(
                 PlayerControls(
                     radio = radio,
                     viewModel = viewModel,
-                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
+                    onNavigateToCategory = { category ->
+                        // Přejdeme na všechny stanice, kde se zobrazí vybraná kategorie
+                        onNavigateToAllStations()
+                    }
                 )
             }
         }

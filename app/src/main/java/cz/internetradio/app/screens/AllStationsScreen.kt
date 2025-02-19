@@ -265,7 +265,16 @@ fun AllStationsScreen(
                 PlayerControls(
                     radio = radio,
                     viewModel = viewModel,
-                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs
+                    onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
+                    onNavigateToCategory = { category ->
+                        // Najdeme index kategorie a přepneme na ni
+                        val categoryIndex = categories.indexOf(category)
+                        if (categoryIndex != -1) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(categoryIndex)
+                            }
+                        }
+                    }
                 )
             }
         }
