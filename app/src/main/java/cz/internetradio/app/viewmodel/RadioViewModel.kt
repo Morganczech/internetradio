@@ -663,7 +663,7 @@ class RadioViewModel @Inject constructor(
                 originalCategory = category,
                 startColor = Gradients.getGradientForCategory(category).first,
                 endColor = Gradients.getGradientForCategory(category).second,
-                isFavorite = true,
+                isFavorite = category == RadioCategory.VLASTNI,  // Nastavíme isFavorite pouze pro kategorii VLASTNI
                 bitrate = station.bitrate?.toString()?.toIntOrNull()
             )
             radioRepository.insertRadio(radio)
