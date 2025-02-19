@@ -24,16 +24,16 @@ fun AudioVisualizer(
     var phase by remember { mutableStateOf(0f) }
     var errorState by remember { mutableStateOf<String?>(null) }
     
-    // Pulzující animace
+    // Pulzující animace pro amplitudu
     val pulseAnim = rememberInfiniteTransition(label = "pulse")
-    val scale by pulseAnim.animateFloat(
+    val amplitudeScale by pulseAnim.animateFloat(
         initialValue = 0.95f,
         targetValue = 1.05f,
         animationSpec = infiniteRepeatable(
             animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "scale"
+        label = "amplitude"
     )
     
     // Rotační animace
@@ -72,7 +72,7 @@ fun AudioVisualizer(
             Path().apply {
                 val phaseRadians = (phase + offset) * PI.toFloat() / 180f
                 val steps = 50
-                val baseAmplitude = if (isPlaying) size.height * amplitude else 0f
+                val baseAmplitude = if (isPlaying) size.height * amplitude * amplitudeScale else 0f
                 
                 moveTo(0f, size.height)
                 
@@ -92,27 +92,24 @@ fun AudioVisualizer(
             }
         }
         
-        // Aplikace scale transformace
-        scale(scale) {
-            // Vykreslení několika vln s různými parametry
-            val waves = listOf(
-                Triple(0f, 2f, 0.1f),      // Základní vlna
-                Triple(45f, 3f, 0.08f),    // Rychlejší, menší vlna
-                Triple(90f, 1.5f, 0.12f),  // Pomalejší, větší vlna
-                Triple(135f, 4f, 0.06f)    // Nejrychlejší, nejmenší vlna
-            )
-            
-            waves.forEachIndexed { index, (offset, freq, amp) ->
-                val alpha = 1f - (index * 0.2f)
-                drawPath(
-                    path = createWavePath(offset + rotation, freq, amp),
-                    brush = Brush.verticalGradient(
-                        colors = colors.map { it.copy(alpha = it.alpha * alpha) },
-                        startY = 0f,
-                        endY = size.height
-                    )
+        // Vykreslení několika vln s různými parametry
+        val waves = listOf(
+            Triple(0f, 2f, 0.1f),      // Základní vlna
+            Triple(45f, 3f, 0.08f),    // Rychlejší, menší vlna
+            Triple(90f, 1.5f, 0.12f),  // Pomalejší, větší vlna
+            Triple(135f, 4f, 0.06f)    // Nejrychlejší, nejmenší vlna
+        )
+        
+        waves.forEachIndexed { index, (offset, freq, amp) ->
+            val alpha = 1f - (index * 0.2f)
+            drawPath(
+                path = createWavePath(offset + rotation, freq, amp),
+                brush = Brush.verticalGradient(
+                    colors = colors.map { it.copy(alpha = it.alpha * alpha) },
+                    startY = 0f,
+                    endY = size.height
                 )
-            }
+            )
         }
     }
 } 
