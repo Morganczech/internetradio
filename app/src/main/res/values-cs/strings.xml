@@ -69,6 +69,7 @@
 
     <!-- Search -->
     <string name="search_hint">Vyhledat stanice online...</string>
+    <string name="search_hint_saved">Vyhledat uložené stanice...</string>
     <string name="search_no_results">Žádné stanice nenalezeny</string>
     <string name="search_error">Chyba při vyhledávání stanic</string>
     <string name="search_min_chars">Zadejte alespoň 3 znaky</string>
@@ -98,6 +99,7 @@
     <string name="action_close">Zavřít</string>
     <string name="action_more_options">Více možností</string>
     <string name="action_copy_to_clipboard">Kopírovat do schránky</string>
+    <string name="action_clear">Vymazat</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Dosažen maximální počet oblíbených</string>

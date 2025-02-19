@@ -92,28 +92,37 @@ fun AllStationsScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
+        var showSearch by remember { mutableStateOf(false) }
+
         // Top App Bar
         TopAppBar(
-            title = { Text("Moje stanice") },
+            title = { Text(stringResource(R.string.nav_my_stations)) },
             actions = {
+                IconButton(onClick = { showSearch = !showSearch }) {
+                    Icon(
+                        imageVector = if (showSearch) Icons.Default.Clear else Icons.Default.Search,
+                        contentDescription = stringResource(R.string.nav_search),
+                        tint = Color.White
+                    )
+                }
                 IconButton(onClick = onNavigateToPopularStations) {
                     Icon(
                         imageVector = Icons.Default.Flag,
-                        contentDescription = "Populární stanice",
+                        contentDescription = stringResource(R.string.nav_popular_stations),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = onNavigateToBrowseStations) {
                     Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Vyhledat stanice",
+                        imageVector = Icons.Default.ManageSearch,
+                        contentDescription = stringResource(R.string.nav_search_stations),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Nastavení",
+                        contentDescription = stringResource(R.string.nav_settings_desc),
                         tint = Color.White
                     )
                 }
@@ -122,52 +131,58 @@ fun AllStationsScreen(
             elevation = 4.dp
         )
 
-        // Vyhledávací pole
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            placeholder = { Text("Vyhledat uložené rádio...") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Vyhledat",
-                    tint = Color.White.copy(alpha = 0.7f)
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { searchQuery = "" }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Vymazat",
-                            tint = Color.White.copy(alpha = 0.7f)
-                        )
+        // Vyhledávací pole - zobrazí se pouze když je showSearch true
+        AnimatedVisibility(
+            visible = showSearch,
+            enter = slideInVertically(initialOffsetY = { -it }),
+            exit = slideOutVertically(targetOffsetY = { -it })
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text(stringResource(R.string.search_hint_saved)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(R.string.nav_search),
+                        tint = Color.White.copy(alpha = 0.7f)
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.action_clear),
+                                tint = Color.White.copy(alpha = 0.7f)
+                            )
+                        }
                     }
-                }
-            },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = Color.White,
-                cursorColor = Color.White,
-                placeholderColor = Color.White.copy(alpha = 0.7f),
-                focusedBorderColor = MaterialTheme.colors.primary,
-                unfocusedBorderColor = Color.White.copy(alpha = 0.3f)
-            ),
-            shape = RoundedCornerShape(8.dp),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = { keyboardController?.hide() }
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.White,
+                    cursorColor = Color.White,
+                    placeholderColor = Color.White.copy(alpha = 0.7f),
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = { keyboardController?.hide() }
+                )
             )
-        )
+        }
 
         // Kategorie
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 16.dp)
+                .padding(top = if (showSearch) 8.dp else 16.dp, bottom = 16.dp)
         ) {
             LazyRow(
                 state = lazyRowState,
