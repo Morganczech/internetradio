@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ fun SettingsScreen(
     val fadeOutDuration by viewModel.fadeOutDuration.collectAsState()
     var showFadeOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showClearDataDialog by remember { mutableStateOf(false) }
     val currentLanguage by viewModel.currentLanguage.collectAsState()
     val scrollState = rememberScrollState()
     
@@ -344,6 +346,49 @@ fun SettingsScreen(
                     tint = Color.White.copy(alpha = 0.7f)
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Vymazat data aplikace
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showClearDataDialog = true }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Vymazat data aplikace",
+                            style = MaterialTheme.typography.subtitle1,
+                            color = Color.Red
+                        )
+                        Text(
+                            text = "Vymaže všechna data a nastavení aplikace",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.Red.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color.Red.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 
@@ -430,6 +475,38 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) {
                     Text(stringResource(R.string.action_close))
+                }
+            }
+        )
+    }
+
+    // Dialog pro potvrzení vymazání dat
+    if (showClearDataDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDataDialog = false },
+            title = { Text("Vymazat data aplikace") },
+            text = {
+                Text(
+                    "Opravdu chcete vymazat všechna data aplikace? Tato akce je nevratná a vymaže všechny stanice, nastavení a oblíbené skladby. Aplikace se poté restartuje s výchozím nastavením.",
+                    style = MaterialTheme.typography.body1
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.clearAllData()
+                        showClearDataDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.Red
+                    )
+                ) {
+                    Text("Vymazat")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDataDialog = false }) {
+                    Text("Zrušit")
                 }
             }
         )

@@ -36,4 +36,7 @@ interface FavoriteSongDao {
         )
     """)
     suspend fun songExists(title: String, artist: String?, radioId: String): Boolean
+
+    @Query("DELETE FROM favorite_songs")
+    suspend fun deleteAllSongs()
 } 

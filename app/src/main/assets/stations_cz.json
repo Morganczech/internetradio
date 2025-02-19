@@ -10,7 +10,8 @@
       "homepage": "http://www.rozhlas.cz/radiozurnal/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "evropa2",
@@ -29,7 +30,8 @@
         "software": "Icecast 2.4.4",
         "location": "Czech Republic",
         "admin": "hostmaster@actve.net"
-      }
+      },
+      "bitrate": 128
     },
     {
       "id": "impuls",
@@ -40,7 +42,8 @@
       "homepage": "https://www.impuls.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "blanik",
@@ -56,7 +59,8 @@
       "homepage": "https://radioblanik.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "kiss",
@@ -67,7 +71,8 @@
       "homepage": "https://www.kiss.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "hitradio",
@@ -86,7 +91,8 @@
       "homepage": "https://www.frekvence1.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "beat",
@@ -98,7 +104,8 @@
       "homepage": "http://www.radiobeat.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "dvojka",
@@ -196,7 +203,8 @@
       "language": "czech",
       "server": {
         "url": "https://22723.live.streamtheworld.com/"
-      }
+      },
+      "bitrate": 128
     },
     {
       "id": "humor2",
@@ -219,7 +227,8 @@
       "homepage": "http://www.rozhlas.cz/vltava/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "oldies",
@@ -241,7 +250,8 @@
       "homepage": "https://www.danceradio.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 320
     },
     {
       "id": "radiozurnalsport",
@@ -326,7 +336,8 @@
       "homepage": "https://www.casrock.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 192
     },
     {
       "id": "colormusic",
@@ -349,7 +360,8 @@
       "country": "Czechia",
       "countryCode": "CZ",
       "countrySubdivision": "Prague",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "chillers",
@@ -360,7 +372,8 @@
       "homepage": "https://www.chillers.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 192
     },
     {
       "id": "czrock",
@@ -383,9 +396,7 @@
       "country": "Czechia",
       "countryCode": "CZ",
       "language": "czech",
-      "server": {
-        "url": "https://rozhlas.stream/"
-      }
+      "bitrate": 128
     },
     {
       "id": "xaver",
@@ -408,7 +419,8 @@
       "homepage": "http://www.abradio.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "english"
+      "language": "english",
+      "bitrate": 128
     },
     {
       "id": "rockradio",
@@ -421,7 +433,8 @@
       "language": "czech",
       "server": {
         "url": "http://ice.abradio.cz/"
-      }
+      },
+      "bitrate": 128
     },
     {
       "id": "classicpraha",
@@ -432,7 +445,8 @@
       "homepage": "http://www.classicpraha.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "danceclub",
@@ -443,7 +457,8 @@
       "homepage": "https://radia.cz/radio-dance-radio-info",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "e2flashback",
@@ -472,9 +487,7 @@
       "country": "Czechia",
       "countryCode": "CZ",
       "language": "czech,english",
-      "server": {
-        "url": "http://icecast8.play.cz/"
-      }
+      "bitrate": 128
     },
     {
       "id": "phonk",
@@ -554,7 +567,8 @@
       "homepage": "https://hitradiocernahora.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "funkstar",
@@ -576,7 +590,8 @@
       "homepage": "http://www.rockmax.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 256
     },
     {
       "id": "proglas",
@@ -587,7 +602,8 @@
       "homepage": "http://icecast2.play.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "fedstrap",
@@ -611,7 +627,8 @@
       "country": "Czechia",
       "countryCode": "CZ",
       "countrySubdivision": "Středočeský kraj",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     },
     {
       "id": "radiowave",
@@ -633,7 +650,8 @@
       "homepage": "https://hitradiocity.cz/",
       "country": "Czechia",
       "countryCode": "CZ",
-      "language": "czech"
+      "language": "czech",
+      "bitrate": 128
     }
   ]
 } 

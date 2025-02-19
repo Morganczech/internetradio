@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import cz.internetradio.app.PlayerControls
 import cz.internetradio.app.R
 import android.util.Log
+import cz.internetradio.app.ui.theme.Gradients
 
 data class Country(
     val name: String,
@@ -126,6 +127,8 @@ fun PopularStationsScreen(
             }
         } else {
             // Zobrazení stanic pro vybranou zemi
+            var displayedStations by remember { mutableStateOf(10) }
+            
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -136,8 +139,10 @@ fun PopularStationsScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                countries[selectedCountry]?.stations?.let { stations ->
-                    items(stations) { station ->
+                countries[selectedCountry]?.stations?.let { allStations ->
+                    val stationsToShow = allStations.take(displayedStations)
+                    
+                    items(stationsToShow) { station ->
                         // Kontrola, zda je stanice v oblíbených
                         val savedRadio = allRadios.find { it.id == station.id }
                         val radio = Radio(
@@ -146,9 +151,9 @@ fun PopularStationsScreen(
                             streamUrl = station.streamUrl,
                             imageUrl = station.imageUrl,
                             description = station.description,
-                            category = RadioCategory.OSTATNI,
-                            startColor = Color(0xFF1976D2).copy(alpha = 0.8f),
-                            endColor = Color(0xFF2196F3).copy(alpha = 0.6f),
+                            category = RadioCategory.MISTNI,
+                            startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
+                            endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
                             isFavorite = savedRadio?.isFavorite ?: false
                         )
 
@@ -160,6 +165,20 @@ fun PopularStationsScreen(
                             onEditClick = { onNavigateToEdit(radio.id) },
                             onDeleteClick = { viewModel.removeStation(radio.id) }
                         )
+                    }
+                    
+                    // Přidání tlačítka "Zobrazit další" pokud jsou k dispozici další stanice
+                    if (displayedStations < allStations.size) {
+                        item {
+                            Button(
+                                onClick = { displayedStations += 10 },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text("Zobrazit další")
+                            }
+                        }
                     }
                 }
             }

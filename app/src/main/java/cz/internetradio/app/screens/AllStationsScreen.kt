@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import cz.internetradio.app.R
+import cz.internetradio.app.ui.theme.Gradients
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalPagerApi::class)
 @Composable
@@ -303,6 +305,20 @@ fun AllStationsScreen(
                             onDeleteClick = { viewModel.removeStation(radio.id) }
                         )
                     }
+
+                    // Přidání tlačítka "Zobrazit další" pro kategorii MISTNI
+                    if (category == RadioCategory.MISTNI && !searchQuery.isNotEmpty()) {
+                        item {
+                            Button(
+                                onClick = { viewModel.loadMoreStations() },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text("Zobrazit další")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -357,44 +373,55 @@ fun CategoryChip(
     onClick: () -> Unit
 ) {
     // Definice barev pro pozadí
-    val backgroundColor = if (isSelected) {
+    val colors = if (isSelected) {
         when (category) {
             // Pro obecné kategorie použijeme výchozí primární barvu
             RadioCategory.VSE,
-            RadioCategory.VLASTNI -> MaterialTheme.colors.primary
-            else -> category.startColor
+            RadioCategory.VLASTNI -> listOf(MaterialTheme.colors.primary, MaterialTheme.colors.primary)
+            else -> {
+                val gradient = Gradients.getGradientForCategory(category)
+                listOf(gradient.first, gradient.second)
+            }
         }
-    } else Color.Transparent
+    } else listOf(Color.Transparent, Color.Transparent)
 
     Card(
         modifier = Modifier
             .height(32.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = backgroundColor,
+        backgroundColor = Color.Transparent,
         border = if (!isSelected) ButtonDefaults.outlinedBorder else null,
         elevation = 0.dp
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.horizontalGradient(colors = colors)
+                )
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center
         ) {
-            if (category == RadioCategory.VLASTNI) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (category == RadioCategory.VLASTNI) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
+                    )
+                }
+                Text(
+                    text = stringResource(category.getTitleRes()),
+                    style = MaterialTheme.typography.body2.copy(
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                    ),
+                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
                 )
             }
-            Text(
-                text = stringResource(category.getTitleRes()),
-                style = MaterialTheme.typography.body2.copy(
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                ),
-                color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
-            )
         }
     }
 } 

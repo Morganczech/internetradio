@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import cz.internetradio.app.model.RadioCategory
 import androidx.compose.ui.graphics.toArgb
 import android.util.Log
+import cz.internetradio.app.ui.theme.Gradients
 
 @Singleton
 class RadioRepository @Inject constructor(
@@ -101,7 +102,7 @@ class RadioRepository @Inject constructor(
         return radioDao.getRadioById(radioId)?.toRadio()
     }
 
-    suspend fun addRadioStationToFavorites(radioStation: RadioStation, category: RadioCategory) {
+    suspend fun addStationToFavorites(radioStation: RadioStation, category: RadioCategory) {
         val streamUrl = radioStation.url_resolved ?: radioStation.url
         
         // Kontrola, zda již existuje stanice se stejnou URL (kontrolujeme obě možné URL)
@@ -114,14 +115,15 @@ class RadioRepository @Inject constructor(
 
         if (existingRadio != null) {
             // Pokud stanice existuje, zachováme její nastavení oblíbenosti a ID
+            val gradient = Gradients.getGradientForCategory(category)
             val updatedRadio = existingRadio.copy(
                 name = radioStation.name,
                 imageUrl = radioStation.favicon ?: existingRadio.imageUrl,
                 description = radioStation.tags ?: existingRadio.description,
                 category = category,
                 originalCategory = if (existingRadio.isFavorite) existingRadio.originalCategory else category,
-                startColor = category.startColor,
-                endColor = category.endColor,
+                startColor = gradient.first,
+                endColor = gradient.second,
                 bitrate = try {
                     radioStation.bitrate?.toInt()
                 } catch (e: NumberFormatException) {
@@ -132,6 +134,7 @@ class RadioRepository @Inject constructor(
             radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
         } else {
             // Pokud stanice neexistuje, vytvoříme nový záznam
+            val gradient = Gradients.getGradientForCategory(category)
             val radio = Radio(
                 id = radioStation.stationuuid ?: radioStation.url,
                 name = radioStation.name,
@@ -140,8 +143,8 @@ class RadioRepository @Inject constructor(
                 description = radioStation.tags ?: "",
                 category = category,
                 originalCategory = category,
-                startColor = category.startColor,
-                endColor = category.endColor,
+                startColor = gradient.first,
+                endColor = gradient.second,
                 isFavorite = false,
                 bitrate = try {
                     radioStation.bitrate?.toInt()
@@ -191,6 +194,7 @@ class RadioRepository @Inject constructor(
             when {
                 // Pokud existuje stanice se stejným ID, aktualizujeme ji
                 existingById != null -> {
+                    val gradient = Gradients.getGradientForCategory(entity.category)
                     val updatedEntity = existingById.copy(
                         name = entity.name,
                         streamUrl = entity.streamUrl,
@@ -198,8 +202,8 @@ class RadioRepository @Inject constructor(
                         description = entity.description,
                         category = entity.category,
                         originalCategory = existingById.originalCategory ?: entity.originalCategory,
-                        startColor = entity.startColor,
-                        endColor = entity.endColor,
+                        startColor = gradient.first.toArgb(),
+                        endColor = gradient.second.toArgb(),
                         isFavorite = true,  // Explicitně nastavíme jako oblíbenou
                         bitrate = entity.bitrate
                     )
@@ -208,14 +212,15 @@ class RadioRepository @Inject constructor(
                 }
                 // Pokud existuje stanice se stejnou URL, aktualizujeme ji
                 existingByUrl != null -> {
+                    val gradient = Gradients.getGradientForCategory(entity.category)
                     val updatedEntity = existingByUrl.copy(
                         name = entity.name,
                         imageUrl = entity.imageUrl,
                         description = entity.description,
                         category = entity.category,
                         originalCategory = existingByUrl.originalCategory ?: entity.originalCategory,
-                        startColor = entity.startColor,
-                        endColor = entity.endColor,
+                        startColor = gradient.first.toArgb(),
+                        endColor = gradient.second.toArgb(),
                         isFavorite = true,  // Explicitně nastavíme jako oblíbenou
                         bitrate = entity.bitrate
                     )
@@ -224,7 +229,12 @@ class RadioRepository @Inject constructor(
                 }
                 // Pokud stanice neexistuje, vložíme ji jako novou
                 else -> {
-                    val newEntity = entity.copy(isFavorite = true)  // Zajistíme, že nová stanice bude oblíbená
+                    val gradient = Gradients.getGradientForCategory(entity.category)
+                    val newEntity = entity.copy(
+                        isFavorite = true,
+                        startColor = gradient.first.toArgb(),
+                        endColor = gradient.second.toArgb()
+                    )  // Zajistíme, že nová stanice bude oblíbená
                     radioDao.insertRadio(newEntity)
                     Log.d("RadioRepository", "Vložena nová stanice: ${entity.name}")
                 }
@@ -233,5 +243,9 @@ class RadioRepository @Inject constructor(
             Log.e("RadioRepository", "Chyba při vkládání stanice: ${entity.name}", e)
             throw e
         }
+    }
+
+    suspend fun deleteAllStations() {
+        radioDao.deleteAllRadios()
     }
 } 

@@ -49,7 +49,7 @@ import cz.internetradio.app.model.RadioCategory
 import cz.internetradio.app.navigation.Screen
 import cz.internetradio.app.screens.*
 import cz.internetradio.app.viewmodel.RadioViewModel
-import cz.internetradio.app.screens.AddRadioViewModel
+import cz.internetradio.app.viewmodel.AddRadioViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.WindowManager
 import android.view.View

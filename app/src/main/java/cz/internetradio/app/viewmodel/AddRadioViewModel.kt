@@ -6,11 +6,16 @@ import cz.internetradio.app.model.Radio
 import cz.internetradio.app.model.RadioCategory
 import cz.internetradio.app.repository.RadioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.ui.graphics.Color
+import cz.internetradio.app.data.entity.RadioEntity
+import cz.internetradio.app.utils.StreamUrlParser
+import java.util.UUID
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import cz.internetradio.app.ui.theme.Gradients
 
 @HiltViewModel
 class AddRadioViewModel @Inject constructor(
@@ -38,13 +43,13 @@ class AddRadioViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _validationError = MutableStateFlow<ValidationError?>(null)
-    val validationError: StateFlow<ValidationError?> = _validationError
+    val validationError: StateFlow<ValidationError?> = _validationError.asStateFlow()
 
     private var radioToEdit: Radio? = null
 
     sealed class ValidationError {
-        data class DuplicateStreamUrl(val url: String) : ValidationError()
-        data class DuplicateName(val name: String) : ValidationError()
+        object DuplicateStreamUrl : ValidationError()
+        object DuplicateName : ValidationError()
         data class StreamError(val message: String) : ValidationError()
     }
 
@@ -71,12 +76,12 @@ class AddRadioViewModel @Inject constructor(
     fun loadRadioForEdit(radioId: String) {
         viewModelScope.launch {
             radioRepository.getRadioById(radioId)?.let { radio ->
-                radioToEdit = radio
                 _name.value = radio.name
                 _streamUrl.value = radio.streamUrl
                 _imageUrl.value = radio.imageUrl
                 _description.value = radio.description
                 _category.value = radio.category
+                radioToEdit = radio
             }
         }
     }
@@ -91,46 +96,22 @@ class AddRadioViewModel @Inject constructor(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                if (name.isBlank()) {
-                    _validationError.value = ValidationError.StreamError("Zadejte název rádia")
-                    return@launch
-                }
-                if (streamUrl.isBlank()) {
-                    _validationError.value = ValidationError.StreamError("Zadejte URL streamu")
-                    return@launch
-                }
+            val existingRadio = radioRepository.getRadioById(radioId) ?: return@launch
 
-                // Určíme originalCategory podle toho, zda je stanice oblíbená
-                val originalCategory = if (radioToEdit?.isFavorite == true) {
-                    // Pokud je stanice oblíbená, zachováme původní kategorii
-                    radioToEdit?.originalCategory ?: category
-                } else {
-                    // Pokud není oblíbená, aktualizujeme původní kategorii
-                    category
-                }
+            val gradient = Gradients.getGradientForCategory(category)
+            val radio = existingRadio.copy(
+                name = name,
+                streamUrl = streamUrl,
+                imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                description = description ?: "",
+                category = category,
+                originalCategory = category,
+                startColor = gradient.first,
+                endColor = gradient.second
+            )
 
-                val radio = Radio(
-                    id = radioId,
-                    name = name,
-                    streamUrl = streamUrl,
-                    imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
-                    description = description ?: "",
-                    category = category,
-                    originalCategory = originalCategory,
-                    startColor = category.startColor,
-                    endColor = category.endColor,
-                    isFavorite = radioToEdit?.isFavorite ?: false
-                )
-
-                radioRepository.insertRadio(radio)
-                onSuccess()
-            } catch (e: Exception) {
-                _validationError.value = ValidationError.StreamError("Chyba při ukládání: ${e.message}")
-            } finally {
-                _isLoading.value = false
-            }
+            radioRepository.insertRadio(radio)
+            onSuccess()
         }
     }
 
@@ -143,51 +124,39 @@ class AddRadioViewModel @Inject constructor(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                if (name.isBlank()) {
-                    _validationError.value = ValidationError.StreamError("Zadejte název rádia")
-                    return@launch
-                }
-                if (streamUrl.isBlank()) {
-                    _validationError.value = ValidationError.StreamError("Zadejte URL streamu")
-                    return@launch
-                }
-
-                // Kontrola duplicity
-                if (radioRepository.existsByName(name)) {
-                    _validationError.value = ValidationError.DuplicateName(name)
-                    return@launch
-                }
-                if (radioRepository.existsByStreamUrl(streamUrl)) {
-                    _validationError.value = ValidationError.DuplicateStreamUrl(streamUrl)
-                    return@launch
-                }
-
-                val radio = Radio(
-                    id = streamUrl,
-                    name = name,
-                    streamUrl = streamUrl,
-                    imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
-                    description = description ?: "",
-                    category = category,
-                    originalCategory = category,
-                    startColor = category.startColor,
-                    endColor = category.endColor,
-                    isFavorite = false
-                )
-
-                radioRepository.insertRadio(radio)
-                onSuccess()
-            } catch (e: Exception) {
-                _validationError.value = ValidationError.StreamError("Chyba při ukládání: ${e.message}")
-            } finally {
-                _isLoading.value = false
+            if (radioRepository.existsByName(name)) {
+                _validationError.value = ValidationError.DuplicateName
+                return@launch
             }
+            if (radioRepository.existsByStreamUrl(streamUrl)) {
+                _validationError.value = ValidationError.DuplicateStreamUrl
+                return@launch
+            }
+
+            val gradient = Gradients.getGradientForCategory(category)
+            val radio = Radio(
+                id = streamUrl,
+                name = name,
+                streamUrl = streamUrl,
+                imageUrl = imageUrl ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                description = description ?: "",
+                category = category,
+                originalCategory = category,
+                startColor = gradient.first,
+                endColor = gradient.second,
+                isFavorite = false
+            )
+
+            radioRepository.insertRadio(radio)
+            onSuccess()
         }
     }
 
     fun dismissError() {
+        _validationError.value = null
+    }
+
+    fun clearValidationError() {
         _validationError.value = null
     }
 } 

@@ -43,4 +43,8 @@ class FavoriteSongRepository @Inject constructor(
     suspend fun songExists(title: String, artist: String?, radioId: String): Boolean {
         return favoriteSongDao.songExists(title, artist, radioId)
     }
+
+    suspend fun deleteAllSongs() {
+        favoriteSongDao.deleteAllSongs()
+    }
 } 

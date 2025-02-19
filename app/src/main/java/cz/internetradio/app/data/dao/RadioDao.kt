@@ -36,4 +36,7 @@ interface RadioDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM radios WHERE name = :name)")
     suspend fun existsByName(name: String): Boolean
+
+    @Query("DELETE FROM radios")
+    suspend fun deleteAllRadios()
 } 

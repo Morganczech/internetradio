@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import cz.internetradio.app.model.Language
 import cz.internetradio.app.R
 import cz.internetradio.app.data.entity.RadioEntity
+import cz.internetradio.app.ui.theme.Gradients
 
 private data class Country(
     val name: String,
@@ -64,7 +65,8 @@ private data class PopularStation(
     val name: String,
     val streamUrl: String,
     val imageUrl: String,
-    val description: String
+    val description: String,
+    val bitrate: Int? = null
 )
 
 @OptIn(UnstableApi::class)
@@ -323,42 +325,46 @@ class RadioViewModel @Inject constructor(
     }
 
     private suspend fun initializeFavoriteStations() {
-        // Kontrola, zda už byly stanice inicializovány
+        // Kontrola, zda už byly stanice inicializovány a zda jsou v databázi nějaké stanice
         val isInitialized = prefs.getBoolean("favorites_initialized", false)
-        if (!isInitialized) {
-            val favoriteCount = radioRepository.getFavoriteRadios().first().size
-            if (favoriteCount == 0) {
-                // Načtení stanic ze souboru podle jazyka/lokace
-                val countryCode = locationService.getCurrentCountry() ?: 
-                    if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
+        val totalStations = radioRepository.getAllRadios().first().size
+        
+        if (!isInitialized || totalStations == 0) {
+            // Resetujeme příznak inicializace
+            prefs.edit().putBoolean("favorites_initialized", false).apply()
+            
+            // Načtení stanic ze souboru podle jazyka/lokace
+            val countryCode = locationService.getCurrentCountry() ?: 
+                if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
 
-                try {
-                    val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
-                    val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
-                    val countryData = Gson().fromJson(jsonString, Country::class.java)
-                    
-                    // Přidání stanic do databáze
-                    countryData.stations.take(10).forEach { station ->
-                        val radio = Radio(
-                            id = station.id,
-                            name = station.name,
-                            streamUrl = station.streamUrl,
-                            imageUrl = station.imageUrl,
-                            description = station.description,
-                            category = RadioCategory.MISTNI,
-                            originalCategory = RadioCategory.MISTNI,
-                            startColor = RadioCategory.MISTNI.startColor,
-                            endColor = RadioCategory.MISTNI.endColor,
-                            isFavorite = false
-                        )
-                        radioRepository.insertRadio(radio)
-                    }
-                } catch (e: Exception) {
-                    Log.e("RadioViewModel", "Chyba při inicializaci místních stanic", e)
+            try {
+                val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
+                val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
+                val countryData = Gson().fromJson(jsonString, Country::class.java)
+                
+                // Přidání prvních 10 stanic do databáze
+                countryData.stations.take(10).forEach { station ->
+                    val radio = Radio(
+                        id = station.id,
+                        name = station.name,
+                        streamUrl = station.streamUrl,
+                        imageUrl = station.imageUrl,
+                        description = station.description,
+                        category = RadioCategory.MISTNI,
+                        originalCategory = RadioCategory.MISTNI,
+                        startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
+                        endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
+                        isFavorite = false,
+                        bitrate = station.bitrate
+                    )
+                    radioRepository.insertRadio(radio)
                 }
+                
+                // Označení, že inicializace proběhla
+                prefs.edit().putBoolean("favorites_initialized", true).apply()
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "Chyba při inicializaci místních stanic", e)
             }
-            // Označení, že inicializace proběhla
-            prefs.edit().putBoolean("favorites_initialized", true).apply()
         }
     }
 
@@ -647,7 +653,20 @@ class RadioViewModel @Inject constructor(
             }
             
             Log.d("RadioViewModel", "Ukládám stanici: ${station.name}")
-            radioRepository.addRadioStationToFavorites(station, category)
+            val radio = Radio(
+                id = station.stationuuid ?: station.url,
+                name = station.name,
+                streamUrl = station.url_resolved ?: station.url,
+                imageUrl = station.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                description = station.tags ?: "",
+                category = category,
+                originalCategory = category,
+                startColor = Gradients.getGradientForCategory(category).first,
+                endColor = Gradients.getGradientForCategory(category).second,
+                isFavorite = true,
+                bitrate = station.bitrate?.toString()?.toIntOrNull()
+            )
+            radioRepository.insertRadio(radio)
         }
     }
 
@@ -969,9 +988,9 @@ class RadioViewModel @Inject constructor(
                                         description = entity.description,
                                         category = entity.category,
                                         originalCategory = entity.originalCategory,
-                                        startColor = Color(entity.startColor),
-                                        endColor = Color(entity.endColor),
-                                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
+                                        startColor = Gradients.getGradientForCategory(entity.category).first,
+                                        endColor = Gradients.getGradientForCategory(entity.category).second,
+                                        isFavorite = true,
                                         bitrate = entity.bitrate
                                     )
                                     radioRepository.insertRadio(newRadio)
@@ -1026,5 +1045,101 @@ class RadioViewModel @Inject constructor(
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
+    }
+
+    fun clearAllData() {
+        viewModelScope.launch {
+            try {
+                // Zastavení přehrávání
+                stopPlayback()
+
+                // Vymazání všech stanic z databáze
+                radioRepository.deleteAllStations()
+                
+                // Vymazání všech oblíbených skladeb
+                favoriteSongRepository.deleteAllSongs()
+
+                // Vymazání SharedPreferences
+                prefs.edit().clear().apply()
+
+                // Obnovení výchozích hodnot
+                _maxFavorites.value = DEFAULT_MAX_FAVORITES
+                _fadeOutDuration.value = DEFAULT_FADE_OUT_DURATION
+                _currentLanguage.value = Language.SYSTEM
+                _equalizerEnabled.value = false
+                _currentPreset.value = EqualizerPreset.NORMAL
+                _bandValues.value = EqualizerPreset.NORMAL.bands
+                _volume.value = 1f
+
+                // Reinicializace stanic
+                initializeFavoriteStations()
+
+                // Počkáme na dokončení inicializace
+                delay(1000)
+
+                // Restartování aplikace
+                val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK) // Přidáno pro úplné vyčištění back stacku
+                }
+                if (intent != null) {
+                    context.startActivity(intent)
+                    // Ukončení současné aktivity
+                    android.os.Process.killProcess(android.os.Process.myPid())
+                }
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "Chyba při mazání dat: ${e.message}")
+                _message.value = "Chyba při mazání dat aplikace"
+            }
+        }
+    }
+
+    fun loadMoreStations() {
+        viewModelScope.launch {
+            try {
+                // Načtení stanic ze souboru podle jazyka/lokace
+                val countryCode = locationService.getCurrentCountry() ?: 
+                    if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
+
+                val jsonFileName = if (countryCode == "CZ") "stations_cz.json" else "stations_sk.json"
+                val jsonString = context.assets.open(jsonFileName).bufferedReader().use { it.readText() }
+                val countryData = Gson().fromJson(jsonString, Country::class.java)
+                
+                // Získání aktuálních stanic z databáze
+                val currentStations = radioRepository.getAllRadios().first()
+                
+                // Načtení dalších 10 stanic, které ještě nejsou v databázi
+                val newStations = countryData.stations
+                    .filterNot { station -> currentStations.any { it.id == station.id } }
+                    .take(10)
+                
+                // Přidání nových stanic do databáze
+                newStations.forEach { station ->
+                    val radio = Radio(
+                        id = station.id,
+                        name = station.name,
+                        streamUrl = station.streamUrl,
+                        imageUrl = station.imageUrl,
+                        description = station.description,
+                        category = RadioCategory.MISTNI,
+                        originalCategory = RadioCategory.MISTNI,
+                        startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
+                        endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
+                        isFavorite = false,
+                        bitrate = station.bitrate
+                    )
+                    radioRepository.insertRadio(radio)
+                }
+
+                // Pokud už nejsou další stanice k načtení, informujeme uživatele
+                if (newStations.isEmpty()) {
+                    _message.value = "Všechny dostupné stanice jsou již načteny"
+                }
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "Chyba při načítání dalších stanic", e)
+                _message.value = "Chyba při načítání dalších stanic"
+            }
+        }
     }
 } 

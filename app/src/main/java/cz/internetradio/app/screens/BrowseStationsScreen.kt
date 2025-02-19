@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.stringResource
 import cz.internetradio.app.R
+import cz.internetradio.app.ui.theme.Gradients
 
 @Composable
 fun BrowseStationsScreen(
@@ -352,10 +353,16 @@ private fun StationItem(
     station: RadioStation,
     onAddToFavorites: () -> Unit
 ) {
-    val colors = listOf(
-        station.category?.startColor ?: Color(0xFF2196F3),
-        station.category?.endColor ?: Color(0xFF1976D2)
-    )
+    val colors = when (val category = station.category) {
+        null -> {
+            val defaultGradient = Gradients.getGradientForCategory(RadioCategory.OSTATNI)
+            listOf(defaultGradient.first, defaultGradient.second)
+        }
+        else -> {
+            val gradient = Gradients.getGradientForCategory(category)
+            listOf(gradient.first, gradient.second)
+        }
+    }
     
     Card(
         modifier = Modifier

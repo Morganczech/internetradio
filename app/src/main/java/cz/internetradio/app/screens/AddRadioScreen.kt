@@ -21,36 +21,28 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import cz.internetradio.app.R
 import cz.internetradio.app.ui.theme.Gradients
-import cz.internetradio.app.screens.AddRadioViewModel
+import cz.internetradio.app.viewmodel.AddRadioViewModel
 import cz.internetradio.app.model.RadioCategory
 
 @Composable
 fun AddRadioScreen(
     onNavigateBack: () -> Unit,
-    viewModel: AddRadioViewModel = hiltViewModel(),
+    viewModel: AddRadioViewModel = hiltViewModel<AddRadioViewModel>(),
     radioToEdit: String? = null
 ) {
     var showCategoryPicker by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     
-    var name by remember { mutableStateOf("") }
-    var streamUrl by remember { mutableStateOf("") }
-    var imageUrl by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(RadioCategory.MISTNI) }
+    val name by viewModel.name.collectAsState()
+    val streamUrl by viewModel.streamUrl.collectAsState()
+    val imageUrl by viewModel.imageUrl.collectAsState()
+    val description by viewModel.description.collectAsState()
+    val category by viewModel.category.collectAsState()
     val validationError by viewModel.validationError.collectAsState()
 
     // Načtení existujícího rádia pro úpravu
     LaunchedEffect(radioToEdit) {
-        if (radioToEdit != null) {
-            viewModel.loadRadioForEdit(radioToEdit)?.let { radio ->
-                name = radio.name
-                streamUrl = radio.streamUrl
-                imageUrl = radio.imageUrl
-                description = radio.description
-                selectedCategory = radio.category
-            }
-        }
+        radioToEdit?.let { viewModel.loadRadioForEdit(it) }
     }
 
     Column(
@@ -80,28 +72,28 @@ fun AddRadioScreen(
         ) {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { viewModel.setName(it) },
                 label = { Text(stringResource(R.string.add_station_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = streamUrl,
-                onValueChange = { streamUrl = it },
+                onValueChange = { viewModel.setStreamUrl(it) },
                 label = { Text(stringResource(R.string.add_station_stream_url)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = imageUrl,
-                onValueChange = { imageUrl = it },
+                onValueChange = { viewModel.setImageUrl(it) },
                 label = { Text(stringResource(R.string.add_station_image_url)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = description,
-                onValueChange = { description = it },
+                onValueChange = { viewModel.setDescription(it) },
                 label = { Text(stringResource(R.string.add_station_description)) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3
@@ -109,7 +101,7 @@ fun AddRadioScreen(
 
             // Výběr kategorie
             OutlinedTextField(
-                value = stringResource(selectedCategory.getTitleRes()),
+                value = stringResource(category.getTitleRes()),
                 onValueChange = { },
                 enabled = false,
                 readOnly = true,
@@ -130,18 +122,18 @@ fun AddRadioScreen(
             ) {
                 // Filtrujeme kategorie - odstraníme OSTATNI a VLASTNI
                 RadioCategory.values()
-                    .filter { category -> 
-                        category != RadioCategory.OSTATNI && 
-                        category != RadioCategory.VLASTNI 
+                    .filter { cat -> 
+                        cat != RadioCategory.OSTATNI && 
+                        cat != RadioCategory.VLASTNI 
                     }
-                    .forEach { category ->
+                    .forEach { cat ->
                         DropdownMenuItem(
                             onClick = {
-                                selectedCategory = category
+                                viewModel.setCategory(cat)
                                 showCategoryPicker = false
                             }
                         ) {
-                            Text(stringResource(category.getTitleRes()))
+                            Text(stringResource(cat.getTitleRes()))
                         }
                     }
             }
@@ -156,7 +148,7 @@ fun AddRadioScreen(
                             streamUrl = streamUrl,
                             imageUrl = if (imageUrl.isBlank()) null else imageUrl,
                             description = if (description.isBlank()) null else description,
-                            category = selectedCategory,
+                            category = category,
                             onSuccess = onNavigateBack
                         )
                     } else {
@@ -165,7 +157,7 @@ fun AddRadioScreen(
                             streamUrl = streamUrl,
                             imageUrl = if (imageUrl.isBlank()) null else imageUrl,
                             description = if (description.isBlank()) null else description,
-                            category = selectedCategory,
+                            category = category,
                             onSuccess = onNavigateBack
                         )
                     }
@@ -184,6 +176,7 @@ fun AddRadioScreen(
                     is AddRadioViewModel.ValidationError.DuplicateStreamUrl -> stringResource(R.string.add_station_error_duplicate_url)
                     is AddRadioViewModel.ValidationError.DuplicateName -> stringResource(R.string.add_station_error_duplicate_name)
                     is AddRadioViewModel.ValidationError.StreamError -> error.message
+                    else -> ""
                 },
                 color = MaterialTheme.colors.error,
                 modifier = Modifier.padding(horizontal = 16.dp)
