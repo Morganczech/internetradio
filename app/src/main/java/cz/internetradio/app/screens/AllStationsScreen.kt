@@ -514,150 +514,135 @@ class DragDropState(
         private set
 
     // Konstanty pro konfiguraci
-    private val sensitivityFactor = 1.2f
     private val itemHeight = 150f
-    private val moveThreshold = 0.4f
-    private val directionThreshold = 2
-    private val debounceTime = 150L
-    private val debounceOffset = 15f
+    private val debounceTime = 100L
+    private val deadZoneRatio = 0.2f  // 20% výšky položky
+    private val deadZoneHeight = itemHeight * deadZoneRatio
 
     // Interní stavové proměnné
     private var startY: Float? = null
-    private var lastY: Float? = null
-    private var lastTargetId: String? = null
-    private var dragDirection: Int = 0
-    private var movingDirectionCounter = 0
     private var lastMoveTime = 0L
+    private var currentDragIndex: Int? = null
+
+    // Kompletní reset stavu
+    private fun reset() {
+        draggingItemId = null
+        draggedOverItemId = null
+        draggedOffset = 0f
+        startY = null
+        lastMoveTime = 0L
+        currentDragIndex = null
+        Log.d("DragDropState", "Reset state completed")
+    }
 
     private fun calculateTargetIndex(
         currentY: Float,
         listSize: Int,
-        items: List<Radio>,
-        currentIndex: Int
+        items: List<Radio>
     ): Int? {
-        if (startY == null) return currentIndex
+        val draggingItemIndex = currentDragIndex ?: items.indexOfFirst { it.id == draggingItemId }
+        if (draggingItemIndex == -1) return null
 
-        val offset = currentY - startY!!
-        val relative = (offset / itemHeight) * sensitivityFactor
+        // Výpočet center položek s mrtvou zónou
+        val itemPositions = (0 until listSize).map { index ->
+            val itemTop = index * itemHeight
+            val itemCenter = itemTop + (itemHeight / 2)
+            Triple(
+                index,
+                itemCenter - deadZoneHeight,  // Horní hranice mrtvé zóny
+                itemCenter + deadZoneHeight   // Spodní hranice mrtvé zóny
+            )
+        }
 
-        // Výpočet cílového indexu s použitím threshold
-        val targetIndex = when {
-            relative > moveThreshold -> 
-                (currentIndex + 1).coerceIn(0, listSize - 1)
-            relative < -moveThreshold -> 
-                (currentIndex - 1).coerceIn(0, listSize - 1)
-            else -> currentIndex
+        // Najdeme pozici, kde se má položka přesunout
+        var targetIndex = draggingItemIndex
+        var minDistance = Float.MAX_VALUE
+
+        itemPositions.forEach { (index, topBound, bottomBound) ->
+            // Přeskočíme aktuální pozici přetahované položky
+            if (index != draggingItemIndex) {
+                when {
+                    // Pokud je kurzor nad mrtvou zónou
+                    currentY < topBound -> {
+                        val distance = topBound - currentY
+                        if (distance < minDistance) {
+                            minDistance = distance
+                            targetIndex = index
+                        }
+                    }
+                    // Pokud je kurzor pod mrtvou zónou
+                    currentY > bottomBound -> {
+                        val distance = currentY - bottomBound
+                        if (distance < minDistance) {
+                            minDistance = distance
+                            targetIndex = if (index > draggingItemIndex) index else index + 1
+                        }
+                    }
+                }
+            }
         }
 
         Log.d("DragDropState", """
             Calculate Target:
-            - current=$currentIndex
-            - offset=$offset
-            - relative=$relative
-            - direction=$dragDirection
-            - counter=$movingDirectionCounter
-            - target=$targetIndex
-            - draggingId=$draggingItemId
-            - targetId=${items.getOrNull(targetIndex)?.id}
+            - currentY: $currentY
+            - draggingIndex: $draggingItemIndex
+            - targetIndex: $targetIndex
+            - minDistance: $minDistance
         """.trimIndent())
 
-        return targetIndex
+        return targetIndex.coerceIn(0, listSize - 1)
     }
 
     fun onDragStart(index: Int, startPosition: Float, itemId: String) {
         Log.d("DragDropState", "Starting drag for index $index, id $itemId at position $startPosition")
+        reset()  // Reset stavu před začátkem nového přetahování
+        currentDragIndex = index
         draggingItemId = itemId
         draggedOverItemId = itemId
-        lastTargetId = itemId
         startY = startPosition
-        lastY = startPosition
-        draggedOffset = 0f
-        dragDirection = 0
-        movingDirectionCounter = 0
         lastMoveTime = System.currentTimeMillis()
     }
 
     fun onDragEnd() {
         Log.d("DragDropState", "Ending drag for id $draggingItemId")
-        draggingItemId = null
-        draggedOverItemId = null
-        lastTargetId = null
-        draggedOffset = 0f
-        startY = null
-        lastY = null
-        dragDirection = 0
-        movingDirectionCounter = 0
+        reset()  // Kompletní reset stavu po ukončení přetahování
     }
 
     fun onDraggedOver(currentY: Float, listSize: Int, items: List<Radio>) {
-        if (startY == null || lastY == null || draggingItemId == null) return
-
-        val currentIndex = items.indexOfFirst { it.id == draggingItemId }
-        if (currentIndex == -1) return
-
-        // Výpočet směru pohybu
-        val newDirection = when {
-            currentY > lastY!! + debounceOffset -> 1  // Dolů
-            currentY < lastY!! - debounceOffset -> -1 // Nahoru
-            else -> dragDirection
-        }
-
-        // Aktualizace směru a počítadla
-        if (newDirection == dragDirection && newDirection != 0) {
-            movingDirectionCounter++
-        } else if (newDirection != dragDirection) {
-            movingDirectionCounter = 0
-            dragDirection = newDirection
-            startY = currentY
-            draggedOffset = 0f
-        }
-
-        // Výpočet offsetu pro plynulý pohyb
-        draggedOffset = currentY - startY!!
-
-        Log.d("DragDropState", """
-            Dragging:
-            - Y: $currentY
-            - offset: $draggedOffset
-            - direction: $dragDirection
-            - counter: $movingDirectionCounter
-            - draggingId=$draggingItemId
-            - currentIndex=$currentIndex
-        """.trimIndent())
+        if (startY == null || draggingItemId == null || currentDragIndex == null) return
 
         // Výpočet nového cílového indexu
-        val newTargetIndex = calculateTargetIndex(currentY, listSize, items, currentIndex)
+        val newTargetIndex = calculateTargetIndex(currentY, listSize, items)
         val currentTime = System.currentTimeMillis()
 
-        // Aplikace změny pouze při splnění všech podmínek
+        // Aplikace změny pouze pokud uplynul dostatečný čas od poslední změny
+        // a cílový index je jiný než aktuální
         if (newTargetIndex != null && 
-            items.getOrNull(newTargetIndex)?.id != lastTargetId &&
-            movingDirectionCounter >= directionThreshold &&
+            newTargetIndex != currentDragIndex && 
             currentTime - lastMoveTime > debounceTime
         ) {
-            val targetId = items[newTargetIndex].id
-            
-            Log.d("DragDropState", "Moving from $currentIndex to $newTargetIndex (id: $draggingItemId -> $targetId)")
+            Log.d("DragDropState", """
+                Moving item:
+                - from: $currentDragIndex (${items[currentDragIndex!!].name})
+                - to: $newTargetIndex (${items[newTargetIndex].name})
+                - draggingId: $draggingItemId
+            """.trimIndent())
 
             // Zavolání onMove callbacku
-            onMove(currentIndex, newTargetIndex)
+            onMove(currentDragIndex!!, newTargetIndex)
 
             // Aktualizace stavu
-            draggedOverItemId = targetId
-            lastTargetId = targetId
-            startY = currentY
-            draggedOffset = 0f
-            movingDirectionCounter = 0
+            draggedOverItemId = items[newTargetIndex].id
+            draggingItemId = items[newTargetIndex].id  // Synchronizace ID
+            currentDragIndex = newTargetIndex  // Aktualizace aktuálního indexu
             lastMoveTime = currentTime
-
-            Log.d("DragDropState", """
-                Move completed:
-                - from=$currentIndex ($draggingItemId)
-                - to=$newTargetIndex ($targetId)
-                - newState: dragging=$draggingItemId, over=$draggedOverItemId
-            """.trimIndent())
+            startY = currentY   // Aktualizace počáteční pozice
+            draggedOffset = 0f  // Reset offsetu po přesunu
         }
 
-        lastY = currentY
+        // Aktualizace offsetu pro animaci pouze pokud se nezměnil index
+        if (currentDragIndex == newTargetIndex) {
+            draggedOffset = currentY - (startY ?: currentY)
+        }
     }
 } 

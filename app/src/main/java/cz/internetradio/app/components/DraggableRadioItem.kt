@@ -43,20 +43,20 @@ fun DraggableRadioItem(
             .pointerInput(Unit) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = { offset ->
-                        Log.d("DraggableRadioItem", "Drag started on item ${radio.id} at ${offset.y}")
+                        Log.d("DraggableRadioItem", "Drag started on item ${radio.name} (${radio.id}) at ${offset.y}")
                         dragDropState.onDragStart(index, offset.y, radio.id)
                     },
                     onDragEnd = {
-                        Log.d("DraggableRadioItem", "Drag ended on item ${radio.id}")
+                        Log.d("DraggableRadioItem", "Drag ended on item ${radio.name} (${radio.id})")
                         dragDropState.onDragEnd()
                     },
                     onDragCancel = {
-                        Log.d("DraggableRadioItem", "Drag cancelled on item ${radio.id}")
+                        Log.d("DraggableRadioItem", "Drag cancelled on item ${radio.name} (${radio.id})")
                         dragDropState.onDragEnd()
                     },
                     onDrag = { change, _ ->
                         change.consume()
-                        Log.d("DraggableRadioItem", "Dragging item ${radio.id} at ${change.position.y}")
+                        Log.d("DraggableRadioItem", "Dragging item ${radio.name} (${radio.id}) at ${change.position.y}")
                         dragDropState.onDraggedOver(change.position.y, listSize, items)
                     }
                 )
