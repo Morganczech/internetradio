@@ -97,52 +97,61 @@ fun AllStationsScreen(
     // Synchronizace selectedCategory s pagerState
     var selectedCategory by rememberSaveable { mutableStateOf(categories[0]) }
     
-    LaunchedEffect(pagerState.currentPage) {
-        selectedCategory = categories[pagerState.currentPage]
-    }
-
     // Implementace drag & drop s mutableStateListOf
     val radiosList = remember {
         mutableStateListOf<Radio>()
     }
 
-    LaunchedEffect(allRadios, selectedCategory, searchQuery) {
-        radiosList.clear()
-        radiosList.addAll(
-            if (searchQuery.isEmpty()) {
-                allRadios.filter { radio ->
-                    when {
-                        selectedCategory == RadioCategory.VSE -> true
-                        selectedCategory == RadioCategory.VLASTNI -> radio.isFavorite
-                        selectedCategory == RadioCategory.OSTATNI -> {
-                            val specificCategories = RadioCategory.values().filter { 
-                                it != RadioCategory.VSE && 
-                                it != RadioCategory.VLASTNI && 
-                                it != RadioCategory.OSTATNI 
-                            }
-                            !specificCategories.contains(radio.category)
-                        }
-                        else -> radio.category == selectedCategory
-                    }
-                }
-            } else {
-                allRadios.filter { radio ->
-                    radio.name.contains(searchQuery, ignoreCase = true)
-                }
-            }.sortedBy { it.name.lowercase() }
-        )
-    }
-
+    // Stav pro správu drag & drop
     val dragDropState = rememberDragDropState(
         onMove = { fromIndex, toIndex ->
             if (fromIndex != toIndex && fromIndex in radiosList.indices && toIndex in radiosList.indices) {
-                val item = radiosList.removeAt(fromIndex)
-                radiosList.add(toIndex, item)
-                // Aktualizujeme pořadí v ViewModel
+                // Přesun položky v seznamu
+                radiosList.move(fromIndex, toIndex)
+                
+                // Přinutíme recomposition vytvořením nového seznamu
+                val newList = radiosList.toList()
+                radiosList.clear()
+                radiosList.addAll(newList)
+
+                // Aktualizace pořadí v ViewModel
                 viewModel.updateStationOrder(selectedCategory, fromIndex, toIndex)
             }
         }
     )
+
+    LaunchedEffect(pagerState.currentPage) {
+        selectedCategory = categories[pagerState.currentPage]
+    }
+
+    LaunchedEffect(allRadios, selectedCategory, searchQuery) {
+        // Vytvoříme nový seznam a seřadíme ho
+        val filteredAndSortedList = if (searchQuery.isEmpty()) {
+            allRadios.filter { radio ->
+                when {
+                    selectedCategory == RadioCategory.VSE -> true
+                    selectedCategory == RadioCategory.VLASTNI -> radio.isFavorite
+                    selectedCategory == RadioCategory.OSTATNI -> {
+                        val specificCategories = RadioCategory.values().filter { 
+                            it != RadioCategory.VSE && 
+                            it != RadioCategory.VLASTNI && 
+                            it != RadioCategory.OSTATNI 
+                        }
+                        !specificCategories.contains(radio.category)
+                    }
+                    else -> radio.category == selectedCategory
+                }
+            }
+        } else {
+            allRadios.filter { radio ->
+                radio.name.contains(searchQuery, ignoreCase = true)
+            }
+        }.sortedBy { it.name.lowercase() }
+
+        // Aktualizujeme seznam najednou pro zajištění správné recomposition
+        radiosList.clear()
+        radiosList.addAll(filteredAndSortedList)
+    }
 
     // Sledování offsetu pro plynulý posun kategorií
     LaunchedEffect(pagerState.currentPage, pagerState.currentPageOffset) {
@@ -339,6 +348,8 @@ fun AllStationsScreen(
                             dragDropState = dragDropState,
                             index = index,
                             listSize = radiosList.size,
+                            radio = radio,
+                            items = radiosList,
                             itemModifier = Modifier.animateItemPlacement()
                         ) { isDragging ->
                             RadioItem(
@@ -472,93 +483,181 @@ fun CategoryChip(
     }
 }
 
+// Funkce pro změnu pořadí položek v seznamu
+private fun <T> MutableList<T>.move(from: Int, to: Int) {
+    if (from == to) return
+    val item = this.removeAt(from)
+    this.add(to, item)
+}
+
 @Composable
-private fun rememberDragDropState(
+fun rememberDragDropState(
     onMove: (Int, Int) -> Unit
 ): DragDropState {
-    val state = remember {
-        DragDropState(
-            onMove = onMove
-        )
+    return remember {
+        DragDropState { fromIndex, toIndex ->
+            onMove(fromIndex, toIndex)
+            Log.d("DragDropState", "Moved item from $fromIndex to $toIndex")
+        }
     }
-    return state
 }
 
 class DragDropState(
     val onMove: (Int, Int) -> Unit
 ) {
-    var draggingItemIndex by mutableStateOf<Int?>(null)
+    // Stavové proměnné
+    var draggingItemId by mutableStateOf<String?>(null)
         private set
-    var draggedOverItemIndex by mutableStateOf<Int?>(null)
+    var draggedOverItemId by mutableStateOf<String?>(null)
         private set
     var draggedOffset by mutableStateOf(0f)
         private set
-    private var lastTargetIndex: Int? = null
-    private val itemHeight = 150f // Výška karty v pixelech
+
+    // Konstanty pro konfiguraci
+    private val sensitivityFactor = 1.2f
+    private val itemHeight = 150f
+    private val moveThreshold = 0.4f
+    private val directionThreshold = 2
+    private val debounceTime = 150L
+    private val debounceOffset = 15f
+
+    // Interní stavové proměnné
+    private var startY: Float? = null
+    private var lastY: Float? = null
+    private var lastTargetId: String? = null
+    private var dragDirection: Int = 0
+    private var movingDirectionCounter = 0
+    private var lastMoveTime = 0L
 
     private fun calculateTargetIndex(
-        draggedIndex: Int,
-        draggedOffset: Float,
-        listSize: Int
+        currentY: Float,
+        listSize: Int,
+        items: List<Radio>,
+        currentIndex: Int
     ): Int? {
-        // Výpočet relativní pozice vzhledem k výšce karty
-        val relativePosition = draggedOffset / itemHeight
-        
-        // Určení směru pohybu
-        val direction = when {
-            relativePosition > 0.3f -> 1  // Pohyb dolů
-            relativePosition < -0.3f -> -1 // Pohyb nahoru
-            else -> 0 // Žádný pohyb
+        if (startY == null) return currentIndex
+
+        val offset = currentY - startY!!
+        val relative = (offset / itemHeight) * sensitivityFactor
+
+        // Výpočet cílového indexu s použitím threshold
+        val targetIndex = when {
+            relative > moveThreshold -> 
+                (currentIndex + 1).coerceIn(0, listSize - 1)
+            relative < -moveThreshold -> 
+                (currentIndex - 1).coerceIn(0, listSize - 1)
+            else -> currentIndex
         }
-        
-        // Výpočet nového indexu s omezením na jednu pozici
-        return when {
-            direction != 0 -> (draggedIndex + direction).coerceIn(0, listSize - 1)
-            else -> null
-        }
+
+        Log.d("DragDropState", """
+            Calculate Target:
+            - current=$currentIndex
+            - offset=$offset
+            - relative=$relative
+            - direction=$dragDirection
+            - counter=$movingDirectionCounter
+            - target=$targetIndex
+            - draggingId=$draggingItemId
+            - targetId=${items.getOrNull(targetIndex)?.id}
+        """.trimIndent())
+
+        return targetIndex
     }
 
-    fun onDragStart(index: Int) {
-        Log.d("DragDropState", "Starting drag for index $index")
-        draggingItemIndex = index
-        draggedOverItemIndex = null
+    fun onDragStart(index: Int, startPosition: Float, itemId: String) {
+        Log.d("DragDropState", "Starting drag for index $index, id $itemId at position $startPosition")
+        draggingItemId = itemId
+        draggedOverItemId = itemId
+        lastTargetId = itemId
+        startY = startPosition
+        lastY = startPosition
         draggedOffset = 0f
-        lastTargetIndex = null
+        dragDirection = 0
+        movingDirectionCounter = 0
+        lastMoveTime = System.currentTimeMillis()
     }
 
     fun onDragEnd() {
-        Log.d("DragDropState", "Ending drag")
-        // Provedeme finální přesun pouze pokud máme platný cílový index
-        if (lastTargetIndex != null && draggingItemIndex != null && lastTargetIndex != draggingItemIndex) {
-            onMove(draggingItemIndex!!, lastTargetIndex!!)
-        }
-        draggingItemIndex = null
-        draggedOverItemIndex = null
+        Log.d("DragDropState", "Ending drag for id $draggingItemId")
+        draggingItemId = null
+        draggedOverItemId = null
+        lastTargetId = null
         draggedOffset = 0f
-        lastTargetIndex = null
+        startY = null
+        lastY = null
+        dragDirection = 0
+        movingDirectionCounter = 0
     }
 
-    fun onDraggedOver(index: Int, offsetY: Float, listSize: Int) {
-        if (draggingItemIndex == null) return
+    fun onDraggedOver(currentY: Float, listSize: Int, items: List<Radio>) {
+        if (startY == null || lastY == null || draggingItemId == null) return
 
-        // Akumulujeme offset pro plynulejší pohyb
-        draggedOffset += offsetY
-        
-        Log.d("DragDropState", "Dragging item $index, dragAmount: $offsetY")
-        
-        // Výpočet nového cílového indexu
-        val targetIndex = calculateTargetIndex(draggingItemIndex!!, draggedOffset, listSize)
-        
-        // Aktualizujeme pouze pokud:
-        // 1. Máme platný cílový index
-        // 2. Je jiný než aktuální
-        // 3. Nepřeskakujeme více než jednu pozici
-        if (targetIndex != null && targetIndex != lastTargetIndex) {
-            lastTargetIndex = targetIndex
-            draggedOverItemIndex = targetIndex
-            // Resetujeme offset po přesunu
-            draggedOffset = 0f
-            Log.d("DragDropState", "Target index updated to: $targetIndex")
+        val currentIndex = items.indexOfFirst { it.id == draggingItemId }
+        if (currentIndex == -1) return
+
+        // Výpočet směru pohybu
+        val newDirection = when {
+            currentY > lastY!! + debounceOffset -> 1  // Dolů
+            currentY < lastY!! - debounceOffset -> -1 // Nahoru
+            else -> dragDirection
         }
+
+        // Aktualizace směru a počítadla
+        if (newDirection == dragDirection && newDirection != 0) {
+            movingDirectionCounter++
+        } else if (newDirection != dragDirection) {
+            movingDirectionCounter = 0
+            dragDirection = newDirection
+            startY = currentY
+            draggedOffset = 0f
+        }
+
+        // Výpočet offsetu pro plynulý pohyb
+        draggedOffset = currentY - startY!!
+
+        Log.d("DragDropState", """
+            Dragging:
+            - Y: $currentY
+            - offset: $draggedOffset
+            - direction: $dragDirection
+            - counter: $movingDirectionCounter
+            - draggingId=$draggingItemId
+            - currentIndex=$currentIndex
+        """.trimIndent())
+
+        // Výpočet nového cílového indexu
+        val newTargetIndex = calculateTargetIndex(currentY, listSize, items, currentIndex)
+        val currentTime = System.currentTimeMillis()
+
+        // Aplikace změny pouze při splnění všech podmínek
+        if (newTargetIndex != null && 
+            items.getOrNull(newTargetIndex)?.id != lastTargetId &&
+            movingDirectionCounter >= directionThreshold &&
+            currentTime - lastMoveTime > debounceTime
+        ) {
+            val targetId = items[newTargetIndex].id
+            
+            Log.d("DragDropState", "Moving from $currentIndex to $newTargetIndex (id: $draggingItemId -> $targetId)")
+
+            // Zavolání onMove callbacku
+            onMove(currentIndex, newTargetIndex)
+
+            // Aktualizace stavu
+            draggedOverItemId = targetId
+            lastTargetId = targetId
+            startY = currentY
+            draggedOffset = 0f
+            movingDirectionCounter = 0
+            lastMoveTime = currentTime
+
+            Log.d("DragDropState", """
+                Move completed:
+                - from=$currentIndex ($draggingItemId)
+                - to=$newTargetIndex ($targetId)
+                - newState: dragging=$draggingItemId, over=$draggedOverItemId
+            """.trimIndent())
+        }
+
+        lastY = currentY
     }
 } 

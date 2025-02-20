@@ -14,6 +14,7 @@ import androidx.compose.ui.zIndex
 import cz.internetradio.app.screens.DragDropState
 import android.util.Log
 import kotlin.math.roundToInt
+import cz.internetradio.app.model.Radio
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -21,44 +22,42 @@ fun DraggableRadioItem(
     dragDropState: DragDropState,
     index: Int,
     listSize: Int,
+    radio: Radio,
+    items: List<Radio>,
     itemModifier: Modifier = Modifier,
     content: @Composable (isDragging: Boolean) -> Unit
 ) {
-    val isDragging = dragDropState.draggingItemIndex == index
-    val isTarget = dragDropState.draggedOverItemIndex == index
+    val isDragging = dragDropState.draggingItemId == radio.id
+    val isTarget = dragDropState.draggedOverItemId == radio.id
+    val offsetY = if (isDragging) dragDropState.draggedOffset else 0f
 
     Box(
         modifier = Modifier
-            .then(if (!isDragging) itemModifier else Modifier)
-            .offset { 
-                IntOffset(
-                    x = 0, 
-                    y = if (isDragging) dragDropState.draggedOffset.roundToInt() else 0
-                ) 
-            }
+            .then(itemModifier)
+            .offset { IntOffset(0, offsetY.roundToInt()) }
             .zIndex(when {
-                isDragging -> 3f  // Přetahovaná karta nejvýše
-                isTarget -> 2f    // Cílová pozice uprostřed
-                else -> 1f        // Ostatní karty nejníže
+                isDragging -> 2f  // Přetahovaná karta nejvýše
+                isTarget -> 1f    // Cílová pozice uprostřed
+                else -> 0f        // Ostatní karty nejníže
             })
-            .pointerInput(dragDropState) {
+            .pointerInput(Unit) {
                 detectDragGesturesAfterLongPress(
-                    onDragStart = {
-                        Log.d("DraggableRadioItem", "Drag started on item $index")
-                        dragDropState.onDragStart(index)
+                    onDragStart = { offset ->
+                        Log.d("DraggableRadioItem", "Drag started on item ${radio.id} at ${offset.y}")
+                        dragDropState.onDragStart(index, offset.y, radio.id)
                     },
                     onDragEnd = {
-                        Log.d("DraggableRadioItem", "Drag ended on item $index")
+                        Log.d("DraggableRadioItem", "Drag ended on item ${radio.id}")
                         dragDropState.onDragEnd()
                     },
                     onDragCancel = {
-                        Log.d("DraggableRadioItem", "Drag cancelled on item $index")
+                        Log.d("DraggableRadioItem", "Drag cancelled on item ${radio.id}")
                         dragDropState.onDragEnd()
                     },
-                    onDrag = { change, dragAmount ->
+                    onDrag = { change, _ ->
                         change.consume()
-                        Log.d("DraggableRadioItem", "Dragging item $index, dragAmount: ${dragAmount.y}")
-                        dragDropState.onDraggedOver(index, dragAmount.y, listSize)
+                        Log.d("DraggableRadioItem", "Dragging item ${radio.id} at ${change.position.y}")
+                        dragDropState.onDraggedOver(change.position.y, listSize, items)
                     }
                 )
             }
