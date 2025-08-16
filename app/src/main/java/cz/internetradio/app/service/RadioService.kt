@@ -1299,7 +1299,7 @@ class RadioService : Service() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             "Přehrávání rádia",
-            NotificationManager.IMPORTANCE_LOW // Důležité pro MediaStyle
+            NotificationManager.IMPORTANCE_DEFAULT // Důležité pro MediaStyle
         ).apply {
             description = "Ovládání přehrávání internetového rádia"
             setShowBadge(false) // Vypnout odznak pro MediaStyle
