@@ -45,7 +45,11 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="cz.internetradio.app.ACTION_PLAY_PAUSE" />
+                <action android:name="cz.internetradio.app.action.PLAY" />
+                <action android:name="cz.internetradio.app.action.PAUSE" />
+                <action android:name="cz.internetradio.app.action.NEXT" />
+                <action android:name="cz.internetradio.app.action.PREVIOUS" />
+                <action android:name="cz.internetradio.app.action.STOP" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
