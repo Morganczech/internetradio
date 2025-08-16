@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,37 +77,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: RadioViewModel by viewModels()
-    
-    private val powerConnectionReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                Intent.ACTION_POWER_CONNECTED -> {
-                    Log.d("MainActivity", "Napájení připojeno")
-                }
-                Intent.ACTION_POWER_DISCONNECTED -> {
-                    Log.d("MainActivity", "Napájení odpojeno")
-                }
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Nastavení jazyka
-        lifecycleScope.launch {
-            viewModel.currentLanguage.collect { language ->
-                updateLocale(language)
-            }
-        }
-        
-        // Registrace přijímače pro sledování stavu nabíjení
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_POWER_CONNECTED)
-            addAction(Intent.ACTION_POWER_DISCONNECTED)
-        }
-        registerReceiver(powerConnectionReceiver, filter)
-        
         // Nastavení tmavé systémové lišty
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -120,6 +92,12 @@ class MainActivity : ComponentActivity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
         setContent {
+            val currentLanguage by viewModel.currentLanguage.collectAsState()
+            LaunchedEffect(currentLanguage) {
+ updateLocale(currentLanguage)
+            }
+            SystemEventReceiver(onPowerConnected = { Log.d("MainActivity", "Napájení připojeno") },
+                onPowerDisconnected = { Log.d("MainActivity", "Napájení odpojeno") })
             MaterialTheme(
                 colors = when {
                     isSystemInDarkTheme() -> darkColors(
