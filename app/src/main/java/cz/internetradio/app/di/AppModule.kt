@@ -7,6 +7,7 @@ import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.AudioSink
 import cz.internetradio.app.audio.AudioSpectrumProcessor
+import cz.internetradio.app.audio.EqualizerManager
 import cz.internetradio.app.api.RadioBrowserApi
 import dagger.Module
 import dagger.Provides
@@ -28,6 +29,12 @@ object AppModule {
     @Singleton
     fun provideContext(@ApplicationContext context: Context): Context {
         return context
+    }
+
+    @Provides
+    @Singleton
+    fun provideEqualizerManager(@ApplicationContext context: Context): EqualizerManager {
+        return EqualizerManager(context)
     }
 
     @Provides

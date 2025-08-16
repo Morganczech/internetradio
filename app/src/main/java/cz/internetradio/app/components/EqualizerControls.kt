@@ -14,6 +14,7 @@ import cz.internetradio.app.viewmodel.RadioViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.border
+import android.util.Log
 
 @Composable
 fun EqualizerControls(
@@ -43,7 +44,10 @@ fun EqualizerControls(
             )
             Switch(
                 checked = equalizerEnabled,
-                onCheckedChange = { viewModel.setEqualizerEnabled(it) },
+                onCheckedChange = { 
+                    Log.d("EqualizerControls", "Přepínám equalizer na: $it")
+                    viewModel.setEqualizerEnabled(it) 
+                },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colors.primary,
                     checkedTrackColor = MaterialTheme.colors.primary.copy(alpha = 0.5f)
@@ -75,7 +79,10 @@ fun EqualizerControls(
                                 Color.White.copy(alpha = 0.3f),
                             shape = RoundedCornerShape(16.dp)
                         )
-                        .clickable { viewModel.setEqualizerPreset(preset) }
+                        .clickable { 
+                            Log.d("EqualizerControls", "Nastavuji preset: ${preset.title}")
+                            viewModel.setEqualizerPreset(preset) 
+                        }
                 ) {
                     Text(
                         text = preset.title,
@@ -104,7 +111,10 @@ fun EqualizerControls(
                     ) {
                         Slider(
                             value = value,
-                            onValueChange = { viewModel.setBandValue(index, it) },
+                            onValueChange = { newValue ->
+                                Log.d("EqualizerControls", "Nastavuji pásmo $index na hodnotu $newValue")
+                                viewModel.setBandValue(index, newValue.coerceIn(-12f, 12f))
+                            },
                             valueRange = -12f..12f,
                             modifier = Modifier
                                 .height(150.dp)

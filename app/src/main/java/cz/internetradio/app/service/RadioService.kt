@@ -77,6 +77,7 @@ class RadioService : Service() {
     private var bufferSize = 2000 // Výchozí velikost bufferu v ms
     
     companion object {
+        private const val TAG = "RadioService"
         const val ACTION_PLAY = "cz.internetradio.app.action.PLAY"
         const val ACTION_PAUSE = "cz.internetradio.app.action.PAUSE"
         const val ACTION_NEXT = "cz.internetradio.app.action.NEXT"
@@ -88,6 +89,7 @@ class RadioService : Service() {
         const val EXTRA_IS_PLAYING = "is_playing"
         const val EXTRA_METADATA = "metadata"
         const val EXTRA_CURRENT_RADIO = "current_radio"
+        const val EXTRA_AUDIO_SESSION_ID = "audio_session_id"
         private const val NOTIFICATION_CHANNEL_ID = "radio_channel"
         private const val NOTIFICATION_ID = 1
         private const val WAKELOCK_TAG = "RadioService::WakeLock"
@@ -122,6 +124,26 @@ class RadioService : Service() {
         imageLoader = ImageLoader.Builder(this)
             .crossfade(true)
             .build()
+        
+        // Inicializace repository s RadioDao a RadioBrowserApi
+        radioRepository = RadioRepository(database.radioDao(), radioBrowserApi)
+        
+        // Nastavení ExoPlayeru
+        exoPlayer = ExoPlayer.Builder(this)
+            .setLoadControl(
+                DefaultLoadControl.Builder()
+                    .setBufferDurationsMs(
+                        bufferSize,
+                        bufferSize * 2,
+                        bufferSize / 2,
+                        bufferSize / 2
+                    )
+                    .setPrioritizeTimeOverSizeThresholds(true)
+                    .build()
+            )
+            .build()
+        
+        setupPlayer()
         
         // Inicializace MediaSession hned na začátku
         mediaSession = MediaSessionCompat(this, "RadioService").apply {
@@ -176,10 +198,6 @@ class RadioService : Service() {
             screenWakeLock.acquire()
         }
         
-        // Inicializace repository s RadioDao a RadioBrowserApi
-        radioRepository = RadioRepository(database.radioDao(), radioBrowserApi)
-        
-        setupPlayer()
         createNotificationChannel()
         
         // Vytvoření základní notifikace pro foreground service
@@ -200,12 +218,23 @@ class RadioService : Service() {
             addAction(Intent.ACTION_POWER_DISCONNECTED)
         }
         registerReceiver(batteryReceiver, filter)
+        
+        // Odeslání počátečního stavu
+        broadcastPlaybackState()
     }
 
     private fun setupPlayer() {
+        Log.d(TAG, "🎵 Nastavuji ExoPlayer")
+        val initialSessionId = exoPlayer.audioSessionId
+        Log.d(TAG, "🎵 Počáteční audio session ID: $initialSessionId")
+        
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                Log.d("RadioService", "onIsPlayingChanged: $isPlaying")
+                val currentSessionId = exoPlayer.audioSessionId
+                Log.d(TAG, """🎵 onIsPlayingChanged:
+                    |  - isPlaying: $isPlaying
+                    |  - audio session ID: $currentSessionId
+                    """.trimMargin())
                 _isPlaying.value = isPlaying
                 updatePlaybackState()
                 updateNotification()
@@ -220,9 +249,21 @@ class RadioService : Service() {
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
-                super.onPlaybackStateChanged(playbackState)
-                Log.d("RadioService", "onPlaybackStateChanged: $playbackState")
-                // Přidáno pro lepší synchronizaci
+                val currentSessionId = exoPlayer.audioSessionId
+                Log.d(TAG, """🎵 onPlaybackStateChanged:
+                    |  - stav: ${playbackStateToString(playbackState)}
+                    |  - audio session ID: $currentSessionId
+                    """.trimMargin())
+                onPlaybackStateChanged(playbackState)
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                super.onMediaItemTransition(mediaItem, reason)
+                val currentSessionId = exoPlayer.audioSessionId
+                Log.d(TAG, """🎵 onMediaItemTransition:
+                    |  - důvod: $reason
+                    |  - audio session ID: $currentSessionId
+                    """.trimMargin())
                 broadcastPlaybackState()
             }
 
@@ -338,21 +379,61 @@ class RadioService : Service() {
         })
     }
 
+    private fun onPlaybackStateChanged(playbackState: Int) {
+        Log.d("RadioService", "Stav přehrávání změněn na ${playbackStateToString(playbackState)}, audio session ID: ${exoPlayer.audioSessionId}")
+
+        when (playbackState) {
+            Player.STATE_READY -> {
+                Log.d("RadioService", "Přehrávač je připraven, audio session ID: ${exoPlayer.audioSessionId}")
+                _isPlaying.value = exoPlayer.isPlaying
+                updateNotification()
+            }
+            Player.STATE_BUFFERING -> {
+                Log.d("RadioService", "Přehrávač načítá data, audio session ID: ${exoPlayer.audioSessionId}")
+                updateNotification(isLoading = true)
+            }
+            Player.STATE_ENDED -> {
+                Log.d("RadioService", "Přehrávání skončilo, audio session ID: ${exoPlayer.audioSessionId}")
+                _isPlaying.value = false
+                updateNotification()
+            }
+            Player.STATE_IDLE -> {
+                Log.d("RadioService", "Přehrávač je nečinný, audio session ID: ${exoPlayer.audioSessionId}")
+                _isPlaying.value = false
+                updateNotification()
+            }
+        }
+
+        broadcastPlaybackState()
+    }
+
     private fun broadcastPlaybackState() {
         try {
-            Log.d("RadioService", "Odesílám broadcast - playing: ${_isPlaying.value}, radio: ${_currentRadio.value?.name}")
+            val audioSessionId = exoPlayer.audioSessionId
+            Log.d("RadioService", """📢 Odesílám broadcast:
+                |  - playing: ${_isPlaying.value}
+                |  - metadata: ${_currentMetadata.value}
+                |  - radio: ${_currentRadio.value?.name}
+                |  - audioSessionId: $audioSessionId
+                """.trimMargin())
+
             val intent = Intent(ACTION_PLAYBACK_STATE_CHANGED).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
                 putExtra(EXTRA_IS_PLAYING, _isPlaying.value)
                 putExtra(EXTRA_METADATA, _currentMetadata.value)
                 putExtra(EXTRA_CURRENT_RADIO, _currentRadio.value?.id)
+                putExtra(EXTRA_AUDIO_SESSION_ID, audioSessionId)
                 // Přidání flagů pro zajištění doručení
                 addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
             }
+            
             // Použití applicationContext pro zajištění doručení
             applicationContext.sendBroadcast(intent)
-            Log.d("RadioService", "Broadcast odeslán úspěšně")
+            Log.d("RadioService", "✅ Broadcast odeslán s audio session ID: $audioSessionId")
         } catch (e: Exception) {
-            Log.e("RadioService", "Chyba při odesílání broadcastu: ${e.message}")
+            Log.e("RadioService", "❌ Chyba při odesílání broadcastu: ${e.message}")
+            e.printStackTrace()
         }
     }
 
@@ -678,7 +759,8 @@ class RadioService : Service() {
     }
 
     private fun playRadio(radio: Radio) {
-        Log.d("RadioService", "Spouštím rádio: ${radio.name}")
+        Log.d("RadioService", "🎵 Spouštím rádio: ${radio.name}")
+        Log.d("RadioService", "🎵 Počáteční audio session ID: ${exoPlayer.audioSessionId}")
         try {
             if (!wakeLock.isHeld) {
                 wakeLock.acquire(24 * 60 * 60 * 1000L)
@@ -713,33 +795,22 @@ class RadioService : Service() {
             // Spuštění na hlavním vlákně
             serviceScope.launch(Dispatchers.Main.immediate) {
                 try {
+                    Log.d("RadioService", "🎵 Audio session ID před stop: ${exoPlayer.audioSessionId}")
                     // Reset ExoPlayeru
                     exoPlayer.stop()
+                    Log.d("RadioService", "🎵 Audio session ID po stop: ${exoPlayer.audioSessionId}")
                     exoPlayer.clearMediaItems()
-                    
-                    // Reinicializace ExoPlayeru
-                    exoPlayer = ExoPlayer.Builder(this@RadioService)
-                        .setLoadControl(
-                            DefaultLoadControl.Builder()
-                                .setBufferDurationsMs(
-                                    bufferSize,
-                                    bufferSize * 2,
-                                    bufferSize / 2,
-                                    bufferSize / 2
-                                )
-                                .setPrioritizeTimeOverSizeThresholds(true)
-                                .build()
-                        )
-                        .build()
-                    
-                    setupPlayer()
+                    Log.d("RadioService", "🎵 Audio session ID po clear: ${exoPlayer.audioSessionId}")
                     
                     // Nastavení a přehrání MediaItem
                     exoPlayer.apply {
                         setMediaItem(mediaItem)
+                        Log.d("RadioService", "🎵 Audio session ID po setMediaItem: ${audioSessionId}")
                         volume = 1.0f
                         prepare()
+                        Log.d("RadioService", "🎵 Audio session ID po prepare: ${audioSessionId}")
                         playWhenReady = true
+                        Log.d("RadioService", "🎵 Audio session ID po playWhenReady: ${audioSessionId}")
                     }
                     
                     _isPlaying.value = true
@@ -748,20 +819,21 @@ class RadioService : Service() {
                     // Aktualizace MediaSession s výchozími metadaty
                     updateMediaMetadata("", "")
                     
-                    // Aktualizace notifikace
+                    // Aktualizace notifikace a broadcast stavu
                     updateNotification()
                     broadcastPlaybackState()
                     
                     RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
                     
-                    Log.d("RadioService", "Rádio úspěšně spuštěno: ${radio.name}")
+                    Log.d("RadioService", "✅ Rádio úspěšně spuštěno: ${radio.name}")
+                    Log.d("RadioService", "🎵 Audio session ID: ${exoPlayer.audioSessionId}")
                 } catch (e: Exception) {
-                    Log.e("RadioService", "Chyba při spouštění rádia na hlavním vlákně: ${e.message}", e)
+                    Log.e("RadioService", "❌ Chyba při spouštění rádia na hlavním vlákně: ${e.message}", e)
                     stopPlayback()
                 }
             }
         } catch (e: Exception) {
-            Log.e("RadioService", "Chyba při spouštění rádia: ${e.message}", e)
+            Log.e("RadioService", "❌ Chyba při spouštění rádia: ${e.message}", e)
             stopPlayback()
         }
     }
@@ -799,25 +871,6 @@ class RadioService : Service() {
                 // Zastavení přehrávání
                 exoPlayer.stop()
                 exoPlayer.clearMediaItems()
-                exoPlayer.release()
-                
-                // Reinicializace ExoPlayeru pro další použití
-                exoPlayer = ExoPlayer.Builder(this@RadioService)
-                    .setLoadControl(
-                        DefaultLoadControl.Builder()
-                            .setBufferDurationsMs(
-                                bufferSize,  // Minimální buffer
-                                bufferSize * 2, // Maximální buffer
-                                bufferSize / 2, // Buffer pro začátek přehrávání
-                                bufferSize / 2  // Buffer pro pokračování po rebufferingu
-                            )
-                            .setPrioritizeTimeOverSizeThresholds(true)
-                            .build()
-                    )
-                    .build()
-                
-                // Nastavení posluchačů
-                setupPlayer()
                 
                 // Aktualizace stavů
                 _isPlaying.value = false
@@ -964,6 +1017,16 @@ class RadioService : Service() {
             Log.d("RadioService", "Zdroje úspěšně uvolněny")
         } catch (e: Exception) {
             Log.e("RadioService", "Chyba při uvolňování zdrojů: ${e.message}")
+        }
+    }
+
+    private fun playbackStateToString(state: Int): String {
+        return when (state) {
+            Player.STATE_IDLE -> "IDLE"
+            Player.STATE_BUFFERING -> "BUFFERING"
+            Player.STATE_READY -> "READY"
+            Player.STATE_ENDED -> "ENDED"
+            else -> "UNKNOWN"
         }
     }
 } 

@@ -149,51 +149,58 @@ class RadioViewModel @Inject constructor(
     val message: StateFlow<String?> = _message
 
     private val serviceReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            Log.d("RadioViewModel", "Přijat broadcast: ${intent.action}")
-            when (intent.action) {
-                RadioService.ACTION_PLAYBACK_STATE_CHANGED -> {
-                    val isPlaying = intent.getBooleanExtra(RadioService.EXTRA_IS_PLAYING, false)
-                    val metadata = intent.getStringExtra(RadioService.EXTRA_METADATA)
-                    val radioId = intent.getStringExtra(RadioService.EXTRA_CURRENT_RADIO)
-                    
-                    Log.d("RadioViewModel", "Přijat stav: playing=$isPlaying, metadata=$metadata, radioId=$radioId")
-                    
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("RadioViewModel", "📻 Přijat broadcast")
+            
+            if (context == null || intent == null) {
+                Log.e("RadioViewModel", "❌ Kontext nebo intent je null")
+                return
+            }
+
+            try {
+                val isPlaying = intent.getBooleanExtra(RadioService.EXTRA_IS_PLAYING, false)
+                val metadata = intent.getStringExtra(RadioService.EXTRA_METADATA)
+                val currentRadioId = intent.getStringExtra(RadioService.EXTRA_CURRENT_RADIO)
+                val audioSessionId = intent.getIntExtra(RadioService.EXTRA_AUDIO_SESSION_ID, -1)
+
+                Log.d("RadioViewModel", "📻 Přijatá data:")
+                Log.d("RadioViewModel", "- isPlaying: $isPlaying")
+                Log.d("RadioViewModel", "- metadata: $metadata")
+                Log.d("RadioViewModel", "- currentRadioId: $currentRadioId")
+                Log.d("RadioViewModel", "- audioSessionId: $audioSessionId")
+
+                _isPlaying.value = isPlaying
+                _currentMetadata.value = metadata
+
+                if (currentRadioId != null) {
                     viewModelScope.launch {
                         try {
-                            // Aktualizace rádia
-                            if (radioId != null) {
-                                val radio = radioRepository.getRadioById(radioId)
-                                if (radio != null) {
-                                    Log.d("RadioViewModel", "Aktualizuji rádio na: ${radio.name}")
-                                    _currentRadio.value = radio
-                                } else {
-                                    Log.e("RadioViewModel", "Rádio s ID $radioId nebylo nalezeno")
-                                }
-                            } else {
-                                Log.d("RadioViewModel", "Resetuji aktuální rádio (radioId je null)")
-                                _currentRadio.value = null
-                            }
-
-                            // Aktualizace stavu přehrávání
-                            if (_isPlaying.value != isPlaying) {
-                                Log.d("RadioViewModel", "Aktualizuji stav přehrávání na: $isPlaying")
-                                _isPlaying.value = isPlaying
-                            }
-
-                            // Aktualizace metadat
-                            if (_currentMetadata.value != metadata) {
-                                Log.d("RadioViewModel", "Aktualizuji metadata na: $metadata")
-                                _currentMetadata.value = metadata
-                            }
-
-                            // Aktualizace stavu pro wearable
-                            updateWearableState()
+                            val radio = radioRepository.getRadioById(currentRadioId)
+                            _currentRadio.value = radio
+                            Log.d("RadioViewModel", "✅ Aktualizováno rádio: ${radio?.name}")
                         } catch (e: Exception) {
-                            Log.e("RadioViewModel", "Chyba při zpracování broadcastu: ${e.message}")
+                            Log.e("RadioViewModel", "❌ Chyba při načítání rádia: ${e.message}")
                         }
                     }
                 }
+
+                if (audioSessionId != -1) {
+                    Log.d("RadioViewModel", "🎵 Nastavuji equalizer s audio session ID: $audioSessionId")
+                    viewModelScope.launch {
+                        try {
+                            equalizerManager.setupEqualizer(audioSessionId)
+                            Log.d("RadioViewModel", "✅ Equalizer nastaven")
+                        } catch (e: Exception) {
+                            Log.e("RadioViewModel", "❌ Chyba při nastavování equalizeru: ${e.message}")
+                            e.printStackTrace()
+                        }
+                    }
+                } else {
+                    Log.w("RadioViewModel", "⚠️ Neplatné audio session ID")
+                }
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "❌ Chyba při zpracování broadcastu: ${e.message}")
+                e.printStackTrace()
             }
         }
     }
@@ -232,14 +239,17 @@ class RadioViewModel @Inject constructor(
         try {
             // Registrace broadcast receiveru s explicitním povolením exportu
             val filter = IntentFilter(RadioService.ACTION_PLAYBACK_STATE_CHANGED)
+            filter.addCategory(Intent.CATEGORY_DEFAULT)
+            
             context.registerReceiver(
                 serviceReceiver,
                 filter,
                 Context.RECEIVER_EXPORTED
             )
-            Log.d("RadioViewModel", "Broadcast receiver úspěšně zaregistrován")
+            Log.d("RadioViewModel", "DEBUG: Broadcast receiver úspěšně zaregistrován pro akci: ${RadioService.ACTION_PLAYBACK_STATE_CHANGED}")
         } catch (e: Exception) {
             Log.e("RadioViewModel", "Chyba při registraci receiveru: ${e.message}")
+            e.printStackTrace()
         }
 
         loadLocalStations()
@@ -388,6 +398,9 @@ class RadioViewModel @Inject constructor(
         _isPlaying.value = false
         _currentMetadata.value = null
         
+        // Uvolnění equalizeru
+        equalizerManager.release()
+        
         // Zastavení služby
         val intent = Intent(context, RadioService::class.java)
         context.stopService(intent)
@@ -488,43 +501,99 @@ class RadioViewModel @Inject constructor(
     }
 
     private fun loadEqualizerState() {
+        Log.d("RadioViewModel", "📱 Načítám stav equalizeru")
         _equalizerEnabled.value = prefs.getBoolean("equalizer_enabled", false)
         val presetName = prefs.getString("equalizer_preset", EqualizerPreset.NORMAL.name)
         _currentPreset.value = EqualizerPreset.valueOf(presetName ?: EqualizerPreset.NORMAL.name)
-        applyEqualizerSettings()
+        _bandValues.value = _currentPreset.value.bands
+        
+        Log.d("RadioViewModel", """📱 Načtený stav equalizeru:
+            |  - Enabled: ${_equalizerEnabled.value}
+            |  - Preset: ${_currentPreset.value.title}
+            |  - Hodnoty pásem: ${_bandValues.value}
+            """.trimMargin())
     }
 
     fun setEqualizerEnabled(enabled: Boolean) {
+        Log.d("RadioViewModel", "🎛️ Nastavuji equalizer enabled: $enabled")
         _equalizerEnabled.value = enabled
         prefs.edit().putBoolean("equalizer_enabled", enabled).apply()
-        equalizerManager.setEnabled(enabled)
-        applyEqualizerSettings()
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                equalizerManager.setEnabled(enabled)
+                if (enabled) {
+                    Log.d("RadioViewModel", "🎛️ Equalizer zapnut, aplikuji nastavení")
+                    // Znovu aplikujeme aktuální preset
+                    _currentPreset.value.bands.forEachIndexed { index, value ->
+                        equalizerManager.setBandLevel(index, value.toInt())
+                        Log.d("RadioViewModel", "✅ Nastaveno pásmo $index na hodnotu ${value.toInt()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "❌ Chyba při nastavování stavu equalizeru", e)
+            }
+        }
     }
 
     fun setEqualizerPreset(preset: EqualizerPreset) {
+        Log.d("RadioViewModel", "🎛️ Nastavuji equalizer preset: ${preset.title}")
         _currentPreset.value = preset
         _bandValues.value = preset.bands
         prefs.edit().putString("equalizer_preset", preset.name).apply()
+        
         if (_equalizerEnabled.value) {
-            equalizerManager.applyPreset(preset)
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    equalizerManager.setEnabled(true) // Ujistíme se, že je equalizer zapnutý
+                    preset.bands.forEachIndexed { index, value ->
+                        equalizerManager.setBandLevel(index, value.toInt())
+                        Log.d("RadioViewModel", "✅ Nastaveno pásmo $index na hodnotu ${value.toInt()}")
+                    }
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "❌ Chyba při aplikování presetu", e)
+                }
+            }
         }
     }
 
     fun setBandValue(index: Int, value: Float) {
+        Log.d("RadioViewModel", "🎛️ Nastavuji band $index na hodnotu $value")
         val newValues = _bandValues.value.toMutableList()
         newValues[index] = value
         _bandValues.value = newValues
+        
         if (_equalizerEnabled.value) {
-            equalizerManager.setBandLevel(index, value)
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    equalizerManager.setBandLevel(index, value.toInt())
+                    Log.d("RadioViewModel", "✅ Band $index úspěšně nastaven na $value")
+                } catch (e: Exception) {
+                    Log.e("RadioViewModel", "❌ Chyba při nastavování bandu $index", e)
+                }
+            }
         }
     }
 
     private fun applyEqualizerSettings() {
-        if (_equalizerEnabled.value) {
-            equalizerManager.setEnabled(true)
-            equalizerManager.applyPreset(_currentPreset.value)
-        } else {
-            equalizerManager.setEnabled(false)
+        Log.d("RadioViewModel", """🎛️ Aplikuji nastavení equalizeru:
+            |  - Enabled: ${_equalizerEnabled.value}
+            |  - Preset: ${_currentPreset.value.title}
+            |  - Hodnoty pásem: ${_bandValues.value}
+            """.trimMargin())
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                equalizerManager.setEnabled(_equalizerEnabled.value)
+                if (_equalizerEnabled.value) {
+                    _bandValues.value.forEachIndexed { index, value ->
+                        equalizerManager.setBandLevel(index, value.toInt())
+                        Log.d("RadioViewModel", "✅ Nastaveno pásmo $index na hodnotu ${value.toInt()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("RadioViewModel", "❌ Chyba při aplikování nastavení equalizeru", e)
+            }
         }
     }
 
