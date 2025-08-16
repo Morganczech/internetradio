@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioManager
 import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -117,6 +118,237 @@ class RadioService : Service() {
         }
     }
 
+    private val audioOutputReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_AUDIO_BECOMING_NOISY -> {
+                    // Tato akce se spustí při odpojení wired headsetu
+                    Log.d(TAG, "🔊 Audio výstup se stal hlučným - pozastavuji přehrávání")
+                    if (_isPlaying.value) {
+                        pausePlayback()
+                    }
+                }
+            }
+        }
+    }
+
+    // Proměnná pro uložení stavu před změnou audio výstupu
+    private var wasPlayingBeforeAudioOutputChange = false
+    
+    // AudioManager pro správu audio focusu a detekci změn
+    private lateinit var audioManager: AudioManager
+    
+    // Audio Focus Change Listener pro správu audio focusu
+    private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        Log.d(TAG, "🎵 Audio focus změna: $focusChange")
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                Log.d(TAG, "🎵 Audio focus získán")
+                // Můžeme pokračovat v přehrávání
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                Log.d(TAG, "🎵 Audio focus ztracen - pozastavuji přehrávání")
+                if (_isPlaying.value) {
+                    pausePlayback()
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                Log.d(TAG, "🎵 Audio focus dočasně ztracen - pozastavuji přehrávání")
+                if (_isPlaying.value) {
+                    wasPlayingBeforeAudioOutputChange = true
+                    pausePlayback()
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                Log.d(TAG, "🎵 Audio focus dočasně ztracen - snižuji hlasitost")
+                // Můžeme snížit hlasitost místo pozastavení
+                exoPlayer.volume = 0.3f
+            }
+        }
+    }
+    
+    // Metoda pro požádání o audio focus
+    private fun requestAudioFocus(): Boolean {
+        val result = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val audioAttributes = android.media.AudioAttributes.Builder()
+                .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+            val focusRequest = android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(audioAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(audioFocusChangeListener)
+                .build()
+            audioManager.requestAudioFocus(focusRequest)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(
+                audioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
+        
+        val granted = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        Log.d(TAG, "🎵 Audio focus požadavek: ${if (granted) "udělen" else "zamítnut"}")
+        return granted
+    }
+    
+    // Metoda pro uvolnění audio focusu
+    private fun abandonAudioFocus() {
+        audioManager.abandonAudioFocus(audioFocusChangeListener)
+        Log.d(TAG, "🎵 Audio focus uvolněn")
+    }
+    
+    // Metoda pro kontrolu změn audio výstupu
+    private fun checkAudioOutputChanges() {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val currentAudioOutput = isAudioOutputConnected()
+        
+        // Kontrola, zda se změnil stav audio výstupu
+        if (!currentAudioOutput && _isPlaying.value) {
+            Log.d(TAG, "🔍 Žádný audio výstup není připojen - pozastavuji přehrávání")
+            
+            // Uložení stavu před pozastavením
+            wasPlayingBeforeAudioOutputChange = true
+            
+            // Pozastavení přehrávání
+            pausePlayback()
+            
+            // Zobrazení notifikace uživateli
+            showAudioOutputDisconnectedNotification()
+            
+            // Aktualizace notifikace s informací o pozastavení
+            updateNotificationWithAudioOutputInfo("Pozastaveno - audio výstup odpojen")
+            
+        } else if (currentAudioOutput && !_isPlaying.value && wasPlayingBeforeAudioOutputChange) {
+            Log.d(TAG, "🔍 Audio výstup je opět připojen - obnovuji přehrávání")
+            wasPlayingBeforeAudioOutputChange = false
+            
+            // Obnovení přehrávání, pokud bylo předtím pozastaveno kvůli odpojení audio výstupu
+            _currentRadio.value?.let { radio ->
+                playRadio(radio)
+            }
+            
+            // Skrytí notifikace o odpojení audio výstupu
+            notificationManager.cancel(2)
+            
+            // Obnovení původní notifikace
+            updateNotification()
+        }
+        
+        // Kontrola, zda je audio systém stále aktivní
+        if (currentAudioOutput && _isPlaying.value) {
+            val isAudioStillActive = audioManager.isMusicActive || 
+                                   audioManager.mode != AudioManager.MODE_NORMAL
+            
+            if (!isAudioStillActive) {
+                Log.d(TAG, "🔍 Audio systém není aktivní - pozastavuji přehrávání")
+                wasPlayingBeforeAudioOutputChange = true
+                pausePlayback()
+                updateNotificationWithAudioOutputInfo("Pozastaveno - audio systém neaktivní")
+            }
+        }
+    }
+    
+    // Metoda pro kontrolu, zda je připojen Bluetooth nebo headset
+    private fun isAudioOutputConnected(): Boolean {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val isBluetoothConnected = audioManager.isBluetoothScoOn || 
+                                 audioManager.isBluetoothA2dpOn ||
+                                 audioManager.mode == AudioManager.MODE_IN_COMMUNICATION
+        val isWiredHeadsetConnected = audioManager.isWiredHeadsetOn
+        val isSpeakerOn = audioManager.isSpeakerphoneOn
+        
+        // Kontrola, zda je aktivní nějaký audio výstup
+        val hasActiveAudioOutput = isBluetoothConnected || isWiredHeadsetConnected || isSpeakerOn
+        
+        // Kontrola, zda je audio systém aktivní
+        val isAudioSystemActive = audioManager.mode != AudioManager.MODE_NORMAL || 
+                                 audioManager.isMusicActive
+        
+        // Kontrola, zda je nějaké audio zařízení připojeno
+        val hasConnectedAudioDevice = audioManager.isBluetoothScoOn || 
+                                    audioManager.isBluetoothA2dpOn ||
+                                    audioManager.isWiredHeadsetOn ||
+                                    audioManager.isSpeakerphoneOn
+        
+        Log.d(TAG, "🔍 Kontrola audio výstupu: Bluetooth SCO=$isBluetoothConnected, A2DP=${audioManager.isBluetoothA2dpOn}, Headset=$isWiredHeadsetConnected, Speaker=$isSpeakerOn, Active=$hasActiveAudioOutput, System=$isAudioSystemActive, Device=$hasConnectedAudioDevice")
+        
+        return hasActiveAudioOutput || isAudioSystemActive || hasConnectedAudioDevice
+    }
+    
+    // Spuštění periodické kontroly audio výstupu
+    private fun startAudioOutputMonitoring() {
+        serviceScope.launch {
+            while (true) {
+                try {
+                    kotlinx.coroutines.delay(3000) // Kontrola každé 3 sekundy
+                    
+                    // Kontrola, zda je audio focus stále aktivní
+                    if (_isPlaying.value && !audioManager.isMusicActive) {
+                        Log.d(TAG, "🔍 Audio focus není aktivní - pozastavuji přehrávání")
+                        wasPlayingBeforeAudioOutputChange = true
+                        pausePlayback()
+                        updateNotificationWithAudioOutputInfo("Pozastaveno - audio focus ztracen")
+                    }
+                    
+                    // Kontrola Bluetooth stavu
+                    val isBluetoothActive = audioManager.isBluetoothScoOn || audioManager.isBluetoothA2dpOn
+                    if (!isBluetoothActive && _isPlaying.value && wasPlayingBeforeAudioOutputChange) {
+                        Log.d(TAG, "🔍 Bluetooth není aktivní - pozastavuji přehrávání")
+                        pausePlayback()
+                        updateNotificationWithAudioOutputInfo("Pozastaveno - Bluetooth odpojen")
+                    }
+                    
+                    // Kontrola, zda je nějaký audio výstup připojen
+                    if (_isPlaying.value && !isAudioOutputConnected()) {
+                        Log.d(TAG, "🔍 Žádný audio výstup není připojen - pozastavuji přehrávání")
+                        wasPlayingBeforeAudioOutputChange = true
+                        pausePlayback()
+                        updateNotificationWithAudioOutputInfo("Pozastaveno - audio výstup odpojen")
+                    }
+                    
+                } catch (e: Exception) {
+                    Log.e(TAG, "Chyba při kontrole audio výstupu: ${e.message}")
+                    break
+                }
+            }
+        }
+    }
+    
+    // Zobrazení notifikace o odpojení audio výstupu
+    private fun showAudioOutputDisconnectedNotification() {
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("Audio výstup odpojen")
+            .setContentText("Přehrávání bylo pozastaveno - připojte reproduktor nebo headset")
+            .setSmallIcon(R.drawable.ic_radio_default)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setTimeoutAfter(5000) // Automatické skrytí po 5 sekundách
+            .build()
+        
+        notificationManager.notify(2, notification)
+    }
+    
+    // Aktualizace hlavní notifikace s informací o audio výstupu
+    private fun updateNotificationWithAudioOutputInfo(info: String) {
+        val currentRadio = _currentRadio.value
+        if (currentRadio != null) {
+            val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(currentRadio.name)
+                .setContentText(info)
+                .setSmallIcon(R.drawable.ic_radio_default)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOngoing(true)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .build()
+            
+            notificationManager.notify(NOTIFICATION_ID, notification)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         
@@ -124,6 +356,9 @@ class RadioService : Service() {
         imageLoader = ImageLoader.Builder(this)
             .crossfade(true)
             .build()
+        
+        // Inicializace AudioManager
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         
         // Inicializace repository s RadioDao a RadioBrowserApi
         radioRepository = RadioRepository(database.radioDao(), radioBrowserApi)
@@ -150,7 +385,12 @@ class RadioService : Service() {
             setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() {
-                    _currentRadio.value?.let { playRadio(it) }
+                    _currentRadio.value?.let { radio ->
+                        // Požádání o audio focus před obnovením přehrávání
+                        if (requestAudioFocus()) {
+                            playRadio(radio)
+                        }
+                    }
                 }
 
                 override fun onPause() {
@@ -243,6 +483,15 @@ class RadioService : Service() {
             addAction(Intent.ACTION_POWER_DISCONNECTED)
         }
         registerReceiver(batteryReceiver, filter)
+        
+        // Registrace receiveru pro sledování změn audio výstupu
+        val audioFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_AUDIO_BECOMING_NOISY)
+        }
+        registerReceiver(audioOutputReceiver, audioFilter)
+        
+        // Spuštění periodické kontroly audio výstupu
+        startAudioOutputMonitoring()
         
         // Odeslání počátečního stavu
         broadcastPlaybackState()
@@ -852,102 +1101,63 @@ class RadioService : Service() {
     }
 
     private fun playRadio(radio: Radio) {
-        Log.d("RadioService", "🎵 Spouštím rádio: ${radio.name}")
-        Log.d("RadioService", "🎵 Počáteční audio session ID: ${exoPlayer.audioSessionId}")
+        Log.d("RadioService", "🎵 Spouštím přehrávání rádia: ${radio.name}")
+        
+        // Požádání o audio focus před začátkem přehrávání
+        if (!requestAudioFocus()) {
+            Log.w(TAG, "🎵 Audio focus nebyl udělen - nelze přehrávat")
+            return
+        }
+        
         try {
-            if (!wakeLock.isHeld) {
-                wakeLock.acquire(24 * 60 * 60 * 1000L)
-            }
+            // Nastavení MediaItem
+            val mediaItem = MediaItem.fromUri(radio.url)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            exoPlayer.play()
             
-            initMediaSession()
-            
+            // Aktualizace stavů
             _currentRadio.value = radio
-            _currentMetadata.value = null
+            _isPlaying.value = true
             
-            // Zobrazení "Čekejte chvíli..."
-            updateNotification(loading = true)
-            
-            // Vytvoření MediaItem s metadaty
-            val mediaItem = MediaItem.Builder()
-                .setUri(radio.streamUrl)
-                .setMediaMetadata(
-                    androidx.media3.common.MediaMetadata.Builder()
-                        .setTitle(radio.name)
-                        .setDisplayTitle(radio.name)
-                        .setDescription(radio.description)
-                        .setArtist("")
-                        .setIsBrowsable(false)
-                        .setIsPlayable(true)
-                        .setExtras(Bundle().apply {
-                            putString("station_name", radio.name)
-                        })
-                        .build()
-                )
+            // Nastavení MediaSession pro přehrávání
+            val playbackState = PlaybackStateCompat.Builder()
+                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                .setActions(PlaybackStateCompat.ACTION_PLAY or 
+                           PlaybackStateCompat.ACTION_PAUSE or 
+                           PlaybackStateCompat.ACTION_SKIP_TO_NEXT or 
+                           PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or 
+                           PlaybackStateCompat.ACTION_STOP)
                 .build()
+            mediaSession.setPlaybackState(playbackState)
             
-            // Spuštění na hlavním vlákně
-            serviceScope.launch(Dispatchers.Main.immediate) {
-                try {
-                    Log.d("RadioService", "🎵 Audio session ID před stop: ${exoPlayer.audioSessionId}")
-                    // Reset ExoPlayeru
-                    exoPlayer.stop()
-                    Log.d("RadioService", "🎵 Audio session ID po stop: ${exoPlayer.audioSessionId}")
-                    exoPlayer.clearMediaItems()
-                    Log.d("RadioService", "🎵 Audio session ID po clear: ${exoPlayer.audioSessionId}")
-                    
-                    // Nastavení a přehrání MediaItem
-                    exoPlayer.apply {
-                        setMediaItem(mediaItem)
-                        Log.d("RadioService", "🎵 Audio session ID po setMediaItem: ${audioSessionId}")
-                        volume = 1.0f
-                        prepare()
-                        Log.d("RadioService", "🎵 Audio session ID po prepare: ${audioSessionId}")
-                        playWhenReady = true
-                        Log.d("RadioService", "🎵 Audio session ID po playWhenReady: ${audioSessionId}")
-                    }
-                    
-                    _isPlaying.value = true
-                    mediaSession.isActive = true
-                    
-                    // Nastavení MediaSession pro přehrávání
-                    val playbackState = PlaybackStateCompat.Builder()
-                        .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
-                        .setActions(PlaybackStateCompat.ACTION_PLAY or 
-                                   PlaybackStateCompat.ACTION_PAUSE or 
-                                   PlaybackStateCompat.ACTION_SKIP_TO_NEXT or 
-                                   PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or 
-                                   PlaybackStateCompat.ACTION_STOP)
-                        .build()
-                    mediaSession.setPlaybackState(playbackState)
-                    
-                    // Aktualizace MediaSession s výchozími metadaty
-                    updateMediaMetadata("", "")
-                    
-                    // Aktualizace notifikace a broadcast stavu
-                    Log.d("RadioService", "🔄 Aktualizuji notifikaci po spuštění rádia")
-                    updateNotification()
-                    broadcastPlaybackState()
-                    
-                    RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
-                    
-                    Log.d("RadioService", "✅ Rádio úspěšně spuštěno: ${radio.name}")
-                    Log.d("RadioService", "🎵 Audio session ID: ${exoPlayer.audioSessionId}")
-                    
-                    // Kontrola notifikace po spuštění
-                    serviceScope.launch {
-                        kotlinx.coroutines.delay(500)
-                        val activeNotifications = notificationManager.activeNotifications
-                        val hasOurNotification = activeNotifications.any { it.id == NOTIFICATION_ID }
-                        Log.d("RadioService", "🔍 Kontrola notifikace po spuštění: ${if (hasOurNotification) "ZOBRAZUJE SE" else "NEZOBRAZUJE SE"}")
-                    }
-                } catch (e: Exception) {
-                    Log.e("RadioService", "❌ Chyba při spouštění rádia na hlavním vlákně: ${e.message}", e)
-                    stopPlayback()
-                }
+            // Aktivace MediaSession
+            mediaSession.isActive = true
+            
+            // Aktualizace notifikace
+            updateNotification()
+            
+            // Odeslání broadcastu o změně stavu
+            broadcastPlaybackState()
+            
+            // Získání WakeLock pro přehrávání
+            if (!wakeLock.isHeld) {
+                wakeLock.acquire()
             }
+            
+            // Aktualizace widgetu
+            RadioWidgetProvider.updateWidgets(
+                applicationContext,
+                true,
+                radio.id
+            )
+            
+            Log.d("RadioService", "✅ Přehrávání rádia úspěšně spuštěno")
+            
         } catch (e: Exception) {
-            Log.e("RadioService", "❌ Chyba při spouštění rádia: ${e.message}", e)
-            stopPlayback()
+            Log.e("RadioService", "Chyba při spouštění přehrávání: ${e.message}", e)
+            // Uvolnění audio focusu při chybě
+            abandonAudioFocus()
         }
     }
 
@@ -1006,6 +1216,9 @@ class RadioService : Service() {
                 // Zastavení přehrávání
                 exoPlayer.stop()
                 exoPlayer.clearMediaItems()
+                
+                // Uvolnění audio focusu
+                abandonAudioFocus()
                 
                 // Aktualizace stavů
                 _isPlaying.value = false
@@ -1139,6 +1352,9 @@ class RadioService : Service() {
             exoPlayer.stop()
             exoPlayer.clearMediaItems()
             
+            // Uvolnění audio focusu
+            abandonAudioFocus()
+            
             // Uvolnění ExoPlayeru
             exoPlayer.release()
             
@@ -1157,6 +1373,7 @@ class RadioService : Service() {
             
             // Odregistrace receiveru
             unregisterReceiver(batteryReceiver)
+            unregisterReceiver(audioOutputReceiver) // Odregistrace nového receiveru
             
             // Zrušení coroutine scope
             serviceJob.cancel()
