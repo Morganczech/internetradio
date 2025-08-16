@@ -104,6 +104,11 @@
     <string name="action_copy_to_clipboard">Copy to clipboard</string>
     <string name="action_clear">Clear</string>
 
+    <!-- Widget -->
+    <string name="widget_description">Radio player widget for quick access to your favorite stations</string>
+    <string name="widget_radio_name">Radio Station</string>
+    <string name="widget_metadata">Now Playing</string>
+
     <!-- Messages -->
     <string name="msg_favorites_limit">Maximum number of favorites reached</string>
     <string name="msg_song_saved">Song has been saved to favorites</string>

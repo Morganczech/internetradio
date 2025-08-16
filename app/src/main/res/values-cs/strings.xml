@@ -98,6 +98,11 @@
     <string name="action_save">Uložit</string>
     <string name="action_close">Zavřít</string>
     <string name="action_more_options">Více možností</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Widget přehrávače rádia pro rychlý přístup k oblíbeným stanicím</string>
+    <string name="widget_radio_name">Rádiová stanice</string>
+    <string name="widget_metadata">Právě hraje</string>
     <string name="action_copy_to_clipboard">Kopírovat do schránky</string>
     <string name="action_clear">Vymazat</string>
 

@@ -206,11 +206,36 @@ class RadioService : Service() {
             .setContentText("Připraveno k přehrávání")
             .setSmallIcon(R.drawable.ic_radio_default)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setOngoing(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()
             
+        Log.d("RadioService", "🔔 Vytvářím počáteční notifikaci")
+        Log.d("RadioService", "🔔 Notifikace obsahuje:")
+        Log.d("RadioService", "   - Title: ${initialNotification.extras.getString("android.title")}")
+        Log.d("RadioService", "   - Text: ${initialNotification.extras.getString("android.text")}")
+        Log.d("RadioService", "   - Priority: ${initialNotification.extras.getInt("android.priority", 0)}")
+        Log.d("RadioService", "   - Category: ${initialNotification.extras.getString("android.category")}")
+        Log.d("RadioService", "   - Visibility: ${initialNotification.extras.getInt("android.visibility", 0)}")
+        Log.d("RadioService", "   - Ongoing: ${initialNotification.extras.getBoolean("android.ongoing", false)}")
+        
         startForeground(NOTIFICATION_ID, initialNotification)
+        
+        // Kontrola, zda se notifikace zobrazuje při startu
+        val activeNotifications = notificationManager.activeNotifications
+        val hasOurNotification = activeNotifications.any { it.id == NOTIFICATION_ID }
+        Log.d("RadioService", "🔍 Kontrola notifikace při startu: ${if (hasOurNotification) "ZOBRAZUJE SE" else "NEZOBRAZUJE SE"}")
+        Log.d("RadioService", "🔍 Počet aktivních notifikací: ${activeNotifications.size}")
+        
+        // Kontrola notifikace po chvíli
+        serviceScope.launch {
+            kotlinx.coroutines.delay(1000)
+            val delayedNotifications = notificationManager.activeNotifications
+            val hasDelayedNotification = delayedNotifications.any { it.id == NOTIFICATION_ID }
+            Log.d("RadioService", "🔍 Kontrola notifikace po 1s: ${if (hasDelayedNotification) "ZOBRAZUJE SE" else "NEZOBRAZUJE SE"}")
+            Log.d("RadioService", "🔍 Počet aktivních notifikací po 1s: ${delayedNotifications.size}")
+        }
         
         // Registrace receiveru pro sledování stavu baterie
         val filter = IntentFilter().apply {
@@ -237,7 +262,13 @@ class RadioService : Service() {
                     """.trimMargin())
                 _isPlaying.value = isPlaying
                 updatePlaybackState()
-                updateNotification()
+                
+                // Explicitní aktualizace notifikace s malým zpožděním
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(100)
+                    updateNotification()
+                }
+                
                 broadcastPlaybackState()
                 
                 // Aktualizace widgetu
@@ -328,7 +359,13 @@ class RadioService : Service() {
                 }
 
                 updateMediaMetadata(extractedArtist, extractedTitle)
-                updateNotification()
+                
+                // Explicitní aktualizace notifikace po změně metadat
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(200)
+                    updateNotification()
+                }
+                
                 broadcastPlaybackState()
             }
         })
@@ -386,7 +423,12 @@ class RadioService : Service() {
             Player.STATE_READY -> {
                 Log.d("RadioService", "Přehrávač je připraven, audio session ID: ${exoPlayer.audioSessionId}")
                 _isPlaying.value = exoPlayer.isPlaying
-                updateNotification()
+                
+                // Aktualizace notifikace s malým zpožděním
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(150)
+                    updateNotification()
+                }
             }
             Player.STATE_BUFFERING -> {
                 Log.d("RadioService", "Přehrávač načítá data, audio session ID: ${exoPlayer.audioSessionId}")
@@ -395,12 +437,22 @@ class RadioService : Service() {
             Player.STATE_ENDED -> {
                 Log.d("RadioService", "Přehrávání skončilo, audio session ID: ${exoPlayer.audioSessionId}")
                 _isPlaying.value = false
-                updateNotification()
+                
+                // Aktualizace notifikace s malým zpožděním
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(150)
+                    updateNotification()
+                }
             }
             Player.STATE_IDLE -> {
                 Log.d("RadioService", "Přehrávač je nečinný, audio session ID: ${exoPlayer.audioSessionId}")
                 _isPlaying.value = false
-                updateNotification()
+                
+                // Aktualizace notifikace s malým zpožděním
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(150)
+                    updateNotification()
+                }
             }
         }
 
@@ -573,6 +625,27 @@ class RadioService : Service() {
                         stopPlayback()
                     }
                 })
+                
+                // Nastavení výchozího stavu přehrávání
+                val playbackState = PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f)
+                    .setActions(PlaybackStateCompat.ACTION_PLAY or 
+                               PlaybackStateCompat.ACTION_PAUSE or 
+                               PlaybackStateCompat.ACTION_SKIP_TO_NEXT or 
+                               PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or 
+                               PlaybackStateCompat.ACTION_STOP)
+                    .build()
+                setPlaybackState(playbackState)
+                
+                // Nastavení výchozích metadat
+                val metadata = MediaMetadataCompat.Builder()
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "Internetové rádio")
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "")
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "Internetové rádio")
+                    .build()
+                setMetadata(metadata)
+                
+                Log.d("RadioService", "🎵 MediaSession inicializován s session tokenem: ${sessionToken}")
             }
         }
     }
@@ -620,33 +693,30 @@ class RadioService : Service() {
         Log.d("RadioService", "- text: '$displayText'")
         Log.d("RadioService", "- artist: '$artist'")
         Log.d("RadioService", "- title: '$title'")
+        Log.d("RadioService", "- isPlaying: ${_isPlaying.value}")
+        Log.d("RadioService", "- currentRadio: ${_currentRadio.value?.name}")
 
-        // Vytvoření MediaStyle s podporou pro Samsung
+        // Vytvoření MediaStyle s podporou pro moderní Android
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
-            .setShowActionsInCompactView(1, 2)
+            .setShowActionsInCompactView(0, 1, 2) // Zobrazit play/pause, previous, next v kompaktním zobrazení
             .setMediaSession(mediaSession.sessionToken)
+            .setShowCancelButton(true)
 
-        // Vytvoření notifikace s metadaty a vyšší prioritou
+        // Vytvoření notifikace s MediaStyle a správnou prioritou
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(displayTitle)
             .setContentText(displayText)
             .setSubText(title)
             .setTicker(displayText)
             .setStyle(mediaStyle)
-            .setSmallIcon(R.drawable.ic_notification_play)
+            .setSmallIcon(if (isPlaying) R.drawable.ic_notification_play else R.drawable.ic_pause) // Správná ikona podle stavu
             .setContentIntent(contentPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Změna na LOW pro MediaStyle
             .setOngoing(true)
-            .setOnlyAlertOnce(true)
+            .setOnlyAlertOnce(false)
             .setAutoCancel(false)
-            .addExtras(Bundle().apply {
-                putString("android.media.metadata.ARTIST", artist)
-                putString("android.media.metadata.TITLE", title)
-                putString("android.media.metadata.DISPLAY_TITLE", displayTitle)
-                putString("android.media.metadata.DISPLAY_SUBTITLE", displayText)
-            })
+            .setCategory(NotificationCompat.CATEGORY_TRANSPORT) // Důležité pro MediaStyle
 
         // Načtení ikony rádia pomocí Coil
         radio?.imageUrl?.let { imageUrl ->
@@ -738,6 +808,16 @@ class RadioService : Service() {
             }
         }
 
+        Log.d("RadioService", "🔔 Notifikace vytvořena s:")
+        Log.d("RadioService", "   - Style: ${builder.extras.getString("android.mediaStyle")}")
+        Log.d("RadioService", "   - Priority: ${builder.extras.getInt("android.priority", 0)}")
+        Log.d("RadioService", "   - Category: ${builder.extras.getString("android.category")}")
+        Log.d("RadioService", "   - Visibility: ${builder.extras.getInt("android.visibility", 0)}")
+        Log.d("RadioService", "   - Ongoing: ${builder.extras.getBoolean("android.ongoing", false)}")
+        Log.d("RadioService", "   - SmallIcon: ${if (isPlaying) "ic_notification_play" else "ic_pause"}")
+        Log.d("RadioService", "   - MediaSession Token: ${mediaSession.sessionToken}")
+        Log.d("RadioService", "   - MediaSession Active: ${mediaSession.isActive}")
+        
         return builder
     }
 
@@ -752,9 +832,22 @@ class RadioService : Service() {
 
             val notification = notificationBuilder.build()
             Log.d("RadioService", "🔄 Aktualizuji notifikaci ${if (loading) "(Loading...)" else ""}")
+            Log.d("RadioService", "🔔 Notifikace obsahuje:")
+            Log.d("RadioService", "   - Title: ${notification.extras.getString("android.title")}")
+            Log.d("RadioService", "   - Text: ${notification.extras.getString("android.text")}")
+            Log.d("RadioService", "   - SubText: ${notification.extras.getString("android.subText")}")
+            
             notificationManager.notify(NOTIFICATION_ID, notification)
+            Log.d("RadioService", "✅ Notifikace úspěšně aktualizována")
+            
+            // Kontrola, zda se notifikace zobrazuje
+            val activeNotifications = notificationManager.activeNotifications
+            val hasOurNotification = activeNotifications.any { it.id == NOTIFICATION_ID }
+            Log.d("RadioService", "🔍 Kontrola notifikace: ${if (hasOurNotification) "ZOBRAZUJE SE" else "NEZOBRAZUJE SE"}")
+            Log.d("RadioService", "🔍 Počet aktivních notifikací: ${activeNotifications.size}")
         } catch (e: Exception) {
             Log.e("RadioService", "❌ Chyba při aktualizaci notifikace: ${e.message}")
+            e.printStackTrace()
         }
     }
 
@@ -816,10 +909,22 @@ class RadioService : Service() {
                     _isPlaying.value = true
                     mediaSession.isActive = true
                     
+                    // Nastavení MediaSession pro přehrávání
+                    val playbackState = PlaybackStateCompat.Builder()
+                        .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                        .setActions(PlaybackStateCompat.ACTION_PLAY or 
+                                   PlaybackStateCompat.ACTION_PAUSE or 
+                                   PlaybackStateCompat.ACTION_SKIP_TO_NEXT or 
+                                   PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or 
+                                   PlaybackStateCompat.ACTION_STOP)
+                        .build()
+                    mediaSession.setPlaybackState(playbackState)
+                    
                     // Aktualizace MediaSession s výchozími metadaty
                     updateMediaMetadata("", "")
                     
                     // Aktualizace notifikace a broadcast stavu
+                    Log.d("RadioService", "🔄 Aktualizuji notifikaci po spuštění rádia")
                     updateNotification()
                     broadcastPlaybackState()
                     
@@ -827,6 +932,14 @@ class RadioService : Service() {
                     
                     Log.d("RadioService", "✅ Rádio úspěšně spuštěno: ${radio.name}")
                     Log.d("RadioService", "🎵 Audio session ID: ${exoPlayer.audioSessionId}")
+                    
+                    // Kontrola notifikace po spuštění
+                    serviceScope.launch {
+                        kotlinx.coroutines.delay(500)
+                        val activeNotifications = notificationManager.activeNotifications
+                        val hasOurNotification = activeNotifications.any { it.id == NOTIFICATION_ID }
+                        Log.d("RadioService", "🔍 Kontrola notifikace po spuštění: ${if (hasOurNotification) "ZOBRAZUJE SE" else "NEZOBRAZUJE SE"}")
+                    }
                 } catch (e: Exception) {
                     Log.e("RadioService", "❌ Chyba při spouštění rádia na hlavním vlákně: ${e.message}", e)
                     stopPlayback()
@@ -844,7 +957,21 @@ class RadioService : Service() {
             try {
                 exoPlayer.pause()
                 _isPlaying.value = false
+                
+                // Nastavení MediaSession pro pozastavení
+                val playbackState = PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_PAUSED, 0, 1.0f)
+                    .setActions(PlaybackStateCompat.ACTION_PLAY or 
+                               PlaybackStateCompat.ACTION_PAUSE or 
+                               PlaybackStateCompat.ACTION_SKIP_TO_NEXT or 
+                               PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or 
+                               PlaybackStateCompat.ACTION_STOP)
+                    .build()
+                mediaSession.setPlaybackState(playbackState)
+                
                 updatePlaybackState()
+                
+                Log.d("RadioService", "🔄 Aktualizuji notifikaci po pozastavení")
                 updateNotification()
                 broadcastPlaybackState()
                 
@@ -858,6 +985,14 @@ class RadioService : Service() {
                     false,
                     _currentRadio.value?.id
                 )
+                
+                // Kontrola notifikace po pozastavení
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(300)
+                    val activeNotifications = notificationManager.activeNotifications
+                    val hasOurNotification = activeNotifications.any { it.id == NOTIFICATION_ID }
+                    Log.d("RadioService", "🔍 Kontrola notifikace po pozastavení: ${if (hasOurNotification) "ZOBRAZUJE SE" else "NEZOBRAZUJE SE"}")
+                }
             } catch (e: Exception) {
                 Log.e("RadioService", "Chyba při pozastavování přehrávání: ${e.message}", e)
             }
@@ -876,6 +1011,17 @@ class RadioService : Service() {
                 _isPlaying.value = false
                 _currentRadio.value = null
                 _currentMetadata.value = null
+                
+                // Nastavení MediaSession pro zastavení
+                val playbackState = PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f)
+                    .setActions(PlaybackStateCompat.ACTION_PLAY or 
+                               PlaybackStateCompat.ACTION_PAUSE or 
+                               PlaybackStateCompat.ACTION_SKIP_TO_NEXT or 
+                               PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or 
+                               PlaybackStateCompat.ACTION_STOP)
+                    .build()
+                mediaSession.setPlaybackState(playbackState)
                 
                 // Deaktivace MediaSession
                 mediaSession.isActive = false
@@ -940,12 +1086,16 @@ class RadioService : Service() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             "Přehrávání rádia",
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_LOW // Důležité pro MediaStyle
         ).apply {
             description = "Ovládání přehrávání internetového rádia"
-            setShowBadge(false)
+            setShowBadge(false) // Vypnout odznak pro MediaStyle
+            enableLights(false) // Vypnout světla pro MediaStyle
+            enableVibration(false) // Vypnout vibrace pro MediaStyle
+            setSound(null, null) // Vypnout zvuk pro MediaStyle
         }
         notificationManager.createNotificationChannel(channel)
+        Log.d("RadioService", "🔔 Notifikační kanál vytvořen s IMPORTANCE_LOW")
     }
 
     private fun recreatePlayer() {
