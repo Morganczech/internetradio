@@ -26,15 +26,9 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
             arg("room.incremental", "true")
             arg("room.expandProjection", "true")
-        }
-
-        // Potlačení varování o nerozpoznaných možnostech procesoru
-        javaCompileOptions {
-            annotationProcessorOptions {
-                compilerArgumentProviders(
-                    HiltOptions()
-                )
-            }
+            // Hilt/Dagger parametry pro KSP (zde jsou správně)
+            arg("dagger.fastInit", "enabled")
+            arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
         }
     }
 
@@ -113,14 +107,14 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
-    // Coil pro načítání obrázků
+    // Coil
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("io.coil-kt:coil:2.5.0")
 
     // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
-    // Media3 (nástupce ExoPlayeru)
+    // Media3
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
     implementation("androidx.media3:media3-session:1.2.1")
@@ -129,14 +123,14 @@ dependencies {
     // Media Session
     implementation("androidx.media:media:1.7.0")
 
-    // OkHttp pro přehrávání streamů
+    // OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     ksp("com.google.dagger:hilt-android-compiler:2.50")
 
-    // JTransforms pro FFT
+    // JTransforms
     implementation("com.github.wendykierp:JTransforms:3.1") {
         exclude(group = "junit", module = "junit")
     }
@@ -148,7 +142,7 @@ dependencies {
     // Location Services
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
-    // Gson pro práci s JSON
+    // Gson
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Serialization
@@ -170,11 +164,3 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.30.1")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.30.1")
 }
-
-// Přidání třídy pro Hilt možnosti
-private class HiltOptions : CommandLineArgumentProvider {
-    override fun asArguments(): Iterable<String> = listOf(
-        "-Adagger.fastInit=enabled",
-        "-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true"
-    )
-} 

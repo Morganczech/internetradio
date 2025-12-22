@@ -40,7 +40,6 @@ fun AddRadioScreen(
     val category by viewModel.category.collectAsState()
     val validationError by viewModel.validationError.collectAsState()
 
-    // Načtení existujícího rádia pro úpravu
     LaunchedEffect(radioToEdit) {
         radioToEdit?.let { viewModel.loadRadioForEdit(it) }
     }
@@ -56,14 +55,17 @@ fun AddRadioScreen(
             title = { Text(if (radioToEdit != null) "Upravit stanici" else "Přidat stanici") },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Zpět")
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack, 
+                        contentDescription = stringResource(R.string.nav_back),
+                        tint = MaterialTheme.colors.onSurface
+                    )
                 }
             },
             backgroundColor = MaterialTheme.colors.surface,
             elevation = 0.dp
         )
 
-        // Formulář pro úpravu stanice
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,45 +102,52 @@ fun AddRadioScreen(
             )
 
             // Výběr kategorie
-            OutlinedTextField(
-                value = stringResource(category.getTitleRes()),
-                onValueChange = { },
-                enabled = false,
-                readOnly = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showCategoryPicker = true },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null
+            Box {
+                OutlinedTextField(
+                    value = stringResource(category.getTitleRes()),
+                    onValueChange = { },
+                    enabled = false,
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showCategoryPicker = true },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = MaterialTheme.colors.onSurface
+                        )
+                    },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colors.onSurface,
+                        disabledLabelColor = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                        disabledBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
                     )
-                }
-            )
-
-            DropdownMenu(
-                expanded = showCategoryPicker,
-                onDismissRequest = { showCategoryPicker = false }
-            ) {
-                // Filtrujeme kategorie - odstraníme OSTATNI a VLASTNI
-                RadioCategory.values()
-                    .filter { cat -> 
-                        cat != RadioCategory.OSTATNI && 
-                        cat != RadioCategory.VLASTNI 
-                    }
-                    .forEach { cat ->
-                        DropdownMenuItem(
-                            onClick = {
-                                viewModel.setCategory(cat)
-                                showCategoryPicker = false
-                            }
-                        ) {
-                            Text(stringResource(cat.getTitleRes()))
+                )
+                
+                DropdownMenu(
+                    expanded = showCategoryPicker,
+                    onDismissRequest = { showCategoryPicker = false }
+                ) {
+                    RadioCategory.values()
+                        .filter { cat -> 
+                            cat != RadioCategory.OSTATNI && 
+                            cat != RadioCategory.VLASTNI &&
+                            cat != RadioCategory.VSE
                         }
-                    }
+                        .forEach { cat ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    viewModel.setCategory(cat)
+                                    showCategoryPicker = false
+                                }
+                            ) {
+                                Text(stringResource(cat.getTitleRes()))
+                            }
+                        }
+                }
             }
 
-            // Tlačítko pro uložení
             Button(
                 onClick = {
                     if (radioToEdit != null) {
@@ -162,14 +171,14 @@ fun AddRadioScreen(
                         )
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = name.isNotBlank() && streamUrl.isNotBlank()
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = name.isNotBlank() && streamUrl.isNotBlank(),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(if (radioToEdit != null) stringResource(R.string.add_station_save_changes) else stringResource(R.string.add_station_add))
             }
         }
 
-        // Zobrazení chyby validace
         validationError?.let { error ->
             Text(
                 text = when (error) {
@@ -183,4 +192,4 @@ fun AddRadioScreen(
             )
         }
     }
-} 
+}

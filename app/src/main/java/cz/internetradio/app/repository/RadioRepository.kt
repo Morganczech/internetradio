@@ -14,13 +14,58 @@ import kotlinx.coroutines.flow.first
 import cz.internetradio.app.model.RadioCategory
 import androidx.compose.ui.graphics.toArgb
 import android.util.Log
+import com.google.gson.Gson
 import cz.internetradio.app.ui.theme.Gradients
+import cz.internetradio.app.BuildConfig
 
 @Singleton
 class RadioRepository @Inject constructor(
     private val radioDao: RadioDao,
     private val radioBrowserApi: RadioBrowserApi
 ) {
+    private data class CountryData(val stations: List<StationSeed>)
+    private data class StationSeed(
+        val id: String,
+        val name: String,
+        val streamUrl: String,
+        val imageUrl: String,
+        val description: String,
+        val bitrate: Int? = null
+    )
+
+    suspend fun existsByName(name: String): Boolean {
+        return radioDao.existsByName(name)
+    }
+
+    suspend fun existsByStreamUrl(url: String): Boolean {
+        return radioDao.existsByStreamUrl(url)
+    }
+
+    suspend fun initializeDefaultStations(jsonString: String) {
+        try {
+            val countryData = Gson().fromJson(jsonString, CountryData::class.java)
+            val currentMaxOrder = getNextOrderIndex(RadioCategory.MISTNI)
+            
+            countryData.stations.take(10).forEachIndexed { index, seed ->
+                val radio = Radio(
+                    id = seed.id,
+                    name = seed.name,
+                    streamUrl = seed.streamUrl,
+                    imageUrl = seed.imageUrl,
+                    description = seed.description,
+                    category = RadioCategory.MISTNI,
+                    originalCategory = RadioCategory.MISTNI,
+                    startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
+                    endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
+                    isFavorite = false,
+                    bitrate = seed.bitrate
+                )
+                val entity = RadioEntity.fromRadio(radio).copy(orderIndex = currentMaxOrder + index)
+                radioDao.insertRadio(entity)
+            }
+        } catch (e: Exception) {}
+    }
+
     fun getAllRadios(): Flow<List<Radio>> {
         return radioDao.getAllRadios().map { entities ->
             entities.map { it.toRadio() }
@@ -31,12 +76,7 @@ class RadioRepository @Inject constructor(
         return radioBrowserApi.searchStations(params)
     }
 
-    suspend fun getStationsByTag(tag: String): List<RadioStation>? {
-        return radioBrowserApi.getStationsByTag(tag)
-    }
-
     suspend fun getStationsByCountry(country: String): List<RadioStation>? {
-        // Načteme stanice z databáze v kategorii MISTNI
         val entities = radioDao.getRadiosByCategory(RadioCategory.MISTNI).first()
         return entities.map { entity ->
             RadioStation(
@@ -50,10 +90,6 @@ class RadioRepository @Inject constructor(
                 isFromRadioBrowser = false
             )
         }
-    }
-
-    suspend fun getTags(): List<String>? {
-        return radioBrowserApi.getTags()?.map { it.name }
     }
 
     fun getFavoriteRadios(): Flow<List<Radio>> {
@@ -71,30 +107,15 @@ class RadioRepository @Inject constructor(
     suspend fun toggleFavorite(radioId: String) {
         val radio = radioDao.getRadioById(radioId)?.toRadio()
         radio?.let {
-            if (!it.isFavorite) {
-                // Při přidání do oblíbených zachováme původní kategorii
-                val updatedRadio = it.copy(
-                    isFavorite = true
-                )
-                radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
-            } else {
-                // Při odebrání z oblíbených pouze zrušíme příznak oblíbené
-                val updatedRadio = it.copy(
-                    isFavorite = false
-                )
-                radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
-            }
+            val updatedRadio = it.copy(isFavorite = !it.isFavorite)
+            radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
         }
     }
 
     suspend fun removeFavorite(radioId: String) {
-        val radio = radioDao.getRadioById(radioId)?.toRadio()
-        radio?.let {
-            // Při odebrání z oblíbených pouze zrušíme příznak oblíbené
-            val updatedRadio = it.copy(
-                isFavorite = false
-            )
-            radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
+        radioDao.getRadioById(radioId)?.let { entity ->
+            val updated = entity.copy(isFavorite = false)
+            radioDao.insertRadio(updated)
         }
     }
 
@@ -102,39 +123,16 @@ class RadioRepository @Inject constructor(
         return radioDao.getRadioById(radioId)?.toRadio()
     }
 
-    suspend fun addStationToFavorites(radioStation: RadioStation, category: RadioCategory) {
+    suspend fun addStationToFavorites(radioStation: RadioStation, category: RadioCategory, isFavorite: Boolean = true) {
         val streamUrl = radioStation.url_resolved ?: radioStation.url
+        val existingRadio = radioDao.getAllRadios().first().find { it.streamUrl == streamUrl }
         
-        // Kontrola, zda již existuje stanice se stejnou URL (kontrolujeme obě možné URL)
-        val existingRadio = radioDao.getAllRadios().first().find { entity -> 
-            val entityRadio = entity.toRadio()
-            entityRadio.streamUrl == streamUrl || 
-            entityRadio.streamUrl == radioStation.url ||
-            (radioStation.url_resolved != null && entityRadio.streamUrl == radioStation.url_resolved)
-        }?.toRadio()
-
         if (existingRadio != null) {
-            // Pokud stanice existuje, zachováme její nastavení oblíbenosti a ID
-            val gradient = Gradients.getGradientForCategory(category)
-            val updatedRadio = existingRadio.copy(
-                name = radioStation.name,
-                imageUrl = radioStation.favicon ?: existingRadio.imageUrl,
-                description = radioStation.tags ?: existingRadio.description,
-                category = category,
-                originalCategory = if (existingRadio.isFavorite) existingRadio.originalCategory else category,
-                startColor = gradient.first,
-                endColor = gradient.second,
-                bitrate = try {
-                    radioStation.bitrate?.toInt()
-                } catch (e: NumberFormatException) {
-                    Log.w("RadioRepository", "Nepodařilo se převést bitrate na číslo: ${radioStation.bitrate}")
-                    null
-                }
-            )
-            radioDao.insertRadio(RadioEntity.fromRadio(updatedRadio))
+            val updated = existingRadio.copy(category = category, isFavorite = isFavorite)
+            radioDao.insertRadio(updated)
         } else {
-            // Pokud stanice neexistuje, vytvoříme nový záznam
             val gradient = Gradients.getGradientForCategory(category)
+            val nextOrder = getNextOrderIndex(category)
             val radio = Radio(
                 id = radioStation.stationuuid ?: radioStation.url,
                 name = radioStation.name,
@@ -145,104 +143,30 @@ class RadioRepository @Inject constructor(
                 originalCategory = category,
                 startColor = gradient.first,
                 endColor = gradient.second,
-                isFavorite = false,
-                bitrate = try {
-                    radioStation.bitrate?.toInt()
-                } catch (e: NumberFormatException) {
-                    Log.w("RadioRepository", "Nepodařilo se převést bitrate na číslo: ${radioStation.bitrate}")
-                    null
-                }
+                isFavorite = isFavorite,
+                bitrate = radioStation.bitrate?.toString()?.toIntOrNull()
             )
-            radioDao.insertRadio(RadioEntity.fromRadio(radio))
+            val entity = RadioEntity.fromRadio(radio).copy(orderIndex = nextOrder)
+            radioDao.insertRadio(entity)
         }
     }
 
     suspend fun removeStation(radioId: String) {
-        radioDao.getRadioById(radioId)?.let { radioEntity ->
-            radioDao.deleteRadio(radioEntity)
-        }
+        radioDao.getRadioById(radioId)?.let { radioDao.deleteRadio(it) }
     }
 
     suspend fun insertRadio(radio: Radio) {
-        radioDao.insertRadio(RadioEntity.fromRadio(radio))
+        val nextOrder = getNextOrderIndex(radio.category)
+        val entity = RadioEntity.fromRadio(radio).copy(orderIndex = nextOrder)
+        radioDao.insertRadio(entity)
+    }
+
+    suspend fun insertRadioEntity(entity: RadioEntity) {
+        radioDao.insertRadio(entity)
     }
 
     suspend fun deleteRadio(radio: Radio) {
         radioDao.deleteRadio(RadioEntity.fromRadio(radio))
-    }
-
-    suspend fun existsByStreamUrl(streamUrl: String): Boolean {
-        return radioDao.existsByStreamUrl(streamUrl)
-    }
-
-    suspend fun existsByName(name: String): Boolean {
-        return radioDao.existsByName(name)
-    }
-
-    suspend fun getRadioEntityById(id: String): RadioEntity? {
-        return radioDao.getRadioById(id)
-    }
-
-    suspend fun insertRadioEntity(entity: RadioEntity) {
-        try {
-            // Kontrola existence stanice podle ID nebo URL
-            val existingById = radioDao.getRadioById(entity.id)
-            val existingByUrl = radioDao.getAllRadios().first().find { 
-                it.streamUrl == entity.streamUrl 
-            }
-            
-            when {
-                // Pokud existuje stanice se stejným ID, aktualizujeme ji
-                existingById != null -> {
-                    val gradient = Gradients.getGradientForCategory(entity.category)
-                    val updatedEntity = existingById.copy(
-                        name = entity.name,
-                        streamUrl = entity.streamUrl,
-                        imageUrl = entity.imageUrl,
-                        description = entity.description,
-                        category = entity.category,
-                        originalCategory = existingById.originalCategory ?: entity.originalCategory,
-                        startColor = gradient.first.toArgb(),
-                        endColor = gradient.second.toArgb(),
-                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
-                        bitrate = entity.bitrate
-                    )
-                    radioDao.insertRadio(updatedEntity)
-                    Log.d("RadioRepository", "Aktualizována existující stanice podle ID: ${entity.name}")
-                }
-                // Pokud existuje stanice se stejnou URL, aktualizujeme ji
-                existingByUrl != null -> {
-                    val gradient = Gradients.getGradientForCategory(entity.category)
-                    val updatedEntity = existingByUrl.copy(
-                        name = entity.name,
-                        imageUrl = entity.imageUrl,
-                        description = entity.description,
-                        category = entity.category,
-                        originalCategory = existingByUrl.originalCategory ?: entity.originalCategory,
-                        startColor = gradient.first.toArgb(),
-                        endColor = gradient.second.toArgb(),
-                        isFavorite = true,  // Explicitně nastavíme jako oblíbenou
-                        bitrate = entity.bitrate
-                    )
-                    radioDao.insertRadio(updatedEntity)
-                    Log.d("RadioRepository", "Aktualizována existující stanice podle URL: ${entity.name}")
-                }
-                // Pokud stanice neexistuje, vložíme ji jako novou
-                else -> {
-                    val gradient = Gradients.getGradientForCategory(entity.category)
-                    val newEntity = entity.copy(
-                        isFavorite = true,
-                        startColor = gradient.first.toArgb(),
-                        endColor = gradient.second.toArgb()
-                    )  // Zajistíme, že nová stanice bude oblíbená
-                    radioDao.insertRadio(newEntity)
-                    Log.d("RadioRepository", "Vložena nová stanice: ${entity.name}")
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("RadioRepository", "Chyba při vkládání stanice: ${entity.name}", e)
-            throw e
-        }
     }
 
     suspend fun deleteAllStations() {
@@ -260,4 +184,4 @@ class RadioRepository @Inject constructor(
     suspend fun updateStationOrderIndex(radioId: String, newOrder: Int) {
         radioDao.updateOrder(radioId, newOrder)
     }
-} 
+}

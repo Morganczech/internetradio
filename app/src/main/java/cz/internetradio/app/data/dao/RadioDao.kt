@@ -7,13 +7,13 @@ import cz.internetradio.app.model.RadioCategory
 
 @Dao
 interface RadioDao {
-    @Query("SELECT * FROM radios ORDER BY category, orderIndex")
+    @Query("SELECT * FROM radios ORDER BY category, orderIndex ASC, name ASC")
     fun getAllRadios(): Flow<List<RadioEntity>>
 
-    @Query("SELECT * FROM radios WHERE isFavorite = 1 ORDER BY category, orderIndex")
+    @Query("SELECT * FROM radios WHERE isFavorite = 1 ORDER BY orderIndex ASC, name ASC")
     fun getFavoriteRadios(): Flow<List<RadioEntity>>
 
-    @Query("SELECT * FROM radios WHERE category = :category ORDER BY orderIndex")
+    @Query("SELECT * FROM radios WHERE category = :category ORDER BY orderIndex ASC, name ASC")
     fun getRadiosByCategory(category: RadioCategory): Flow<List<RadioEntity>>
 
     @Query("SELECT * FROM radios WHERE id = :radioId")
@@ -55,6 +55,6 @@ interface RadioDao {
     """)
     suspend fun reorderStations(category: RadioCategory, fromPosition: Int, toPosition: Int)
 
-    @Query("SELECT MAX(orderIndex) + 1 FROM radios WHERE category = :category")
+    @Query("SELECT COALESCE(MAX(orderIndex), 0) + 1 FROM radios WHERE category = :category")
     suspend fun getNextOrderIndex(category: RadioCategory): Int?
-} 
+}

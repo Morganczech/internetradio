@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import cz.internetradio.app.RadioItem
 import cz.internetradio.app.model.Radio
 import cz.internetradio.app.model.RadioCategory
@@ -26,15 +25,23 @@ import cz.internetradio.app.viewmodel.RadioViewModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.res.stringResource
 import cz.internetradio.app.PlayerControls
 import cz.internetradio.app.R
 import android.util.Log
 import cz.internetradio.app.ui.theme.Gradients
+import cz.internetradio.app.utils.normalizeForSearch
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import kotlinx.coroutines.delay
 
 data class Country(
     val name: String,
@@ -55,6 +62,7 @@ private val COUNTRIES = mapOf(
     "SK" to "stations_sk.json"
 )
 
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
 fun PopularStationsScreen(
     viewModel: RadioViewModel,
@@ -66,10 +74,13 @@ fun PopularStationsScreen(
     var selectedCountry by remember { mutableStateOf<String?>(null) }
     var countries by remember { mutableStateOf<Map<String, Country>>(emptyMap()) }
     val currentRadio by viewModel.currentRadio.collectAsState()
-    val isPlaying by viewModel.isPlaying.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
+    
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearch by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Načtení JSON souborů
     LaunchedEffect(Unit) {
         val loadedCountries = mutableMapOf<String, Country>()
         COUNTRIES.forEach { (code, filename) ->
@@ -84,6 +95,14 @@ fun PopularStationsScreen(
         countries = loadedCountries
     }
 
+    LaunchedEffect(showSearch) {
+        if (showSearch) {
+            delay(100)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,21 +114,65 @@ fun PopularStationsScreen(
             navigationIcon = {
                 IconButton(onClick = { 
                     if (selectedCountry == null) onNavigateBack()
-                    else selectedCountry = null
+                    else {
+                        selectedCountry = null
+                        showSearch = false
+                        searchQuery = ""
+                    }
                 }) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Zpět",
-                        tint = Color.White
+                        contentDescription = stringResource(R.string.nav_back),
+                        tint = MaterialTheme.colors.onSurface
                     )
                 }
             },
+            actions = {
+                if (selectedCountry != null) {
+                    IconButton(onClick = { 
+                        showSearch = !showSearch
+                        if (!showSearch) searchQuery = ""
+                    }) {
+                        Icon(
+                            imageVector = if (showSearch) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = null,
+                            tint = if (showSearch) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface
+                        )
+                    }
+                }
+            },
             backgroundColor = MaterialTheme.colors.surface,
-            elevation = 4.dp
+            elevation = 0.dp
         )
 
+        Divider(color = MaterialTheme.colors.onSurface.copy(alpha = 0.08f))
+
+        AnimatedVisibility(
+            visible = showSearch,
+            enter = slideInVertically(initialOffsetY = { -it }),
+            exit = slideOutVertically(targetOffsetY = { -it })
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .focusRequester(focusRequester),
+                placeholder = { Text("Hledat v populárních...") },
+                leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide() })
+            )
+        }
+
         if (selectedCountry == null) {
-            // Zobrazení ikon zemí
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(16.dp),
@@ -126,79 +189,78 @@ fun PopularStationsScreen(
                 }
             }
         } else {
-            // Zobrazení stanic pro vybranou zemi
-            var displayedStations by remember { mutableStateOf(10) }
+            var displayedStationsCount by remember { mutableStateOf(10) }
             
+            val filteredStations = remember(selectedCountry, searchQuery, countries) {
+                val allStations = countries[selectedCountry]?.stations ?: emptyList()
+                if (searchQuery.isBlank()) {
+                    allStations
+                } else {
+                    val normalizedQuery = searchQuery.normalizeForSearch()
+                    allStations.filter { it.name.normalizeForSearch().contains(normalizedQuery) }
+                }
+            }
+
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                contentPadding = PaddingValues(
-                    top = 8.dp,
-                    bottom = if (currentRadio != null) 0.dp else 16.dp
-                ),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                countries[selectedCountry]?.stations?.let { allStations ->
-                    val stationsToShow = allStations.take(displayedStations)
-                    
-                    items(stationsToShow) { station ->
-                        // Kontrola, zda je stanice v oblíbených
-                        val savedRadio = allRadios.find { it.id == station.id }
-                        val radio = Radio(
-                            id = station.id,
-                            name = station.name,
-                            streamUrl = station.streamUrl,
-                            imageUrl = station.imageUrl,
-                            description = station.description,
-                            category = RadioCategory.MISTNI,
-                            startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
-                            endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
-                            isFavorite = savedRadio?.isFavorite ?: false
-                        )
+                val stationsToShow = if (searchQuery.isBlank()) {
+                    filteredStations.take(displayedStationsCount)
+                } else {
+                    filteredStations
+                }
 
-                        RadioItem(
-                            radio = radio,
-                            isSelected = radio.id == currentRadio?.id,
-                            onRadioClick = { viewModel.playRadio(radio) },
-                            onFavoriteClick = { viewModel.toggleFavorite(radio) },
-                            onEditClick = { onNavigateToEdit(radio.id) },
-                            onDeleteClick = { viewModel.removeStation(radio.id) }
-                        )
-                    }
-                    
-                    // Přidání tlačítka "Zobrazit další" pokud jsou k dispozici další stanice
-                    if (displayedStations < allStations.size) {
-                        item {
-                            Button(
-                                onClick = { displayedStations += 10 },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            ) {
-                                Text("Zobrazit další")
-                            }
+                items(stationsToShow, key = { it.id }) { station ->
+                    val savedRadio = allRadios.find { it.id == station.id }
+                    val radio = Radio(
+                        id = station.id,
+                        name = station.name,
+                        streamUrl = station.streamUrl,
+                        imageUrl = station.imageUrl,
+                        description = station.description,
+                        category = RadioCategory.MISTNI,
+                        startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
+                        endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
+                        isFavorite = savedRadio?.isFavorite ?: false
+                    )
+
+                    RadioItem(
+                        radio = radio,
+                        isSelected = radio.id == currentRadio?.id,
+                        onRadioClick = { viewModel.playRadio(radio) },
+                        onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                        onEditClick = { onNavigateToEdit(radio.id) },
+                        onDeleteClick = { viewModel.removeStation(radio.id) }
+                    )
+                }
+                
+                if (searchQuery.isBlank() && displayedStationsCount < filteredStations.size) {
+                    item {
+                        Button(
+                            onClick = { displayedStationsCount += 10 },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Zobrazit další")
                         }
                     }
                 }
             }
         }
 
-        // Přehrávač
-        AnimatedVisibility(
-            visible = currentRadio != null,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
-        ) {
+        AnimatedVisibility(visible = currentRadio != null) {
             currentRadio?.let { radio ->
                 PlayerControls(
                     radio = radio,
                     viewModel = viewModel,
                     onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
-                    onNavigateToCategory = { category ->
-                        // Zavřeme obrazovku populárních stanic a přejdeme na kategorii
-                        onNavigateBack()
-                    }
+                    onNavigateToCategory = { onNavigateBack() }
                 )
             }
         }
@@ -216,7 +278,8 @@ fun CountryCard(
             .fillMaxWidth()
             .aspectRatio(1f)
             .clickable(onClick = onClick),
-        elevation = 4.dp
+        elevation = 2.dp,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -241,8 +304,9 @@ fun CountryCard(
             
             Text(
                 text = countryName,
-                style = MaterialTheme.typography.subtitle1
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.onSurface
             )
         }
     }
-} 
+}

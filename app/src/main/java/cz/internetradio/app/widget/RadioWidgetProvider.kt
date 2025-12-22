@@ -255,7 +255,7 @@ class RadioWidgetProvider : AppWidgetProvider() {
         // Nastavení ikon podle stavu přehrávání
         val playPauseIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow
         views.setImageViewResource(R.id.widget_play_pause, playPauseIcon)
-        Log.d("RadioWidgetProvider", "Ikona play/pause nastavena: ${if (isPlaying) "pause" : "play"}")
+        Log.d("RadioWidgetProvider", "Ikona play/pause nastavena: ${if (isPlaying) "pause" else "play"}")
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
         Log.d("RadioWidgetProvider", "Widget aktualizován pro ID: $appWidgetId")
@@ -320,4 +320,4 @@ class RadioWidgetProvider : AppWidgetProvider() {
         
         Log.d("RadioWidgetProvider", "Všechna tlačítka úspěšně nastavena")
     }
-} 
+}

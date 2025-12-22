@@ -37,10 +37,14 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
 fun BrowseStationsScreen(
     viewModel: RadioViewModel = hiltViewModel(),
@@ -58,9 +62,15 @@ fun BrowseStationsScreen(
     var minBitrate by remember { mutableStateOf<Int?>(null) }
     val currentRadio by viewModel.currentRadio.collectAsState()
     
-    // Načtení místních stanic při zobrazení obrazovky
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Načtení místních stanic a spolehlivý automatický focus
     LaunchedEffect(Unit) {
         viewModel.refreshLocalStations()
+        delay(150) // Prodleva pro spolehlivé vysunutí klávesnice po animaci navigace
+        focusRequester.requestFocus()
+        keyboardController?.show()
     }
     
     val sheetState = rememberModalBottomSheetState(
@@ -101,8 +111,9 @@ fun BrowseStationsScreen(
                     verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
                     items(
-                        RadioCategory.values()
-                            .filter { category -> category != RadioCategory.VLASTNI }
+                        items = RadioCategory.values()
+                            .filter { category -> category != RadioCategory.VLASTNI },
+                        key = { it.name }
                     ) { category ->
                         Surface(
                             modifier = Modifier
@@ -193,14 +204,12 @@ fun BrowseStationsScreen(
         },
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     ) {
-        // Původní obsah obrazovky
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // TopAppBar s tlačítkem zpět a filtrem
             TopAppBar(
                 title = { Text(stringResource(R.string.nav_search)) },
                 navigationIcon = {
@@ -220,14 +229,12 @@ fun BrowseStationsScreen(
                 backgroundColor = MaterialTheme.colors.surface
             )
 
-            // Filtry
             AnimatedVisibility(visible = showFilters) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    // Řazení
                     Text(
                         text = stringResource(R.string.filter_sort_by),
                         style = MaterialTheme.typography.subtitle1,
@@ -256,7 +263,6 @@ fun BrowseStationsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Země
                     Text(
                         text = stringResource(R.string.filter_country),
                         style = MaterialTheme.typography.subtitle1,
@@ -280,7 +286,6 @@ fun BrowseStationsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Minimální bitrate
                     Text(
                         text = stringResource(R.string.filter_quality),
                         style = MaterialTheme.typography.subtitle1,
@@ -309,13 +314,11 @@ fun BrowseStationsScreen(
                 }
             }
 
-            // Vyhledávací pole
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { query ->
                     searchQuery = query
                     if (query.length >= 3) {
-                        Log.d("BrowseStationsScreen", "Vyhledávám stanice pro dotaz: $query")
                         isLoading = true
                         viewModel.searchStations(
                             query = query,
@@ -323,7 +326,6 @@ fun BrowseStationsScreen(
                             minBitrate = minBitrate,
                             orderBy = selectedOrder
                         ) { result: List<RadioStation>? ->
-                            Log.d("BrowseStationsScreen", "Nalezeno stanic: ${result?.size ?: 0}")
                             stations = result ?: emptyList()
                             isLoading = false
                         }
@@ -333,20 +335,19 @@ fun BrowseStationsScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .focusRequester(focusRequester),
                 label = { Text(stringResource(R.string.search_hint)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Seznam stanic
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
                 )
             } else if (searchQuery.length < 3) {
-                // Zobrazení místních stanic, když není aktivní vyhledávání
                 val localStations by viewModel.localStations.collectAsState()
                 val countryCode = viewModel.currentCountryCode.collectAsState().value
                 
@@ -357,8 +358,11 @@ fun BrowseStationsScreen(
                             style = MaterialTheme.typography.h6,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
-                        LazyColumn {
-                            items(stations) { station ->
+                        LazyColumn(modifier = Modifier.weight(1f)) {
+                            items(
+                                items = stations,
+                                key = { it.stationuuid ?: it.url }
+                            ) { station ->
                                 StationItem(
                                     station = station.apply { 
                                         isFromRadioBrowser = false
@@ -393,8 +397,11 @@ fun BrowseStationsScreen(
                     )
                 }
             } else {
-                LazyColumn {
-                    items(stations) { station ->
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(
+                        items = stations,
+                        key = { it.stationuuid ?: it.url }
+                    ) { station ->
                         StationItem(
                             station = station,
                             onAddToFavorites = {
@@ -409,7 +416,6 @@ fun BrowseStationsScreen(
                 }
             }
 
-            // Přehrávač
             AnimatedVisibility(
                 visible = currentRadio != null,
                 enter = slideInVertically(initialOffsetY = { it }),
@@ -421,7 +427,6 @@ fun BrowseStationsScreen(
                         viewModel = viewModel,
                         onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
                         onNavigateToCategory = { category ->
-                            // Zavřeme obrazovku vyhledávání a přejdeme na kategorii
                             onNavigateBack()
                         }
                     )
@@ -482,7 +487,6 @@ private fun StationItem(
                     )
                 }
                 
-                // Zobrazení země a bitrate
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -546,4 +550,4 @@ private fun FilterChip(
             )
         }
     }
-} 
+}

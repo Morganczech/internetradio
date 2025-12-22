@@ -6,6 +6,10 @@ import cz.internetradio.app.model.RadioCategory
 object Gradients {
     // Předdefinované gradienty pro kategorie
     private val categoryGradients = mapOf(
+        RadioCategory.VSE to Pair(
+            Color(0xFF607D8B), // Šedá - neutrální pro "Vše"
+            Color(0xFF455A64)
+        ),
         RadioCategory.MISTNI to Pair(
             Color(0xFF1976D2), // Modrá - stejná jako v PopularStationsScreen
             Color(0xFF0D47A1)  // Tmavší modrá pro gradient
@@ -68,7 +72,6 @@ object Gradients {
         )
     )
 
-    // Všechny dostupné gradienty pro výběr
     val availableGradients = listOf(
         GradientOption(0, "Modrá - Česká", Pair(Color(0xFF1976D2), Color(0xFF0D47A1))),
         GradientOption(1, "Růžová - Pop", Pair(Color(0xFFE91E63), Color(0xFFC2185B))),
@@ -91,20 +94,23 @@ object Gradients {
         val colors: Pair<Color, Color>
     )
 
-    // Získá gradient podle ID
     fun getGradientById(id: Int?): Pair<Color, Color> {
         return id?.let { gradientId ->
             availableGradients.find { it.id == gradientId }?.colors
         } ?: categoryGradients[RadioCategory.OSTATNI]!!
     }
 
-    // Získá gradient pro danou kategorii nebo vybraný gradient
+    // Bezpečná metoda pro získání gradientu
     fun getGradientForCategory(category: RadioCategory, selectedGradientId: Int? = null): Pair<Color, Color> {
-        return selectedGradientId?.let { getGradientById(it) } ?: categoryGradients[category]!!
+        return if (selectedGradientId != null) {
+            getGradientById(selectedGradientId)
+        } else {
+            // Použijeme getOrDefault nebo null-safe přístup s fallbackem na OSTATNI
+            categoryGradients[category] ?: categoryGradients[RadioCategory.OSTATNI]!!
+        }
     }
 
-    // Vytvoří vlastní gradient z vybraných barev
     fun createCustomGradient(startColor: Color, endColor: Color): Pair<Color, Color> {
         return Pair(startColor, endColor)
     }
-} 
+}

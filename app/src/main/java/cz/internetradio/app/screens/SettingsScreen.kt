@@ -68,12 +68,12 @@ fun SettingsScreen(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = stringResource(R.string.nav_back),
-                        tint = Color.White
+                        tint = MaterialTheme.colors.onSurface
                     )
                 }
             },
             backgroundColor = MaterialTheme.colors.surface,
-            elevation = 4.dp
+            elevation = 0.dp
         )
 
         // Obsah nastavení
@@ -99,7 +99,7 @@ fun SettingsScreen(
                     Icon(
                         imageVector = Icons.Default.Language,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = MaterialTheme.colors.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -107,25 +107,23 @@ fun SettingsScreen(
                         Text(
                             text = stringResource(R.string.settings_language),
                             style = MaterialTheme.typography.subtitle1,
-                            color = Color.White
+                            color = MaterialTheme.colors.onSurface
                         )
                         Text(
                             text = stringResource(currentLanguage.nameRes),
                             style = MaterialTheme.typography.caption,
-                            color = Color.White.copy(alpha = 0.7f)
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f)
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Přidat stanici
             Row(
@@ -142,36 +140,33 @@ fun SettingsScreen(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = MaterialTheme.colors.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = stringResource(R.string.settings_add_station),
                         style = MaterialTheme.typography.subtitle1,
-                        color = Color.White
+                        color = MaterialTheme.colors.onSurface
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f)
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
             Text(
                 text = stringResource(R.string.settings_max_favorites),
                 style = MaterialTheme.typography.subtitle1,
-                color = Color.White
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier.padding(top = 16.dp)
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Slider pro nastavení maximálního počtu oblíbených
+            // Slider
             Slider(
                 value = maxFavorites.toFloat(),
                 onValueChange = { viewModel.setMaxFavorites(it.toInt()) },
@@ -183,20 +178,17 @@ fun SettingsScreen(
             Text(
                 text = stringResource(R.string.settings_current_limit, maxFavorites),
                 style = MaterialTheme.typography.caption,
-                color = Color.White.copy(alpha = 0.7f)
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
             )
-            
-            Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = stringResource(R.string.settings_favorites_note),
                 style = MaterialTheme.typography.caption,
-                color = Color.White.copy(alpha = 0.7f)
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                modifier = Modifier.padding(top = 8.dp)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
 
             // Nastavení doby fade-outu
             Row(
@@ -211,31 +203,24 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(R.string.settings_fade_duration),
                         style = MaterialTheme.typography.subtitle1,
-                        color = Color.White
+                        color = MaterialTheme.colors.onSurface
                     )
                     Text(
                         text = stringResource(R.string.settings_seconds_format, fadeOutDuration),
                         style = MaterialTheme.typography.caption,
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_fade_note),
-                        style = MaterialTheme.typography.caption,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f)
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Tlačítko pro přechod na equalizer
+            // Equalizer
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -250,108 +235,64 @@ fun SettingsScreen(
                     Icon(
                         imageVector = Icons.Default.GraphicEq,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = MaterialTheme.colors.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = stringResource(R.string.nav_equalizer),
                         style = MaterialTheme.typography.subtitle1,
-                        color = Color.White
+                        color = MaterialTheme.colors.onSurface
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f)
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Export nastavení
+            // Export
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { 
-                        exportLauncher.launch("touchradio_settings.json")
-                    }
+                    .clickable { exportLauncher.launch("touchradio_settings.json") }
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Upload,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Upload, null, tint = MaterialTheme.colors.onSurface, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = stringResource(R.string.settings_export),
-                            style = MaterialTheme.typography.subtitle1,
-                            color = Color.White
-                        )
-                    }
+                    Text(stringResource(R.string.settings_export), style = MaterialTheme.typography.subtitle1, color = MaterialTheme.colors.onSurface)
                 }
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f)
-                )
+                Icon(Icons.Default.KeyboardArrowRight, null, tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Import nastavení
+            // Import
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { 
-                        importLauncher.launch(arrayOf("application/json"))
-                    }
+                    .clickable { importLauncher.launch(arrayOf("application/json")) }
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Download, null, tint = MaterialTheme.colors.onSurface, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = stringResource(R.string.settings_import),
-                            style = MaterialTheme.typography.subtitle1,
-                            color = Color.White
-                        )
-                    }
+                    Text(stringResource(R.string.settings_import), style = MaterialTheme.typography.subtitle1, color = MaterialTheme.colors.onSurface)
                 }
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f)
-                )
+                Icon(Icons.Default.KeyboardArrowRight, null, tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Vymazat data aplikace
+            // Vymazat data
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -360,84 +301,39 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                        tint = Color.Red,
-                        modifier = Modifier.size(24.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Delete, null, tint = Color.Red, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text(
-                            text = "Vymazat data aplikace",
-                            style = MaterialTheme.typography.subtitle1,
-                            color = Color.Red
-                        )
-                        Text(
-                            text = "Vymaže všechna data a nastavení aplikace",
-                            style = MaterialTheme.typography.caption,
-                            color = Color.Red.copy(alpha = 0.7f)
-                        )
+                        Text("Vymazat data aplikace", style = MaterialTheme.typography.subtitle1, color = Color.Red)
+                        Text("Vymaže všechna data a nastavení", style = MaterialTheme.typography.caption, color = Color.Red.copy(alpha = 0.7f))
                     }
                 }
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = Color.Red.copy(alpha = 0.7f)
-                )
+                Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.Red.copy(alpha = 0.7f))
             }
         }
     }
 
+    // Dialogy - opravené barvy textu
     if (showFadeOutDialog) {
         AlertDialog(
             onDismissRequest = { showFadeOutDialog = false },
             title = { Text("Doba zeslabení zvuku") },
             text = {
                 Column {
-                    Text(
-                        text = "Nastavte dobu, po kterou se bude postupně snižovat hlasitost před vypnutím časovače spánku.",
-                        style = MaterialTheme.typography.body2,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    Text("Nastavte dobu zeslabení před vypnutím.", style = MaterialTheme.typography.body2)
                     listOf(30, 60, 90, 120).forEach { seconds ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.setFadeOutDuration(seconds)
-                                    showFadeOutDialog = false
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = fadeOutDuration == seconds,
-                                onClick = {
-                                    viewModel.setFadeOutDuration(seconds)
-                                    showFadeOutDialog = false
-                                }
-                            )
-                            Text(
-                                text = "$seconds sekund",
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
+                        Row(Modifier.fillMaxWidth().clickable { viewModel.setFadeOutDuration(seconds); showFadeOutDialog = false }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = fadeOutDuration == seconds, onClick = { viewModel.setFadeOutDuration(seconds); showFadeOutDialog = false })
+                            Text("$seconds sekund", modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showFadeOutDialog = false }) {
-                    Text("Zavřít")
-                }
-            }
+            confirmButton = { TextButton(onClick = { showFadeOutDialog = false }) { Text("Zavřít") } }
         )
     }
 
-    // Dialog pro výběr jazyka
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
@@ -445,70 +341,25 @@ fun SettingsScreen(
             text = {
                 Column {
                     Language.values().forEach { language ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.setLanguage(language)
-                                    showLanguageDialog = false
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = language == currentLanguage,
-                                onClick = {
-                                    viewModel.setLanguage(language)
-                                    showLanguageDialog = false
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = stringResource(language.nameRes),
-                                style = MaterialTheme.typography.body1,
-                                color = Color.White
-                            )
+                        Row(Modifier.fillMaxWidth().clickable { viewModel.setLanguage(language); showLanguageDialog = false }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = language == currentLanguage, onClick = { viewModel.setLanguage(language); showLanguageDialog = false })
+                            Spacer(Modifier.width(16.dp))
+                            Text(text = stringResource(language.nameRes), style = MaterialTheme.typography.body1)
                         }
                     }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) {
-                    Text(stringResource(R.string.action_close))
-                }
-            }
+            confirmButton = { TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.action_close)) } }
         )
     }
 
-    // Dialog pro potvrzení vymazání dat
     if (showClearDataDialog) {
         AlertDialog(
             onDismissRequest = { showClearDataDialog = false },
             title = { Text("Vymazat data aplikace") },
-            text = {
-                Text(
-                    "Opravdu chcete vymazat všechna data aplikace? Tato akce je nevratná a vymaže všechny stanice, nastavení a oblíbené skladby. Aplikace se poté restartuje s výchozím nastavením.",
-                    style = MaterialTheme.typography.body1
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.clearAllData()
-                        showClearDataDialog = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color.Red
-                    )
-                ) {
-                    Text("Vymazat")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearDataDialog = false }) {
-                    Text("Zrušit")
-                }
-            }
+            text = { Text("Opravdu chcete vymazat všechna data aplikace? Tato akce je nevratná.", style = MaterialTheme.typography.body1) },
+            confirmButton = { TextButton(onClick = { viewModel.clearAllData(); showClearDataDialog = false }, colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)) { Text("Vymazat") } },
+            dismissButton = { TextButton(onClick = { showClearDataDialog = false }) { Text("Zrušit") } }
         )
     }
-} 
+}

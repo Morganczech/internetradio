@@ -1,87 +1,59 @@
-# Internet Radio
+# Touch Radio 📻
 
-Mobilní aplikace pro Android, která umožňuje poslech internetových rádií. Aplikace je napsaná v Kotlinu s využitím moderních technologií a postupů.
+Moderní mobilní aplikace pro Android, která umožňuje poslech tisíců internetových rádií z celého světa. Aplikace je postavená na nejnovějších technologiích (Jetpack Compose, Media3) s důrazem na stabilitu, nízkou spotřebu a skvělý uživatelský zážitek.
 
 ## Funkce
 
-- 📻 Přehrávání internetových rádií
-- 🗂️ Kategorizace stanic (Pop, Rock, Jazz, Dance, atd.)
-- ⭐ Správa oblíbených stanic
-- 🎵 Ukládání oblíbených skladeb
-- 📍 Automatické vyhledávání místních stanic
-- 🎚️ Ekvalizér s předvolbami
-- ⏰ Časovač vypnutí s postupným snižováním hlasitosti
-- 🎯 Widget pro rychlé ovládání
-- ⌚ Podpora pro Wear OS
-- 🔄 Export/Import nastavení a oblíbených stanic
+- 🔊 **Přehrávání na pozadí**: Stabilní streamování pomocí Media3 ExoPlayeru s plnou integrací do systémového ovládání a zamykací obrazovky.
+- 🗂️ **Kategorizace**: Stanice rozdělené podle žánrů (Pop, Rock, Jazz, Dance, atd.).
+- ❤️ **Oblíbené**: Snadná správa oblíbených stanic pomocí ikony srdíčka.
+- 📑 **Vlastní řazení**: Dedikovaný režim pro uspořádání stanic pomocí madel (Drag & Drop).
+- 🎵 **Skladby**: Možnost ukládání informací o právě hrajících skladbách do seznamu oblíbených.
+- 📍 **Lokální obsah**: Automatické vyhledávání stanic podle vaší aktuální polohy.
+- 🔍 **Inteligentní hledání**: Vyhledávání stanic v databázi Radio Browser bez nutnosti psát diakritiku (např. "cesky" najde "Český").
+- 🎚️ **Audio vylepšení**: Pětipásmový ekvalizér s předvolbami.
+- ⏰ **Sleep Timer**: Časovač vypnutí s plynulým zeslabováním zvuku (Fade-out).
+- 🎯 **Widget**: Ovládání přehrávače přímo z plochy telefonu.
+- ⌚ **Wear OS**: Doprovodná aplikace pro vaše chytré hodinky.
+- 🔄 **Záloha**: Export a import kompletního nastavení a seznamů do JSON souboru.
 
 ### Hlavní výhody
 
-- 🎨 Moderní Material Design
-- 🔍 Vyhledávání stanic z Radio Browser API
-- 📱 Responzivní UI pro různé velikosti obrazovek
-- 🌙 Tmavý režim
-- 🔊 Vysoká kvalita zvuku
-- 🔋 Nízká spotřeba baterie
+- 🎨 **Moderní UI**: Čistý design s podporou světlého i tmavého režimu.
+- 🔋 **Úspora dat a baterie**: Efektivní správa síťových prostředků a procesoru.
+- 📱 **Plná podpora Android 13+**: Korektní správa oprávnění pro notifikace a polohu.
 
 ## Instalace
 
-1. Stáhněte si nejnovější verzi APK z [releases](https://github.com/Morganczech/internetradio/releases)
-2. Povolte instalaci z neznámých zdrojů v nastavení Android:
-   - Otevřete Nastavení > Zabezpečení
-   - Povolte "Instalace z neznámých zdrojů" nebo "Instalovat neznámé aplikace"
-3. Otevřete stažený APK soubor a nainstalujte aplikaci
-4. Po instalaci můžete zakázat "Instalace z neznámých zdrojů"
+1. Stáhněte si nejnovější verzi APK z [releases](https://github.com/Morganczech/internetradio/releases).
+2. Povolte instalaci z neznámých zdrojů v nastavení Androidu.
+3. Otevřete APK a nainstalujte aplikaci.
 
 ## Použití
 
 ### První spuštění
-- Při prvním spuštění se automaticky načtou místní stanice podle vaší lokace
-- Můžete procházet kategorie nebo vyhledávat nové stanice
-- Přidejte si oblíbené stanice pro rychlý přístup
+- Aplikace vás přivítá krátkým dialogem s vysvětlením potřebných oprávnění.
+- Automaticky se načtou místní stanice podle vaší lokace (pokud je povolena).
 
-### Hlavní funkce
-- **Přehrávání**: Klikněte na stanici pro spuštění přehrávání
-- **Oblíbené**: Přidejte stanici do oblíbených pomocí hvězdičky
-- **Vyhledávání**: Použijte vyhledávací pole pro nalezení nových stanic
-- **Časovač**: Nastavte časovač vypnutí v menu nastavení
-- **Ekvalizér**: Upravte zvuk pomocí ekvalizéru
-- **Export/Import**: Zálohujte své nastavení a oblíbené stanice
+### Tipy pro ovládání
+- **Hledání**: Kliknutím na lupu v horní liště aktivujete filtr uložených stanic. Ikona "+" slouží k hledání nových stanic na internetu.
+- **Řazení**: Klikněte na ikonu seznamu v horní liště pro aktivaci režimu přesouvání karet.
+- **Přehrávač**: Kliknutím na kartu hrající stanice rozbalíte pokročilé ovládání (hlasitost, časovač, bitrate).
 
 ## Technologie
 
-- 🎯 Kotlin
-- 🎨 Jetpack Compose
-- 🎵 Media3 ExoPlayer
-- 💉 Hilt (Dependency Injection)
-- ⚡ Kotlin Coroutines & Flow
-- 💾 Room Database
-- 🏗️ MVVM architektura
+- **Kotlin**: 100% čistý kód.
+- **Jetpack Compose**: Moderní deklarativní UI.
+- **Media3 ExoPlayer**: Špičkový engine pro zpracování audia.
+- **Hilt**: Dependency Injection pro čistou architekturu.
+- **Room**: Lokální SQLite databáze.
+- **MVVM**: Ověřený architektonický vzor.
 
 ## Požadavky
 
-- Android 8.0 (Oreo) nebo novější (API level 26+)
-- Cílová verze: Android 14 (API level 34)
-- Připojení k internetu
-- Minimálně 50 MB volného místa
-
-## Vývoj
-
-Pro vývoj budete potřebovat:
-- Android Studio Hedgehog nebo novější
-- JDK 17
-- Android SDK
-
-Klonování repozitáře:
-```bash
-git clone https://github.com/Morganczech/internetradio.git
-```
-
-### Sestavení projektu
-1. Otevřete projekt v Android Studiu
-2. Synchronizujte Gradle
-3. Spusťte build
-4. Pro vytvoření APK použijte "Build > Build Bundle(s) / APK(s) > Build APK(s)"
+- Android 8.0 (API 26) nebo novější.
+- Připojení k internetu (Wi-Fi nebo mobilní data).
+- Cílové SDK: 34 (Android 14).
 
 ## Licence
 
@@ -89,5 +61,5 @@ Tento projekt je licencován pod [MIT licencí](LICENSE).
 
 ## Poděkování
 
-- [Radio Browser API](https://api.radio-browser.info/) za poskytnutí databáze rádií
-- Všem přispěvatelům a testerům 
+- [Radio Browser API](https://api.radio-browser.info/) za poskytnutí globální databáze rádií.
+- Všem přispěvatelům a testerům za pomoc s laděním aplikace.
