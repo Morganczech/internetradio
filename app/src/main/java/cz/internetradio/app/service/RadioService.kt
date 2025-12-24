@@ -80,6 +80,7 @@ class RadioService : Service() {
         const val ACTION_PREVIOUS = "cz.internetradio.app.action.PREVIOUS"
         const val ACTION_STOP = "cz.internetradio.app.action.STOP"
         const val ACTION_SET_VOLUME = "cz.internetradio.app.action.SET_VOLUME"
+        const val ACTION_REQUEST_STATE = "cz.internetradio.app.action.REQUEST_STATE"
         const val EXTRA_RADIO_ID = "radio_id"
         const val EXTRA_VOLUME = "volume"
         const val EXTRA_IS_PLAYING = "is_playing"
@@ -331,8 +332,10 @@ class RadioService : Service() {
             ACTION_PAUSE -> pausePlayback()
             ACTION_NEXT -> playNextRadio()
             ACTION_PREVIOUS -> playPreviousRadio()
+            ACTION_PREVIOUS -> playPreviousRadio()
             ACTION_STOP -> stopPlayback()
             ACTION_SET_VOLUME -> exoPlayer.volume = intent.getFloatExtra(EXTRA_VOLUME, 1.0f)
+            ACTION_REQUEST_STATE -> broadcastPlaybackState()
         }
         return START_STICKY
     }

@@ -136,6 +136,9 @@ class RadioViewModel @Inject constructor(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
+    private val _isCompactMode = MutableStateFlow(false)
+    val isCompactMode: StateFlow<Boolean> = _isCompactMode
+
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context == null || intent == null) return
@@ -193,6 +196,16 @@ class RadioViewModel @Inject constructor(
 
         loadLocalStations()
         viewModelScope.launch { ensureDatabaseInitialized() }
+        
+        // Synchronize state with service
+        try {
+            val intent = Intent(context, RadioService::class.java).apply {
+                action = RadioService.ACTION_REQUEST_STATE
+            }
+            context.startForegroundService(intent)
+        } catch (e: Exception) {
+            // Service might not be running or permission issue
+        }
     }
 
     private fun isNetworkAvailable(): Boolean {
@@ -215,6 +228,7 @@ class RadioViewModel @Inject constructor(
     private fun loadSavedState() {
         viewModelScope.launch {
             _volume.value = prefs.getFloat("volume", 1.0f)
+            _isCompactMode.value = prefs.getBoolean("compact_mode", false)
             val lastId = prefs.getString("last_radio_id", null)
             if (lastId != null) {
                 _currentRadio.value = radioRepository.getRadioById(lastId)
@@ -253,9 +267,25 @@ class RadioViewModel @Inject constructor(
         }
     }
 
+
     private fun loadLocalStations() {
         viewModelScope.launch {
-            val code = locationService.getCurrentCountry()
+            var code = locationService.getCurrentCountry()
+            if (code == null) {
+                // Fallback podle jazyka
+                code = when (_currentLanguage.value.code) {
+                    "cs" -> "CZ"
+                    "sk" -> "SK"
+                    "en" -> "US" // Default? Or check system locale?
+                    else -> "CZ" // Default fallback
+                }
+                // Check system locale if language is System
+                if (_currentLanguage.value == Language.SYSTEM) {
+                    val sysLang = context.resources.configuration.locales[0].language
+                    code = if (sysLang == "sk") "SK" else "CZ"
+                }
+            }
+            
             if (code != null) {
                 _currentCountryCode.value = code
                 RadioCategory.setCurrentCountryCode(code)
@@ -490,7 +520,8 @@ class RadioViewModel @Inject constructor(
                 _showMaxFavoritesError.value = true
                 return@launch
             }
-            radioRepository.addStationToFavorites(station, category)
+            val isFavorite = category == RadioCategory.VLASTNI
+            radioRepository.addStationToFavorites(station, category, isFavorite)
         }
     }
 
@@ -579,7 +610,11 @@ class RadioViewModel @Inject constructor(
                     val songs = favoriteSongRepository.getAllSongs().first().map { song ->
                         SerializableSong(title = song.title, artist = song.artist, radioName = song.radioName, radioId = song.radioId)
                     }
-                    val json = Json { prettyPrint = true; encodeDefaults = true }.encodeToString(AppSettings.serializer(), AppSettings(maxFavorites = maxFavorites.value, equalizerEnabled = equalizerEnabled.value, fadeOutDuration = fadeOutDuration.value, favoriteStations = stations, favoriteSongs = songs))
+                    val songs = favoriteSongRepository.getAllSongs().first().map { song ->
+                        SerializableSong(title = song.title, artist = song.artist, radioName = song.radioName, radioId = song.radioId)
+                    }
+                    val exportDate = java.time.format.DateTimeFormatter.ISO_LOCAL_DATE.format(java.time.LocalDate.now())
+                    val json = Json { prettyPrint = true; encodeDefaults = true }.encodeToString(AppSettings.serializer(), AppSettings(maxFavorites = maxFavorites.value, equalizerEnabled = equalizerEnabled.value, fadeOutDuration = fadeOutDuration.value, favoriteStations = stations, favoriteSongs = songs, exportDate = exportDate))
                     context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
                     _message.value = context.getString(R.string.msg_settings_exported)
                 } catch (e: Exception) { _message.value = "Chyba exportu" }
@@ -624,6 +659,11 @@ class RadioViewModel @Inject constructor(
                 android.os.Process.killProcess(android.os.Process.myPid())
             } catch (e: Exception) { _message.value = "Chyba mazání dat" }
         }
+    }
+
+    fun setCompactMode(enabled: Boolean) {
+        _isCompactMode.value = enabled
+        prefs.edit().putBoolean("compact_mode", enabled).apply()
     }
 
     fun loadMoreStations() {

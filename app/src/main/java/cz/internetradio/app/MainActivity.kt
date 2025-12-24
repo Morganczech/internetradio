@@ -46,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import java.util.Locale
 import android.content.res.Configuration
+import android.content.res.Resources
 import cz.internetradio.app.model.Language
 import androidx.compose.foundation.isSystemInDarkTheme
 import android.os.Build
@@ -74,6 +75,20 @@ class MainActivity : ComponentActivity() {
                 Intent.ACTION_POWER_DISCONNECTED -> Log.d("MainActivity", "Napájení odpojeno")
             }
         }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val prefs = newBase.getSharedPreferences("radio_prefs", Context.MODE_PRIVATE)
+        val languageCode = prefs.getString("language", "system")
+        val locale = if (languageCode == "system") {
+            Resources.getSystem().configuration.locales[0]
+        } else {
+            Locale(languageCode!!)
+        }
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -264,15 +279,20 @@ class MainActivity : ComponentActivity() {
     }
     
     private fun updateLocale(language: Language) {
+        // Locale is applied in attachBaseContext logic mostly.
+        // This method triggers recreation if needed or updates configuration for runtime changes.
         val locale = when (language) {
-            Language.SYSTEM -> resources.configuration.locales[0]
+            Language.SYSTEM -> Resources.getSystem().configuration.locales[0]
             else -> Locale(language.code)
         }
-        val config = Configuration(resources.configuration).apply {
-            setLocale(locale)
+        
+        if (resources.configuration.locales[0].language != locale.language) {
+             val config = Configuration(resources.configuration).apply {
+                setLocale(locale)
+            }
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(config, resources.displayMetrics)
         }
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
     }
     
     override fun onDestroy() {
@@ -318,14 +338,15 @@ fun RadioItem(
     onFavoriteClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isCompact: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = if (isCompact) 4.dp else 8.dp)
             .clickable(onClick = onRadioClick),
         elevation = if (isSelected) 8.dp else 2.dp,
         backgroundColor = Color.Transparent
@@ -336,12 +357,12 @@ fun RadioItem(
             )
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(if (isCompact) 8.dp else 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(64.dp).padding(end = 16.dp)) {
+                    Box(modifier = Modifier.size(if (isCompact) 40.dp else 64.dp).padding(end = 16.dp)) {
                         AsyncImage(
                             model = radio.imageUrl,
                             contentDescription = null,
@@ -352,8 +373,10 @@ fun RadioItem(
                         )
                     }
                     Column {
-                        Text(text = radio.name, style = MaterialTheme.typography.h6, color = Color.White)
-                        Text(text = radio.description, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f))
+                        Text(text = radio.name, style = if (isCompact) MaterialTheme.typography.subtitle1 else MaterialTheme.typography.h6, color = Color.White)
+                        if (!isCompact) {
+                            Text(text = radio.description, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f))
+                        }
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -381,6 +404,8 @@ fun RadioItem(
     }
 }
 
+import androidx.compose.animation.animateContentSize
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PlayerControls(
@@ -398,7 +423,7 @@ fun PlayerControls(
     var showTimerDropdown by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { isExpanded = !isExpanded },
+        modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { isExpanded = !isExpanded }.animateContentSize(),
         elevation = 8.dp
     ) {
         Box(modifier = Modifier.background(brush = Brush.verticalGradient(listOf(radio.startColor, radio.endColor)))) {
@@ -413,6 +438,7 @@ fun PlayerControls(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = radio.name, style = MaterialTheme.typography.h6, color = Color.White)
                         currentMetadata?.let { Text(text = it, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f)) }
+
                         
                         Row(modifier = Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Card(
@@ -443,23 +469,41 @@ fun PlayerControls(
                             }
                         }
                     }
-                    IconButton(onClick = { viewModel.togglePlayPause() }) {
-                        Icon(imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Volume Control
+                        Box {
+                            var showVolume by remember { mutableStateOf(false) }
+                            IconButton(onClick = { showVolume = true }) {
+                                Icon(Icons.Default.VolumeUp, stringResource(R.string.player_volume), tint = Color.White)
+                            }
+                            DropdownMenu(
+                                expanded = showVolume,
+                                onDismissRequest = { showVolume = false }
+                            ) {
+                                Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
+                                    Slider(
+                                        value = volume,
+                                        onValueChange = { viewModel.setVolume(it) },
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+
+                        IconButton(onClick = { viewModel.togglePlayPause() }) {
+                            Icon(imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
+                        }
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
+                            tint = Color.White
+                        )
                     }
                 }
                 
                 if (isExpanded) {
                     Column(modifier = Modifier.padding(top = 8.dp)) {
-                        Slider(
-                            value = volume,
-                            onValueChange = { viewModel.setVolume(it) },
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            colors = SliderDefaults.colors(
-                                thumbColor = Color.White,
-                                activeTrackColor = Color.White,
-                                inactiveTrackColor = Color.White.copy(alpha = 0.3f)
-                            )
-                        )
+
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 IconButton(onClick = { viewModel.playPreviousStation() }) { Icon(Icons.Default.SkipPrevious, null, tint = Color.White) }

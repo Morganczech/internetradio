@@ -60,7 +60,9 @@ fun BrowseStationsScreen(
     var selectedCountry by remember { mutableStateOf<String?>(null) }
     var selectedOrder by remember { mutableStateOf("votes") }
     var minBitrate by remember { mutableStateOf<Int?>(null) }
+
     val currentRadio by viewModel.currentRadio.collectAsState()
+    val isCompactMode by viewModel.isCompactMode.collectAsState()
     
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -194,9 +196,9 @@ fun BrowseStationsScreen(
                         )
                     ) {
                         Text(
-                            text = "Uložit do kategorie",
+                            text = stringResource(R.string.action_save_to_category),
                             style = MaterialTheme.typography.button,
-                            color = Color.White
+                            color = MaterialTheme.colors.onPrimary
                         )
                     }
                 }
@@ -218,6 +220,13 @@ fun BrowseStationsScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { viewModel.setCompactMode(!isCompactMode) }) {
+                        Icon(
+                            imageVector = if (isCompactMode) Icons.Default.ViewModule else Icons.Default.ViewList,
+                            contentDescription = "Změnit zobrazení",
+                            tint = MaterialTheme.colors.onSurface
+                        )
+                    }
                     IconButton(onClick = { showFilters = !showFilters }) {
                         Icon(
                             imageVector = Icons.Default.FilterList,
@@ -374,7 +383,8 @@ fun BrowseStationsScreen(
                                         scope.launch {
                                             sheetState.show()
                                         }
-                                    }
+                                    },
+                                    isCompact = isCompactMode
                                 )
                             }
                         }
@@ -410,7 +420,8 @@ fun BrowseStationsScreen(
                                 scope.launch {
                                     sheetState.show()
                                 }
-                            }
+                            },
+                            isCompact = isCompactMode
                         )
                     }
                 }
@@ -439,7 +450,8 @@ fun BrowseStationsScreen(
 @Composable
 private fun StationItem(
     station: RadioStation,
-    onAddToFavorites: () -> Unit
+    onAddToFavorites: () -> Unit,
+    isCompact: Boolean = false
 ) {
     val colors = when (val category = station.category) {
         null -> {
@@ -455,7 +467,7 @@ private fun StationItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = if (isCompact) 2.dp else 4.dp),
         elevation = 4.dp,
         backgroundColor = Color.Transparent
     ) {
@@ -468,15 +480,15 @@ private fun StationItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(if (isCompact) 8.dp else 16.dp),
+                verticalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 8.dp)
             ) {
                 Text(
                     text = station.name,
-                    style = MaterialTheme.typography.h6,
+                    style = if (isCompact) MaterialTheme.typography.subtitle1 else MaterialTheme.typography.h6,
                     color = Color.White
                 )
-                if (!station.tags.isNullOrBlank()) {
+                if (!isCompact && !station.tags.isNullOrBlank()) {
                     Text(
                         text = station.tags.let { 
                             if (it.length > 50) it.substring(0, 47) + "..." 
@@ -515,7 +527,11 @@ private fun StationItem(
                         ),
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text("Přidat do kategorie")
+                        Text(
+                            text = stringResource(R.string.action_save_to_category),
+                            style = MaterialTheme.typography.button,
+                            color = MaterialTheme.colors.onPrimary
+                        )
                     }
                 }
             }

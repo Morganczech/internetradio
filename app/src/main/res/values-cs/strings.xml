@@ -12,7 +12,7 @@
     <string name="category_local_pl">Polské stanice</string>
     <string name="category_local_gb">Britské stanice</string>
     <string name="category_local_us">Americké stanice</string>
-    <string name="category_favorites">Moje stanice</string>
+    <string name="category_favorites">Oblíbené</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
     <string name="category_jazz">Jazz</string>
@@ -104,7 +104,9 @@
     <string name="widget_radio_name">Rádiová stanice</string>
     <string name="widget_metadata">Právě hraje</string>
     <string name="action_copy_to_clipboard">Kopírovat do schránky</string>
+    <string name="action_save_to_category">Uložit do kategorie</string>
     <string name="action_clear">Vymazat</string>
+    <string name="action_clear_data">Vymazat data aplikace</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Dosažen maximální počet oblíbených</string>

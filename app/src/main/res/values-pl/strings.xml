@@ -12,7 +12,8 @@
     <string name="category_local_pl">Stacje polskie</string>
     <string name="category_local_gb">Stacje brytyjskie</string>
     <string name="category_local_us">Stacje amerykańskie</string>
-    <string name="category_favorites">Moje stacje</string>
+    <string name="category_all">Wszystkie stacje</string>
+    <string name="category_favorites">Ulubione</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
     <string name="category_jazz">Jazz</string>
@@ -95,6 +96,9 @@
     <string name="action_cancel">Anuluj</string>
     <string name="action_save">Zapisz</string>
     <string name="action_close">Zamknij</string>
+    <string name="action_save_to_category">Zapisz w kategorii</string>
+    <string name="action_clear_data">Wyczyść dane aplikacji</string>
+    <string name="action_clear_data">Wyczyść dane aplikacji</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Osiągnięto maksymalną liczbę ulubionych</string>

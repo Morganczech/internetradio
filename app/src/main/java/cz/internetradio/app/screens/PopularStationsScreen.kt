@@ -75,6 +75,7 @@ fun PopularStationsScreen(
     var countries by remember { mutableStateOf<Map<String, Country>>(emptyMap()) }
     val currentRadio by viewModel.currentRadio.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
+    val isCompactMode by viewModel.isCompactMode.collectAsState()
     
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
@@ -129,6 +130,13 @@ fun PopularStationsScreen(
             },
             actions = {
                 if (selectedCountry != null) {
+                    IconButton(onClick = { viewModel.setCompactMode(!isCompactMode) }) {
+                        Icon(
+                            imageVector = if (isCompactMode) Icons.Default.ViewModule else Icons.Default.ViewList,
+                            contentDescription = "Změnit zobrazení",
+                            tint = MaterialTheme.colors.onSurface
+                        )
+                    }
                     IconButton(onClick = { 
                         showSearch = !showSearch
                         if (!showSearch) searchQuery = ""
@@ -234,7 +242,8 @@ fun PopularStationsScreen(
                         onRadioClick = { viewModel.playRadio(radio) },
                         onFavoriteClick = { viewModel.toggleFavorite(radio) },
                         onEditClick = { onNavigateToEdit(radio.id) },
-                        onDeleteClick = { viewModel.removeStation(radio.id) }
+                        onDeleteClick = { viewModel.removeStation(radio.id) },
+                        isCompact = isCompactMode
                     )
                 }
                 

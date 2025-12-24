@@ -5,7 +5,7 @@
     
     <!-- Main Categories -->
     <string name="category_local">Emisoras locales</string>
-    <string name="category_favorites">Mis emisoras</string>
+    <string name="category_favorites">Favoritos</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
     <string name="category_jazz">Jazz</string>
@@ -26,6 +26,7 @@
     <string name="category_local_pl">Emisoras polacas</string>
     <string name="category_local_gb">Emisoras británicas</string>
     <string name="category_local_us">Emisoras estadounidenses</string>
+    <string name="category_all">Todas las emisoras</string>
 
     <!-- Navigation -->
     <string name="nav_search">Buscar</string>
@@ -98,6 +99,9 @@
     <string name="action_cancel">Cancelar</string>
     <string name="action_save">Guardar</string>
     <string name="action_close">Cerrar</string>
+    <string name="action_save_to_category">Guardar en categoría</string>
+    <string name="action_clear_data">Borrar datos</string>
+    <string name="action_clear_data">Borrar datos</string>
     <string name="action_more_options">Más opciones</string>
     <string name="action_copy_to_clipboard">Copiar al portapapeles</string>
 

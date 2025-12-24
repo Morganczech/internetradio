@@ -39,6 +39,7 @@ fun FavoritesScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
     val maxFavorites by viewModel.maxFavorites.collectAsState()
+    val isCompactMode by viewModel.isCompactMode.collectAsState()
     var showDeleteDialog: Radio? by remember { mutableStateOf<Radio?>(null) }
 
     // Dialog pro potvrzení smazání
@@ -78,6 +79,14 @@ fun FavoritesScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Nastavení"
+                    )
+                }
+
+                IconButton(onClick = { viewModel.setCompactMode(!isCompactMode) }) {
+                    Icon(
+                        imageVector = if (isCompactMode) Icons.Default.ViewModule else Icons.Default.ViewList,
+                        contentDescription = "Změnit zobrazení",
+                        tint = MaterialTheme.colors.onPrimary
                     )
                 }
                 
@@ -168,7 +177,8 @@ fun FavoritesScreen(
                         onRadioClick = { viewModel.playRadio(radio) },
                         onFavoriteClick = { viewModel.toggleFavorite(radio) },
                         onEditClick = { onNavigateToEdit(radio.id) },
-                        onDeleteClick = { showDeleteDialog = radio }
+                        onDeleteClick = { showDeleteDialog = radio },
+                        isCompact = isCompactMode
                     )
                 }
             }

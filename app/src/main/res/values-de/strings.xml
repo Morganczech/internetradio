@@ -5,7 +5,7 @@
     
     <!-- Main Categories -->
     <string name="category_local">Lokale Sender</string>
-    <string name="category_favorites">Meine Sender</string>
+    <string name="category_favorites">Favoriten</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
     <string name="category_jazz">Jazz</string>
@@ -26,6 +26,7 @@
     <string name="category_local_pl">Polnische Sender</string>
     <string name="category_local_gb">Britische Sender</string>
     <string name="category_local_us">Amerikanische Sender</string>
+    <string name="category_all">Alle Sender</string>
 
     <!-- Navigation -->
     <string name="nav_search">Suchen</string>
@@ -95,6 +96,9 @@
     <string name="action_cancel">Abbrechen</string>
     <string name="action_save">Speichern</string>
     <string name="action_close">Schließen</string>
+    <string name="action_save_to_category">In Kategorie speichern</string>
+    <string name="action_clear_data">App-Daten löschen</string>
+    <string name="action_clear_data">App-Daten löschen</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Maximale Anzahl Favoriten erreicht</string>

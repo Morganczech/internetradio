@@ -5,7 +5,7 @@
     
     <!-- Main Categories -->
     <string name="category_local">Miestne stanice</string>
-    <string name="category_favorites">Moje stanice</string>
+    <string name="category_favorites">Obľúbené</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
     <string name="category_jazz">Jazz</string>
@@ -26,6 +26,7 @@
     <string name="category_local_pl">Poľské stanice</string>
     <string name="category_local_gb">Britské stanice</string>
     <string name="category_local_us">Americké stanice</string>
+    <string name="category_all">Všetky stanice</string>
 
     <!-- Navigation -->
     <string name="nav_search">Vyhľadať</string>
@@ -87,6 +88,9 @@
     <string name="action_cancel">Zrušiť</string>
     <string name="action_save">Uložiť</string>
     <string name="action_close">Zavrieť</string>
+    <string name="action_save_to_category">Uložiť do kategórie</string>
+    <string name="action_clear_data">Vymazať dáta aplikácie</string>
+    <string name="action_clear_data">Vymazať dáta aplikácie</string>
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Dosiahnutý maximálny počet obľúbených</string>

@@ -5,7 +5,7 @@
     
     <!-- Main Categories -->
     <string name="category_local">Místní stanice</string>
-    <string name="category_favorites">Moje stanice</string>
+    <string name="category_favorites">Oblíbené</string>
     <string name="category_pop">Pop</string>
     <string name="category_rock">Rock</string>
     <string name="category_jazz">Jazz</string>
@@ -102,7 +102,10 @@
     <string name="action_close">Zavřít</string>
     <string name="action_more_options">Více možností</string>
     <string name="action_copy_to_clipboard">Kopírovat do schránky</string>
+    <string name="action_save_to_category">Uložit do kategorie</string>
     <string name="action_clear">Vymazat</string>
+
+    <string name="action_clear_data">Vymazat data aplikace</string>
 
     <!-- Widget -->
     <string name="widget_description">Widget přehrávače pro rychlý přístup k oblíbeným stanicím</string>

@@ -258,7 +258,10 @@ fun SettingsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { exportLauncher.launch("touchradio_settings.json") }
+                    .clickable { 
+                        val date = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd").format(java.time.LocalDate.now())
+                        exportLauncher.launch("touchradio_settings_$date.json") 
+                    }
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
