@@ -147,6 +147,15 @@ class RadioViewModel @Inject constructor(
             if (context == null || intent == null) return
 
             try {
+                // Handling chyb přehrávání
+                val errorMessage = intent.getStringExtra(RadioService.EXTRA_ERROR)
+                if (errorMessage != null) {
+                    _message.value = errorMessage
+                    // Pokud nastala chyba, zastavíme UI stav
+                    if (_isPlaying.value) _isPlaying.value = false
+                    return
+                }
+
                 val isPlaying = intent.getBooleanExtra(RadioService.EXTRA_IS_PLAYING, false)
                 val metadata = intent.getStringExtra(RadioService.EXTRA_METADATA)
                 val currentRadioId = intent.getStringExtra(RadioService.EXTRA_CURRENT_RADIO)
@@ -273,26 +282,13 @@ class RadioViewModel @Inject constructor(
 
     private fun loadLocalStations() {
         viewModelScope.launch {
-            var code = locationService.getCurrentCountry()
-            if (code == null) {
-                // Fallback podle jazyka
-                code = when (_currentLanguage.value.code) {
-                    "cs" -> "CZ"
-                    "sk" -> "SK"
-                    "en" -> "US" // Default? Or check system locale?
-                    else -> "CZ" // Default fallback
-                }
-                // Check system locale if language is System
-                if (_currentLanguage.value == Language.SYSTEM) {
-                    val sysLang = context.resources.configuration.locales[0].language
-                    code = if (sysLang == "sk") "SK" else "CZ"
-                }
-            }
+            // Přísná strategie: Region pouze podle "Locale.country"
+            val countryCode = java.util.Locale.getDefault().country.uppercase()
             
-            if (code != null) {
-                _currentCountryCode.value = code
-                RadioCategory.setCurrentCountryCode(code)
-                radioRepository.getStationsByCountry(code)?.let { _localStations.value = it }
+            if (countryCode.isNotEmpty()) {
+                _currentCountryCode.value = countryCode
+                RadioCategory.setCurrentCountryCode(countryCode)
+                radioRepository.getStationsByCountry(countryCode)?.let { _localStations.value = it }
             }
         }
     }
@@ -302,22 +298,47 @@ class RadioViewModel @Inject constructor(
     private suspend fun ensureDatabaseInitialized() {
         val isInitialized = prefs.getBoolean("favorites_initialized", false)
         val totalStations = radioRepository.getAllRadios().first().size
-        if (!isInitialized || totalStations == 0) {
-            val code = locationService.getCurrentCountry() ?: if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
-            try {
-                val json = context.assets.open(if (code == "CZ") "stations_cz.json" else "stations_sk.json").bufferedReader().use { it.readText() }
-                radioRepository.initializeDefaultStations(json)
-                prefs.edit().putBoolean("favorites_initialized", true).apply()
-            } catch (e: Exception) {
-                if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
+
+        // Pokud je již inicializováno a DB není prázdná, nic neděláme
+        if (isInitialized && totalStations > 0) return
+
+        val countryCode = java.util.Locale.getDefault().country.uppercase()
+        // Ochrana proti prázdnému locale (např. emulátor), default CZ
+        val targetCountry = if (countryCode.isBlank()) "CZ" else countryCode
+        
+        var success = false
+
+        try {
+            // 1. Zkusíme Seed JSON (stations_XX.json)
+            val seedFileName = "stations_${targetCountry.lowercase()}.json"
+            val assetsList = context.assets.list("") ?: emptyArray()
+
+            if (assetsList.contains(seedFileName)) {
+                val json = context.assets.open(seedFileName).bufferedReader().use { it.readText() }
+                success = radioRepository.initializeDefaultStations(json)
+            } else {
+                // 2. Pokud nemáme seed, zkusíme API (pouze pokud jsme online)
+                if (isNetworkAvailable()) {
+                     success = radioRepository.initializeFromApi(targetCountry)
+                }
+                // 3. Offline + No Seed -> Zůstane prázdné (správné chování)
             }
+
+            // Flag nastavíme POUZE při úspěchu
+            if (success) {
+                prefs.edit().putBoolean("favorites_initialized", true).apply()
+            }
+
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
         }
     }
 
     fun playRadio(radio: Radio, categoryContext: RadioCategory? = null) {
+        // Strict Offline Check
         if (!isNetworkAvailable()) {
-            _message.value = context.getString(R.string.error_no_internet)
-            return
+             _message.value = context.getString(R.string.error_no_internet)
+             return
         }
         viewModelScope.launch {
             _currentRadio.value = radio
@@ -343,10 +364,12 @@ class RadioViewModel @Inject constructor(
     }
 
     fun togglePlayPause() {
-        if (!_isPlaying.value && !isNetworkAvailable()) {
+        // Strict Offline Check
+        if (!isNetworkAvailable()) {
             _message.value = context.getString(R.string.error_no_internet)
             return
         }
+        // ... zbytek logiky
         val intent = Intent(context, RadioService::class.java).apply {
             action = if (_isPlaying.value) RadioService.ACTION_PAUSE else RadioService.ACTION_PLAY
             if (!_isPlaying.value) putExtra(RadioService.EXTRA_RADIO_ID, _currentRadio.value?.id)

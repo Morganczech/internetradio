@@ -41,11 +41,13 @@ class RadioRepository @Inject constructor(
         return radioDao.existsByStreamUrl(url)
     }
 
-    suspend fun initializeDefaultStations(jsonString: String) {
-        try {
+    suspend fun initializeDefaultStations(jsonString: String): Boolean {
+        return try {
             val countryData = Gson().fromJson(jsonString, CountryData::class.java)
             val currentMaxOrder = getNextOrderIndex(RadioCategory.MISTNI)
             
+            if (countryData.stations.isEmpty()) return false
+
             countryData.stations.take(10).forEachIndexed { index, seed ->
                 val radio = Radio(
                     id = seed.id,
@@ -63,7 +65,48 @@ class RadioRepository @Inject constructor(
                 val entity = RadioEntity.fromRadio(radio).copy(orderIndex = currentMaxOrder + index)
                 radioDao.insertRadio(entity)
             }
-        } catch (e: Exception) {}
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun initializeFromApi(countryCode: String): Boolean {
+        return try {
+            val stations = radioBrowserApi.searchStations(
+                SearchParams(
+                    country = countryCode,
+                    limit = 10,
+                    orderBy = "votes",
+                    hideBroken = true
+                )
+            )
+
+            if (stations.isNullOrEmpty()) return false
+
+            val currentMaxOrder = getNextOrderIndex(RadioCategory.MISTNI)
+            stations.forEachIndexed { index, station ->
+                val streamUrl = station.url_resolved ?: station.url
+                val radio = Radio(
+                    id = station.stationuuid ?: station.url,
+                    name = station.name,
+                    streamUrl = streamUrl,
+                    imageUrl = station.favicon ?: "android.resource://cz.internetradio.app/drawable/ic_radio_default",
+                    description = station.tags ?: "",
+                    category = RadioCategory.MISTNI,
+                    originalCategory = RadioCategory.MISTNI,
+                    startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
+                    endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
+                    isFavorite = false,
+                    bitrate = station.bitrate?.toString()?.toIntOrNull()
+                )
+                val entity = RadioEntity.fromRadio(radio).copy(orderIndex = currentMaxOrder + index)
+                radioDao.insertRadio(entity)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun getAllRadios(): Flow<List<Radio>> {
