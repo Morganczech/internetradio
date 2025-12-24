@@ -139,6 +139,9 @@ class RadioViewModel @Inject constructor(
     private val _isCompactMode = MutableStateFlow(false)
     val isCompactMode: StateFlow<Boolean> = _isCompactMode
 
+    private val _useUnifiedAccentColor = MutableStateFlow(false)
+    val useUnifiedAccentColor: StateFlow<Boolean> = _useUnifiedAccentColor
+
     private val _playbackContext = MutableStateFlow<RadioCategory?>(null)
     val playbackContext: StateFlow<RadioCategory?> = _playbackContext
 
@@ -187,6 +190,7 @@ class RadioViewModel @Inject constructor(
         const val PREFS_FADE_OUT_DURATION = "fade_out_duration"
         const val DEFAULT_FADE_OUT_DURATION = 60
         const val PREFS_LANGUAGE = "language"
+        const val PREFS_USE_UNIFIED_ACCENT_COLOR = "use_unified_accent_color"
     }
 
     init {
@@ -241,6 +245,7 @@ class RadioViewModel @Inject constructor(
         viewModelScope.launch {
             _volume.value = prefs.getFloat("volume", 1.0f)
             _isCompactMode.value = prefs.getBoolean("compact_mode", false)
+            _useUnifiedAccentColor.value = prefs.getBoolean(PREFS_USE_UNIFIED_ACCENT_COLOR, false)
             val lastId = prefs.getString("last_radio_id", null)
             if (lastId != null) {
                 _currentRadio.value = radioRepository.getRadioById(lastId)
