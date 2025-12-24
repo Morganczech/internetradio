@@ -465,7 +465,7 @@ private fun StationItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = if (isCompact) 2.dp else 4.dp),
+            .padding(horizontal = 16.dp, vertical = if (isCompact) 4.dp else 8.dp),
         elevation = 4.dp,
         backgroundColor = Color.Transparent
     ) {
