@@ -287,7 +287,7 @@ fun AllStationsScreen(
                                 RadioItem(
                                     radio = radio,
                                     isSelected = radio.id == currentRadio?.id,
-                                    onRadioClick = { if (!isReorderMode) viewModel.playRadio(radio) },
+                                    onRadioClick = { if (!isReorderMode) viewModel.playRadio(radio, category) },
                                     onFavoriteClick = { viewModel.toggleFavorite(radio) },
                                     onEditClick = { onNavigateToEdit(radio.id) },
                                     onDeleteClick = { viewModel.removeStation(radio.id) },

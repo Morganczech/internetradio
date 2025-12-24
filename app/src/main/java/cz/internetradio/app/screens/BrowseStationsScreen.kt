@@ -498,12 +498,11 @@ private fun StationItem(
                 )
                 if (!isCompact && !station.tags.isNullOrBlank()) {
                     Text(
-                        text = station.tags.let { 
-                            if (it.length > 50) it.substring(0, 47) + "..." 
-                            else it 
-                        },
+                        text = station.tags,
                         style = MaterialTheme.typography.body2,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = Color.White.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 }
                 

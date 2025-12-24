@@ -139,6 +139,9 @@ class RadioViewModel @Inject constructor(
     private val _isCompactMode = MutableStateFlow(false)
     val isCompactMode: StateFlow<Boolean> = _isCompactMode
 
+    private val _playbackContext = MutableStateFlow<RadioCategory?>(null)
+    val playbackContext: StateFlow<RadioCategory?> = _playbackContext
+
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context == null || intent == null) return
@@ -311,13 +314,14 @@ class RadioViewModel @Inject constructor(
         }
     }
 
-    fun playRadio(radio: Radio) {
+    fun playRadio(radio: Radio, context: RadioCategory? = null) {
         if (!isNetworkAvailable()) {
             _message.value = context.getString(R.string.error_no_internet)
             return
         }
         viewModelScope.launch {
             _currentRadio.value = radio
+            _playbackContext.value = context
             _currentCategory.value = radio.category
             prefs.edit().putString("last_radio_id", radio.id).apply()
             val intent = Intent(context, RadioService::class.java).apply {

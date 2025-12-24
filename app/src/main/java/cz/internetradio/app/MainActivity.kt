@@ -372,10 +372,16 @@ fun RadioItem(
                             error = painterResource(id = R.drawable.ic_radio_default)
                         )
                     }
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(text = radio.name, style = if (isCompact) MaterialTheme.typography.subtitle1 else MaterialTheme.typography.h6, color = Color.White)
                         if (!isCompact) {
-                            Text(text = radio.description, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f))
+                            Text(
+                                text = radio.description,
+                                style = MaterialTheme.typography.body2,
+                                color = Color.White.copy(alpha = 0.7f),
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
                         }
                     }
                 }
@@ -406,6 +412,7 @@ fun RadioItem(
 
 
 
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PlayerControls(
@@ -419,15 +426,23 @@ fun PlayerControls(
     val remainingSeconds by viewModel.remainingTimeSeconds.collectAsState()
     val currentMetadata by viewModel.currentMetadata.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
+    val playbackContext by viewModel.playbackContext.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var showTimerDropdown by remember { mutableStateOf(false) }
 
+    val visualGradient = if (playbackContext == RadioCategory.VSE) {
+        cz.internetradio.app.ui.theme.Gradients.getGradientForCategory(RadioCategory.VSE)
+    } else {
+        Pair(radio.startColor, radio.endColor)
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { isExpanded = !isExpanded }.animateContentSize(),
-        elevation = 8.dp
+        elevation = if (isExpanded) 12.dp else 6.dp,
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Box(modifier = Modifier.background(brush = Brush.verticalGradient(listOf(radio.startColor, radio.endColor)))) {
-            AudioVisualizer(
+        Box(modifier = Modifier.background(brush = Brush.verticalGradient(listOf(visualGradient.first, visualGradient.second)))) {
+            cz.internetradio.app.components.AudioVisualizer(
                 modifier = Modifier.matchParentSize().alpha(0.2f),
                 baseColor1 = Color.White,
                 baseColor2 = Color.White.copy(alpha = 0.5f),
@@ -437,72 +452,55 @@ fun PlayerControls(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = radio.name, style = MaterialTheme.typography.h6, color = Color.White)
-                        currentMetadata?.let { Text(text = it, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f)) }
+                        currentMetadata?.let { Text(text = it, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
 
-                        
-                        Row(modifier = Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Card(
-                                shape = RoundedCornerShape(12.dp),
-                                backgroundColor = Color.White.copy(alpha = 0.1f),
-                                elevation = 0.dp
-                            ) {
-                                Text(
-                                    text = stringResource(radio.category.getTitleRes()),
-                                    style = MaterialTheme.typography.caption,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                    color = Color.White.copy(alpha = 0.7f)
-                                )
-                            }
-                            radio.bitrate?.let { bitrate ->
+                        AnimatedVisibility(visible = isExpanded) {
+                            Row(modifier = Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Card(
                                     shape = RoundedCornerShape(12.dp),
-                                    backgroundColor = Color.White.copy(alpha = 0.1f),
+                                    backgroundColor = Color.White.copy(alpha = 0.05f),
                                     elevation = 0.dp
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.player_bitrate_format, bitrate),
+                                        text = stringResource(radio.category.getTitleRes()),
                                         style = MaterialTheme.typography.caption,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
                                 }
+                                radio.bitrate?.let { bitrate ->
+                                    Card(
+                                        shape = RoundedCornerShape(12.dp),
+                                        backgroundColor = Color.White.copy(alpha = 0.05f),
+                                        elevation = 0.dp
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.player_bitrate_format, bitrate),
+                                            style = MaterialTheme.typography.caption,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                            color = Color.White.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Volume Control
-                        Box {
-                            var showVolume by remember { mutableStateOf(false) }
-                            IconButton(onClick = { showVolume = true }) {
-                                Icon(Icons.Default.VolumeUp, stringResource(R.string.player_volume), tint = Color.White)
-                            }
-                            DropdownMenu(
-                                expanded = showVolume,
-                                onDismissRequest = { showVolume = false }
-                            ) {
-                                Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
-                                    Slider(
-                                        value = volume,
-                                        onValueChange = { viewModel.setVolume(it) },
-                                        modifier = Modifier.align(Alignment.Center)
-                                    )
-                                }
-                            }
-                        }
-
                         IconButton(onClick = { viewModel.togglePlayPause() }) {
                             Icon(imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
                         }
-                        Icon(
-                            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
-                            tint = Color.White
-                        )
+                        IconButton(onClick = { isExpanded = !isExpanded }, modifier = Modifier.size(48.dp)) {
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
                 
-                if (isExpanded) {
-                    Column(modifier = Modifier.padding(top = 8.dp)) {
+                AnimatedVisibility(visible = isExpanded) {
+                    Column(modifier = Modifier.padding(top = 16.dp).fillMaxWidth().background(Color.Black.copy(alpha = 0.15f), RoundedCornerShape(12.dp)).padding(8.dp)) {
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -510,7 +508,25 @@ fun PlayerControls(
                                 IconButton(onClick = { viewModel.playNextStation() }) { Icon(Icons.Default.SkipNext, null, tint = Color.White) }
                             }
                             
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Box {
+                                    var showVolume by remember { mutableStateOf(false) }
+                                    IconButton(onClick = { showVolume = true }) {
+                                        Icon(Icons.Default.VolumeUp, stringResource(R.string.player_volume), tint = Color.White)
+                                    }
+                                    DropdownMenu(
+                                        expanded = showVolume,
+                                        onDismissRequest = { showVolume = false }
+                                    ) {
+                                        Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
+                                            Slider(
+                                                value = volume,
+                                                onValueChange = { viewModel.setVolume(it) },
+                                                modifier = Modifier.align(Alignment.Center)
+                                            )
+                                        }
+                                    }
+                                }
                                 if (currentMetadata != null) {
                                     IconButton(onClick = { viewModel.saveSongToFavorites() }) {
                                         Icon(Icons.Default.PlaylistAdd, stringResource(R.string.action_save_song), tint = Color.White)
@@ -555,7 +571,7 @@ fun PlayerControls(
                     Text(
                         text = stringResource(R.string.player_time_remaining, minutes, seconds),
                         style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(top = 4.dp),
+                        modifier = Modifier.padding(top = 8.dp),
                         color = Color.White
                     )
                 }
