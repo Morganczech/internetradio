@@ -607,9 +607,7 @@ class RadioViewModel @Inject constructor(
                             isFavorite = radio.isFavorite, bitrate = radio.bitrate
                         )
                     }
-                    val songs = favoriteSongRepository.getAllSongs().first().map { song ->
-                        SerializableSong(title = song.title, artist = song.artist, radioName = song.radioName, radioId = song.radioId)
-                    }
+
                     val songs = favoriteSongRepository.getAllSongs().first().map { song ->
                         SerializableSong(title = song.title, artist = song.artist, radioName = song.radioName, radioId = song.radioId)
                     }
