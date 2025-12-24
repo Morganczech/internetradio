@@ -55,6 +55,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
 
 @OptIn(ExperimentalMaterialApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
@@ -63,6 +65,7 @@ fun BrowseStationsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToFavoriteSongs: () -> Unit
 ) {
+    val scaffoldState = rememberScaffoldState()
     var searchQuery by remember { mutableStateOf("") }
     var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -107,6 +110,7 @@ fun BrowseStationsScreen(
                     .height(bottomSheetHeight)
                     .background(MaterialTheme.colors.surface)
                     .navigationBarsPadding()
+                    .imePadding() // Ensure bottom sheet respects keyboard
             ) {
                 Text(
                     text = stringResource(R.string.settings_add_station),
@@ -189,13 +193,16 @@ fun BrowseStationsScreen(
                             selectedCategory?.let { category ->
                                 selectedStation?.let { station ->
                                     viewModel.addStationToFavorites(station, category)
+                                    scope.launch {
+                                        sheetState.hide()
+                                        val categoryName = context.getString(category.getTitleRes())
+                                        val message = context.getString(R.string.msg_station_saved_to_category, categoryName)
+                                        scaffoldState.snackbarHostState.showSnackbar(message)
+                                    }
                                 }
                             }
                             selectedStation = null
                             selectedCategory = null
-                            scope.launch {
-                                sheetState.hide()
-                            }
                         },
                         modifier = Modifier
                             .weight(1f)
@@ -217,12 +224,21 @@ fun BrowseStationsScreen(
         },
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     ) {
-        Column(
+        val context = LocalContext.current // Need context for string fetching inside coroutine
+        Scaffold(
+            scaffoldState = scaffoldState,
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-        ) {
+                .imePadding(), // Main content respects keyboard
+            backgroundColor = MaterialTheme.colors.background
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
             TopAppBar(
                 title = { Text(stringResource(R.string.nav_search)) },
                 navigationIcon = {

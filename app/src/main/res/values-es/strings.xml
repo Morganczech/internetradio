@@ -157,4 +157,5 @@
     <string name="equalizer_band_910hz">910Hz</string>
     <string name="equalizer_band_3_6khz">3.6kHz</string>
     <string name="equalizer_band_14khz">14kHz</string>
-</resources> 
+ <string name="msg_station_saved_to_category">Estación guardada en la categoría %s</string>
+</resources>

@@ -172,4 +172,6 @@
     <string name="welcome_message">Abychom vám mohli nabídnout ten nejlepší zážitek, potřebujeme následující oprávnění:\n\n• <b>Oznámení</b>: Pro ovládání přehrávače ze zamknuté obrazovky a oznamovací lišty.\n• <b>Poloha</b>: Pro automatické nabízení místních rozhlasových stanic ve vašem okolí.</string>
     <string name="action_continue">Pokračovat</string>
     <string name="permission_notifications_rationale">Oprávnění k oznámení je vyžadováno pro ovládání rádia, když je aplikace na pozadí. Prosím, povolte jej v dalším kroku.</string>
+
+<string name="msg_station_saved_to_category">Stanice uložena do kategorie %s</string>
 </resources>
