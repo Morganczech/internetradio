@@ -485,7 +485,7 @@ private fun StationItem(
                     .fillMaxWidth()
                     .padding(if (isCompact) 8.dp else 16.dp),
                 verticalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 8.dp)
-                verticalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 8.dp)
+
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
