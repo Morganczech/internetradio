@@ -168,9 +168,20 @@ fun SettingsScreen(
             )
             
             // Slider
+            // Slider (optimized smooth behavior)
+            var sliderValue by remember { mutableStateOf(maxFavorites.toFloat()) }
+            LaunchedEffect(maxFavorites) {
+                if (kotlin.math.abs(sliderValue - maxFavorites) > 1f) {
+                    sliderValue = maxFavorites.toFloat()
+                }
+            }
+
             Slider(
-                value = maxFavorites.toFloat(),
-                onValueChange = { viewModel.setMaxFavorites(it.toInt()) },
+                value = sliderValue,
+                onValueChange = { 
+                    sliderValue = it
+                    viewModel.setMaxFavorites(it.toInt()) 
+                },
                 valueRange = 10f..50f,
                 steps = 39,
                 modifier = Modifier.fillMaxWidth()
