@@ -469,15 +469,17 @@ fun PlayerControls(
                             style = MaterialTheme.typography.h6,
                             color = Color.White
                         )
-                        currentMetadata?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.body2,
-                                color = Color.White.copy(alpha = 0.7f),
-                                maxLines = if (isExpanded) 2 else 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
+                        val metadataText = currentMetadata ?: "No data"
+                        val metadataAlpha = if (currentMetadata != null) 0.7f else 0.5f
+
+                        Text(
+                            text = metadataText,
+                            style = MaterialTheme.typography.body2,
+                            color = Color.White.copy(alpha = metadataAlpha),
+                            maxLines = if (isExpanded) 2 else 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            modifier = Modifier.height(IntrinsicSize.Min)
+                        )
                         
                         // Chips (Visible only in Expanded)
                         AnimatedVisibility(visible = isExpanded) {
@@ -607,25 +609,29 @@ fun PlayerControls(
                                         androidx.core.graphics.ColorUtils.blendARGB(
                                             android.graphics.Color.parseColor("#1E1E1E"), // Dark surface fallback
                                             visualGradient.first.toArgb(),
-                                            0.15f
+                                            0.2f // Increased tint to 20%
                                         )
                                     )
                                 }
 
-                                MaterialTheme(
-                                    colors = MaterialTheme.colors.copy(surface = menuBackgroundColor),
-                                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(12.dp))
+                                DropdownMenu(
+                                    expanded = showTimerDropdown,
+                                    onDismissRequest = { showTimerDropdown = false },
+                                    modifier = Modifier.background(Color.Transparent) // Let Surface handle bg
                                 ) {
-                                    DropdownMenu(
-                                        expanded = showTimerDropdown,
-                                        onDismissRequest = { showTimerDropdown = false }
+                                    Surface(
+                                        color = menuBackgroundColor,
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentColor = Color.White
                                     ) {
-                                        DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
-                                            Text(stringResource(R.string.sleep_timer_off), color = Color.White)
-                                        }
-                                        listOf(5, 15, 30, 45, 60).forEach { m ->
-                                            DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
-                                                Text(stringResource(R.string.sleep_timer_minutes, m), color = Color.White)
+                                        Column {
+                                            DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
+                                                Text(stringResource(R.string.sleep_timer_off))
+                                            }
+                                            listOf(5, 15, 30, 45, 60).forEach { m ->
+                                                DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
+                                                    Text(stringResource(R.string.sleep_timer_minutes, m))
+                                                }
                                             }
                                         }
                                     }
@@ -644,18 +650,20 @@ fun PlayerControls(
                                         androidx.core.graphics.ColorUtils.blendARGB(
                                             android.graphics.Color.parseColor("#1E1E1E"),
                                             visualGradient.first.toArgb(),
-                                            0.15f
+                                            0.2f
                                         )
                                     ).copy(alpha = 0.95f)
                                 }
                                 
-                                MaterialTheme(
-                                    colors = MaterialTheme.colors.copy(surface = volumeMenuColor),
-                                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(12.dp))
+                                DropdownMenu(
+                                    expanded = showVolume,
+                                    onDismissRequest = { showVolume = false },
+                                    modifier = Modifier.background(Color.Transparent)
                                 ) {
-                                    DropdownMenu(
-                                        expanded = showVolume,
-                                        onDismissRequest = { showVolume = false }
+                                    Surface(
+                                        color = volumeMenuColor,
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentColor = Color.White
                                     ) {
                                         Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
                                             Slider(
