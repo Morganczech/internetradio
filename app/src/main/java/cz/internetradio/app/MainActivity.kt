@@ -665,9 +665,22 @@ fun PlayerControls(
                                         onDismissRequest = { showVolume = false }
                                     ) {
                                         Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
+                                            var sliderPosition by remember { mutableStateOf(volume) }
+                                            
+                                            // Sync slider position when volume changes externally or menu opens
+                                            LaunchedEffect(showVolume, volume) {
+                                                // Only sync if difference is significant to avoid fighting user input loop
+                                                if (kotlin.math.abs(sliderPosition - volume) > 0.05f) {
+                                                    sliderPosition = volume
+                                                }
+                                            }
+
                                             Slider(
-                                                value = volume,
-                                                onValueChange = { viewModel.setVolume(it) },
+                                                value = sliderPosition,
+                                                onValueChange = { 
+                                                    sliderPosition = it
+                                                    viewModel.setVolume(it)
+                                                },
                                                 modifier = Modifier.align(Alignment.Center),
                                                 colors = SliderDefaults.colors(
                                                     thumbColor = Color.White,
