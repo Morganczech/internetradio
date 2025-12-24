@@ -330,8 +330,26 @@ fun BrowseStationsScreen(
                     .padding(16.dp)
                     .focusRequester(focusRequester),
                 label = { Text(stringResource(R.string.search_hint)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) }
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) },
+                singleLine = true,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                    onSearch = {
+                        keyboardController?.hide()
+                    }
+                )
             )
+
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -341,11 +359,15 @@ fun BrowseStationsScreen(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator()
-                } else if (searchQuery.length < 3) {
+                if (searchQuery.length < 3) {
                     Text(
                         text = stringResource(R.string.search_min_chars),
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else if (!isLoading && stations.isEmpty()) { // Show "No results" only if not loading and list is empty
+                     Text(
+                        text = "Žádné stanice nenalezeny", // TODO: Move to strings.xml
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.padding(16.dp)
                     )
