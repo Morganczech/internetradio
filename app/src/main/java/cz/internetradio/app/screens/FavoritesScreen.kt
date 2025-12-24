@@ -43,6 +43,7 @@ fun FavoritesScreen(
     val favoriteRadios by viewModel.getFavoriteRadios().collectAsState(initial = emptyList())
     val maxFavorites by viewModel.maxFavorites.collectAsState()
     val isCompactMode by viewModel.isCompactMode.collectAsState()
+    val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     var showDeleteDialog: Radio? by remember { mutableStateOf<Radio?>(null) }
 
     // Dialog pro potvrzení smazání
@@ -181,7 +182,8 @@ fun FavoritesScreen(
                         onFavoriteClick = { viewModel.toggleFavorite(radio) },
                         onEditClick = { onNavigateToEdit(radio.id) },
                         onDeleteClick = { showDeleteDialog = radio },
-                        isCompact = isCompactMode
+                        isCompact = isCompactMode,
+                        useUnifiedColor = useUnifiedAccentColor
                     )
                 }
             }

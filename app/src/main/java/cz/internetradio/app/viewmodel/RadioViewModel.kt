@@ -392,6 +392,11 @@ class RadioViewModel @Inject constructor(
         prefs.edit().putInt(PREFS_FADE_OUT_DURATION, seconds).apply()
     }
 
+    fun setUseUnifiedAccentColor(enabled: Boolean) {
+        _useUnifiedAccentColor.value = enabled
+        prefs.edit().putBoolean(PREFS_USE_UNIFIED_ACCENT_COLOR, enabled).apply()
+    }
+
     fun setSleepTimer(minutes: Int?) {
         _sleepTimerMinutes.value = minutes
         _remainingTimeMinutes.value = minutes

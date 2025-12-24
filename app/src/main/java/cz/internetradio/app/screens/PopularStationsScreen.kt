@@ -76,6 +76,7 @@ fun PopularStationsScreen(
     val currentRadio by viewModel.currentRadio.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val isCompactMode by viewModel.isCompactMode.collectAsState()
+    val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
@@ -243,7 +244,8 @@ fun PopularStationsScreen(
                         onFavoriteClick = { viewModel.toggleFavorite(radio) },
                         onEditClick = { onNavigateToEdit(radio.id) },
                         onDeleteClick = { viewModel.removeStation(radio.id) },
-                        isCompact = isCompactMode
+                        isCompact = isCompactMode,
+                        useUnifiedColor = useUnifiedAccentColor
                     )
                 }
                 

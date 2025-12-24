@@ -340,9 +340,16 @@ fun RadioItem(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isCompact: Boolean = false
+    isCompact: Boolean = false,
+    useUnifiedColor: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
+
+    val gradientColors = if (useUnifiedColor) {
+        cz.internetradio.app.ui.theme.Gradients.UNIFIED_COLOR_PAIR
+    } else {
+        Pair(radio.startColor, radio.endColor)
+    }
 
     Card(
         modifier = modifier
@@ -354,7 +361,7 @@ fun RadioItem(
     ) {
         Box(
             modifier = Modifier.background(
-                brush = Brush.horizontalGradient(listOf(radio.startColor, radio.endColor))
+                brush = Brush.horizontalGradient(listOf(gradientColors.first, gradientColors.second))
             )
         ) {
             Row(
@@ -428,10 +435,13 @@ fun PlayerControls(
     val currentMetadata by viewModel.currentMetadata.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val playbackContext by viewModel.playbackContext.collectAsState()
+    val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var showTimerDropdown by remember { mutableStateOf(false) }
 
-    val visualGradient = if (playbackContext == RadioCategory.VSE) {
+    val visualGradient = if (useUnifiedAccentColor) {
+        cz.internetradio.app.ui.theme.Gradients.UNIFIED_COLOR_PAIR
+    } else if (playbackContext == RadioCategory.VSE) {
         cz.internetradio.app.ui.theme.Gradients.getGradientForCategory(RadioCategory.VSE)
     } else {
         Pair(radio.startColor, radio.endColor)

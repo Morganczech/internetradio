@@ -72,6 +72,12 @@ object Gradients {
         )
     )
 
+    // Jednotná neutrální barva pro "Unified Accent Color" režim
+    val UNIFIED_COLOR_PAIR = Pair(
+        Color(0xFF607D8B), // Blue Grey
+        Color(0xFF37474F)
+    )
+
     val availableGradients = listOf(
         GradientOption(0, "Modrá - Česká", Pair(Color(0xFF1976D2), Color(0xFF0D47A1))),
         GradientOption(1, "Růžová - Pop", Pair(Color(0xFFE91E63), Color(0xFFC2185B))),
@@ -101,7 +107,9 @@ object Gradients {
     }
 
     // Bezpečná metoda pro získání gradientu
-    fun getGradientForCategory(category: RadioCategory, selectedGradientId: Int? = null): Pair<Color, Color> {
+    fun getGradientForCategory(category: RadioCategory, selectedGradientId: Int? = null, useUnified: Boolean = false): Pair<Color, Color> {
+        if (useUnified) return UNIFIED_COLOR_PAIR
+        
         return if (selectedGradientId != null) {
             getGradientById(selectedGradientId)
         } else {

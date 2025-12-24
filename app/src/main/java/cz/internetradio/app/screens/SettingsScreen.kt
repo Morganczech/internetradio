@@ -36,6 +36,7 @@ fun SettingsScreen(
     val maxFavorites by viewModel.maxFavorites.collectAsState()
     val equalizerEnabled by viewModel.equalizerEnabled.collectAsState()
     val fadeOutDuration by viewModel.fadeOutDuration.collectAsState()
+    val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     var showFadeOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showClearDataDialog by remember { mutableStateOf(false) }
@@ -249,6 +250,35 @@ fun SettingsScreen(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                )
+            }
+
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Unified Accent Color Switch
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Jednotná barva kategorií",
+                        style = MaterialTheme.typography.subtitle1,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    Text(
+                        text = "Klidný režim barev pro všechny kategorie",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+                Switch(
+                    checked = useUnifiedAccentColor,
+                    onCheckedChange = { viewModel.setUseUnifiedAccentColor(it) },
+                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
                 )
             }
 

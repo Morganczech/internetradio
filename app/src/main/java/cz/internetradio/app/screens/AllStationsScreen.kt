@@ -67,6 +67,7 @@ fun AllStationsScreen(
     val currentRadio by viewModel.currentRadio.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
+    val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showSearch by rememberSaveable { mutableStateOf(false) }
@@ -192,6 +193,7 @@ fun AllStationsScreen(
                     CategoryChip(
                         category = category,
                         isSelected = selectedCategory == category,
+                        useUnifiedColor = useUnifiedAccentColor,
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(categories.indexOf(category)) } }
                     )
                 }
@@ -291,7 +293,8 @@ fun AllStationsScreen(
                                     onFavoriteClick = { viewModel.toggleFavorite(radio) },
                                     onEditClick = { onNavigateToEdit(radio.id) },
                                     onDeleteClick = { viewModel.removeStation(radio.id) },
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
+                                    useUnifiedColor = useUnifiedAccentColor
                                 )
                             }
                         }
@@ -332,9 +335,9 @@ fun AllStationsScreen(
 }
 
 @Composable
-fun CategoryChip(category: RadioCategory, isSelected: Boolean, onClick: () -> Unit) {
+fun CategoryChip(category: RadioCategory, isSelected: Boolean, useUnifiedColor: Boolean, onClick: () -> Unit) {
     val colors = if (isSelected) {
-        val gradient = Gradients.getGradientForCategory(category)
+        val gradient = Gradients.getGradientForCategory(category, useUnified = useUnifiedColor)
         listOf(gradient.first, gradient.second)
     } else listOf(Color.Transparent, Color.Transparent)
 
