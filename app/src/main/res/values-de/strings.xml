@@ -127,7 +127,7 @@
     <string name="list_no_favorite_stations">Noch keine Lieblingssender vorhanden</string>
 
     <!-- Settings Notes -->
-    <string name="settings_favorites_note">Hinweis: Dieses Limit gilt nur für die Kategorie Meine Sender. Andere Kategorien haben keine Beschränkung der Senderanzahl.</string>
+    <string name="settings_favorites_note">Hinweis: Dieses Limit gilt nur für die Kategorie Favoriten. Andere Kategorien haben keine Beschränkung der Senderanzahl.</string>
     <string name="settings_fade_note">Stellen Sie die Zeit ein, in der die Lautstärke vor dem Ausschalten des Sleep-Timers allmählich reduziert wird.</string>
     <string name="settings_current_limit">Aktuelles Limit: %d Sender</string>
     <string name="settings_seconds_format">%d Sekunden</string>

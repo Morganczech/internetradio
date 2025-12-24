@@ -119,7 +119,7 @@
     <string name="list_no_favorite_stations">Zatiaľ nemáte žiadne obľúbené stanice</string>
 
     <!-- Settings Notes -->
-    <string name="settings_favorites_note">Poznámka: Tento limit sa týka iba kategórie Moje stanice. Ostatné kategórie nemajú žiadne obmedzenie počtu staníc.</string>
+    <string name="settings_favorites_note">Poznámka: Tento limit sa týka iba kategórie Obľúbené. Ostatné kategórie nemajú žiadne obmedzenie počtu staníc.</string>
     <string name="settings_fade_note">Nastavte dobu, počas ktorej sa bude postupne znižovať hlasitosť pred vypnutím časovača spánku.</string>
     <string name="settings_current_limit">Aktuálny limit: %d staníc</string>
     <string name="settings_seconds_format">%d sekúnd</string>

@@ -127,7 +127,7 @@
     <string name="list_no_favorite_stations">Nie masz jeszcze żadnych ulubionych stacji</string>
 
     <!-- Settings Notes -->
-    <string name="settings_favorites_note">Uwaga: Ten limit dotyczy tylko kategorii Moje stacje. Pozostałe kategorie nie mają ograniczeń liczby stacji.</string>
+    <string name="settings_favorites_note">Uwaga: Ten limit dotyczy tylko kategorii Ulubione. Pozostałe kategorie nie mają ograniczeń liczby stacji.</string>
     <string name="settings_fade_note">Ustaw czas, przez który głośność będzie stopniowo zmniejszana przed wyłączeniem timera.</string>
     <string name="settings_current_limit">Aktualny limit: %d stacji</string>
     <string name="settings_seconds_format">%d sekund</string>

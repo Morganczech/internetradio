@@ -127,7 +127,7 @@
     <string name="list_no_favorite_stations">Aún no tienes emisoras favoritas</string>
 
     <!-- Settings Notes -->
-    <string name="settings_favorites_note">Nota: Este límite solo se aplica a la categoría Mis emisoras. Las otras categorías no tienen límite de emisoras.</string>
+    <string name="settings_favorites_note">Nota: Este límite solo se aplica a la categoría Favoritos. Las otras categorías no tienen límite de emisoras.</string>
     <string name="settings_fade_note">Establece el tiempo durante el cual el volumen disminuirá gradualmente antes de que se apague el temporizador.</string>
     <string name="settings_current_limit">Límite actual: %d emisoras</string>
     <string name="settings_seconds_format">%d segundos</string>

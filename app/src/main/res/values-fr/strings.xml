@@ -114,7 +114,7 @@
     <string name="list_no_favorite_stations">Aucune station favorite pour le moment</string>
 
     <!-- Settings Notes -->
-    <string name="settings_favorites_note">Note : Cette limite ne s\'applique qu\'à la catégorie Mes stations. Les autres catégories n\'ont pas de limite de nombre de stations.</string>
+    <string name="settings_favorites_note">Note : Cette limite ne s\'applique qu\'à la catégorie Favoris. Les autres catégories n\'ont pas de limite de nombre de stations.</string>
     <string name="settings_fade_note">Définissez la durée pendant laquelle le volume diminuera progressivement avant l\'arrêt de la minuterie.</string>
     <string name="settings_current_limit">Limite actuelle : %d stations</string>
     <string name="settings_seconds_format">%d secondes</string>

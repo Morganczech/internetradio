@@ -143,7 +143,7 @@
     <string name="list_no_favorite_stations">Zatím nemáte žádné oblíbené stanice</string>
 
     <!-- Settings Notes -->
-    <string name="settings_favorites_note">Poznámka: Tento limit platí pouze pro kategorii Moje stanice. Ostatní kategorie jsou bez omezení.</string>
+    <string name="settings_favorites_note">Poznámka: Tento limit platí pouze pro kategorii Oblíbené. Ostatní kategorie jsou bez omezení.</string>
     <string name="settings_fade_note">Nastavte čas, během kterého se bude hlasitost postupně snižovat před vypnutím časovačem spánku.</string>
     <string name="settings_current_limit">Aktuální limit: %d stanic</string>
     <string name="settings_seconds_format">%d sekund</string>
