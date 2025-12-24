@@ -1,7 +1,8 @@
-package cz.internetradio.app.screens
-
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
@@ -228,13 +229,7 @@ fun BrowseStationsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.setCompactMode(!isCompactMode) }) {
-                        Icon(
-                            imageVector = if (isCompactMode) Icons.Default.ViewModule else Icons.Default.ViewList,
-                            contentDescription = "Změnit zobrazení",
-                            tint = MaterialTheme.colors.onSurface
-                        )
-                    }
+
                     IconButton(onClick = { showFilters = !showFilters }) {
                         Icon(
                             imageVector = Icons.Default.FilterList,
@@ -490,12 +485,36 @@ private fun StationItem(
                     .fillMaxWidth()
                     .padding(if (isCompact) 8.dp else 16.dp),
                 verticalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 8.dp)
+                verticalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 8.dp)
             ) {
-                Text(
-                    text = station.name,
-                    style = if (isCompact) MaterialTheme.typography.subtitle1 else MaterialTheme.typography.h6,
-                    color = Color.White
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                   Box(
+                        modifier = Modifier
+                            .size(if (isCompact) 40.dp else 48.dp)
+                            .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+                    ) {
+                        AsyncImage(
+                            model = station.favicon,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit,
+                            fallback = painterResource(id = R.drawable.ic_radio_default),
+                            error = painterResource(id = R.drawable.ic_radio_default)
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = station.name,
+                            style = if (isCompact) MaterialTheme.typography.subtitle1 else MaterialTheme.typography.h6,
+                            color = Color.White
+                        )
+                    }
+                }
                 if (!isCompact && !station.tags.isNullOrBlank()) {
                     Text(
                         text = station.tags,
