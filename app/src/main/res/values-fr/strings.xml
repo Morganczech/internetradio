@@ -85,7 +85,7 @@
     <string name="action_close">Fermer</string>
     <string name="action_save_to_category">Enregistrer dans la catégorie</string>
     <string name="action_clear_data">Effacer les données</string>
-    <string name="action_clear_data">Effacer les données</string>
+
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Nombre maximum de favoris atteint</string>

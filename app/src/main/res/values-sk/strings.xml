@@ -90,7 +90,7 @@
     <string name="action_close">Zavrieť</string>
     <string name="action_save_to_category">Uložiť do kategórie</string>
     <string name="action_clear_data">Vymazať dáta aplikácie</string>
-    <string name="action_clear_data">Vymazať dáta aplikácie</string>
+
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Dosiahnutý maximálny počet obľúbených</string>

@@ -101,7 +101,7 @@
     <string name="action_close">Cerrar</string>
     <string name="action_save_to_category">Guardar en categoría</string>
     <string name="action_clear_data">Borrar datos</string>
-    <string name="action_clear_data">Borrar datos</string>
+
     <string name="action_more_options">Más opciones</string>
     <string name="action_copy_to_clipboard">Copiar al portapapeles</string>
 

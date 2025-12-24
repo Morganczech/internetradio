@@ -104,7 +104,7 @@
     <string name="action_copy_to_clipboard">Copy to clipboard</string>
     <string name="action_save_to_category">Save to category</string>
     <string name="action_clear">Clear</string>
-    <string name="action_clear">Clear</string>
+
     <string name="action_clear_data">Clear app data</string>
 
     <!-- Widget -->

@@ -98,7 +98,7 @@
     <string name="action_close">Schließen</string>
     <string name="action_save_to_category">In Kategorie speichern</string>
     <string name="action_clear_data">App-Daten löschen</string>
-    <string name="action_clear_data">App-Daten löschen</string>
+
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Maximale Anzahl Favoriten erreicht</string>
