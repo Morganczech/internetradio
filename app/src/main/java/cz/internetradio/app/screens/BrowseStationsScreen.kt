@@ -517,10 +517,13 @@ private fun StationItem(
                     Button(
                         onClick = onAddToFavorites,
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xFF333333), // Neutral dark/grey
+                            backgroundColor = Gradients.UNIFIED_COLOR_PAIR.second,
                             contentColor = Color.White
                         ),
-                        modifier = Modifier.fillMaxWidth().height(48.dp), // Increased height, full width
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)), // Added border for contrast
                         elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
                         shape = RoundedCornerShape(8.dp)
                     ) {
