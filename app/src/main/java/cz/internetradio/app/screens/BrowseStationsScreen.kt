@@ -65,6 +65,7 @@ fun BrowseStationsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToFavoriteSongs: () -> Unit
 ) {
+    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     var searchQuery by remember { mutableStateOf("") }
     var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
@@ -224,7 +225,6 @@ fun BrowseStationsScreen(
         },
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     ) {
-        val context = LocalContext.current // Need context for string fetching inside coroutine
         Scaffold(
             scaffoldState = scaffoldState,
             modifier = Modifier
@@ -584,4 +584,4 @@ private fun FilterChip(
             )
         }
     }
-}
+}}
