@@ -12,7 +12,7 @@ data class AppSettings(
     val equalizerEnabled: Boolean,
     val fadeOutDuration: Int,
     val favoriteStations: List<SerializableRadio>,
-    val favoriteStations: List<SerializableRadio>,
+
     val favoriteSongs: List<SerializableSong>,
     val exportDate: String? = null
 )
