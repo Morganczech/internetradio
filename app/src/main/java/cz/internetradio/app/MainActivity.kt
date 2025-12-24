@@ -614,24 +614,20 @@ fun PlayerControls(
                                     )
                                 }
 
-                                DropdownMenu(
-                                    expanded = showTimerDropdown,
-                                    onDismissRequest = { showTimerDropdown = false },
-                                    modifier = Modifier.background(Color.Transparent) // Let Surface handle bg
+                                MaterialTheme(
+                                    colors = MaterialTheme.colors.copy(surface = menuBackgroundColor),
+                                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(12.dp))
                                 ) {
-                                    Surface(
-                                        color = menuBackgroundColor,
-                                        shape = RoundedCornerShape(12.dp),
-                                        contentColor = Color.White
+                                    DropdownMenu(
+                                        expanded = showTimerDropdown,
+                                        onDismissRequest = { showTimerDropdown = false }
                                     ) {
-                                        Column {
-                                            DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
-                                                Text(stringResource(R.string.sleep_timer_off))
-                                            }
-                                            listOf(5, 15, 30, 45, 60).forEach { m ->
-                                                DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
-                                                    Text(stringResource(R.string.sleep_timer_minutes, m))
-                                                }
+                                        DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
+                                            Text(stringResource(R.string.sleep_timer_off), color = Color.White)
+                                        }
+                                        listOf(5, 15, 30, 45, 60).forEach { m ->
+                                            DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
+                                                Text(stringResource(R.string.sleep_timer_minutes, m), color = Color.White)
                                             }
                                         }
                                     }
@@ -655,15 +651,13 @@ fun PlayerControls(
                                     ).copy(alpha = 0.95f)
                                 }
                                 
-                                DropdownMenu(
-                                    expanded = showVolume,
-                                    onDismissRequest = { showVolume = false },
-                                    modifier = Modifier.background(Color.Transparent)
+                                MaterialTheme(
+                                    colors = MaterialTheme.colors.copy(surface = volumeMenuColor),
+                                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(12.dp))
                                 ) {
-                                    Surface(
-                                        color = volumeMenuColor,
-                                        shape = RoundedCornerShape(12.dp),
-                                        contentColor = Color.White
+                                    DropdownMenu(
+                                        expanded = showVolume,
+                                        onDismissRequest = { showVolume = false }
                                     ) {
                                         Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
                                             Slider(
