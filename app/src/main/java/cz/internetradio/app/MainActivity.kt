@@ -476,9 +476,9 @@ fun PlayerControls(
                             text = metadataText,
                             style = MaterialTheme.typography.body2,
                             color = Color.White.copy(alpha = metadataAlpha),
-                            maxLines = if (isExpanded) 2 else 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                            modifier = Modifier.height(IntrinsicSize.Min)
+                            maxLines = 2,
+                            minLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                         
                         // Chips (Visible only in Expanded)
