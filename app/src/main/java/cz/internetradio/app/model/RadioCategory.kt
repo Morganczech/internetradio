@@ -46,22 +46,6 @@ enum class RadioCategory(
 
     @StringRes
     fun getTitleRes(): Int {
-        return if (this == MISTNI) {
-            currentCountryCode?.let {
-                // Pro místní stanice vracíme speciální resource ID podle země
-                when (it.uppercase()) {
-                    "CZ" -> R.string.category_local_cz
-                    "SK" -> R.string.category_local_sk
-                    "DE" -> R.string.category_local_de
-                    "AT" -> R.string.category_local_at
-                    "PL" -> R.string.category_local_pl
-                    "GB", "UK" -> R.string.category_local_gb
-                    "US" -> R.string.category_local_us
-                    else -> R.string.category_local
-                }
-            } ?: titleRes
-        } else {
-            titleRes
-        }
+        return titleRes
     }
 } 
