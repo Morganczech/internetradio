@@ -604,15 +604,7 @@ fun PlayerControls(
                                     Icon(Icons.Default.Timer, "Časovač", tint = tint)
                                 }
 
-                                val menuBackgroundColor = remember(visualGradient) {
-                                    Color(
-                                        androidx.core.graphics.ColorUtils.blendARGB(
-                                            android.graphics.Color.parseColor("#1E1E1E"), // Dark surface fallback
-                                            visualGradient.first.toArgb(),
-                                            0.2f // Increased tint to 20%
-                                        )
-                                    )
-                                }
+                                val menuBackgroundColor = visualGradient.first
 
                                 MaterialTheme(
                                     colors = MaterialTheme.colors.copy(surface = menuBackgroundColor),
@@ -641,15 +633,7 @@ fun PlayerControls(
                                     Icon(Icons.Default.VolumeUp, "Hlasitost", tint = Color.White.copy(alpha = 0.7f))
                                 }
 
-                                val volumeMenuColor = remember(visualGradient) {
-                                    Color(
-                                        androidx.core.graphics.ColorUtils.blendARGB(
-                                            android.graphics.Color.parseColor("#1E1E1E"),
-                                            visualGradient.first.toArgb(),
-                                            0.2f
-                                        )
-                                    ).copy(alpha = 0.95f)
-                                }
+                                val volumeMenuColor = visualGradient.first.copy(alpha = 0.95f)
                                 
                                 MaterialTheme(
                                     colors = MaterialTheme.colors.copy(surface = volumeMenuColor),
