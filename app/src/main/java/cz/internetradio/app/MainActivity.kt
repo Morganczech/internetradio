@@ -463,7 +463,7 @@ fun PlayerControls(
             .animateContentSize()
             .clickable(enabled = !isExpanded && !forceMiniPlayer) { isExpanded = true },
         elevation = if (isExpanded) 12.dp else 4.dp,
-        shape = if (forceMiniPlayer) androidx.compose.ui.graphics.RectangleShape else RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        shape = androidx.compose.ui.graphics.RectangleShape
     ) {
         Box(modifier = Modifier.background(brush = Brush.verticalGradient(listOf(visualGradient.first, visualGradient.second)))) {
             cz.internetradio.app.components.AudioVisualizer(
