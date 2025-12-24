@@ -276,28 +276,7 @@ fun BrowseStationsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = stringResource(R.string.filter_country),
-                        style = MaterialTheme.typography.subtitle1,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        FilterChip(
-                            selected = selectedCountry == "Czech Republic",
-                            onClick = { selectedCountry = if (selectedCountry != "Czech Republic") "Czech Republic" else null },
-                            text = stringResource(R.string.filter_country_czech)
-                        )
-                        FilterChip(
-                            selected = selectedCountry == "Slovakia",
-                            onClick = { selectedCountry = if (selectedCountry != "Slovakia") "Slovakia" else null },
-                            text = stringResource(R.string.filter_country_slovak)
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         text = stringResource(R.string.filter_quality),
@@ -398,10 +377,9 @@ fun BrowseStationsScreen(
                     PlayerControls(
                         radio = radio,
                         viewModel = viewModel,
-                        onNavigateToFavoriteSongs = onNavigateToFavoriteSongs,
-                        onNavigateToCategory = { category ->
-                            onNavigateBack()
-                        }
+                        onNavigateToFavoriteSongs = {},  // Disabled navigation within search
+                        onNavigateToCategory = {}, // Disabled navigation within search
+                        forceMiniPlayer = true // NEW parameter to force mini player
                     )
                 }
             }
@@ -505,17 +483,22 @@ private fun StationItem(
                 }
                 
                 if (station.isFromRadioBrowser) {
-                    TextButton(
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
                         onClick = onAddToFavorites,
-                        colors = ButtonDefaults.textButtonColors(
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color(0xFF333333), // Neutral dark/grey
                             contentColor = Color.White
                         ),
-                        contentPadding = PaddingValues(0.dp)
+                        modifier = Modifier.fillMaxWidth().height(48.dp), // Increased height, full width
+                        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.action_save_to_category),
+                            text = stringResource(R.string.action_save_to_category).uppercase(),
                             style = MaterialTheme.typography.button,
-                            color = MaterialTheme.colors.onPrimary
+                            color = Color.White,
+                            maxLines = 1
                         )
                     }
                 }

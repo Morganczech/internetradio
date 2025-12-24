@@ -427,7 +427,8 @@ fun PlayerControls(
     radio: Radio,
     viewModel: RadioViewModel,
     onNavigateToFavoriteSongs: () -> Unit,
-    onNavigateToCategory: (RadioCategory) -> Unit
+    onNavigateToCategory: (RadioCategory) -> Unit,
+    forceMiniPlayer: Boolean = false
 ) {
     val volume by viewModel.volume.collectAsState()
     val remainingMinutes by viewModel.remainingTimeMinutes.collectAsState()
@@ -437,6 +438,14 @@ fun PlayerControls(
     val playbackContext by viewModel.playbackContext.collectAsState()
     val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
+    
+    // Ensure isExpanded is always false if forceMiniPlayer is true
+    LaunchedEffect(forceMiniPlayer) {
+        if (forceMiniPlayer) {
+            isExpanded = false
+        }
+    }
+
     var showTimerDropdown by remember { mutableStateOf(false) }
 
     val visualGradient = if (useUnifiedAccentColor) {
@@ -452,7 +461,10 @@ fun PlayerControls(
             .fillMaxWidth()
             .padding(16.dp)
             .animateContentSize()
-            .clickable(enabled = !isExpanded) { isExpanded = true },
+            .fillMaxWidth()
+            .padding(16.dp)
+            .animateContentSize()
+            .clickable(enabled = !isExpanded && !forceMiniPlayer) { isExpanded = true },
         elevation = if (isExpanded) 12.dp else 4.dp,
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -537,19 +549,21 @@ fun PlayerControls(
                                     tint = Color.White
                                 )
                             }
-                            IconButton(onClick = { isExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowUp,
-                                    contentDescription = "Rozbalit",
-                                    tint = Color.White
-                                )
+                            if (!forceMiniPlayer) {
+                                IconButton(onClick = { isExpanded = true }) {
+                                    Icon(
+                                        imageVector = Icons.Default.KeyboardArrowUp,
+                                        contentDescription = "Rozbalit",
+                                        tint = Color.White
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
                 // --- EXPANDED CONTENT ---
-                AnimatedVisibility(visible = isExpanded) {
+                AnimatedVisibility(visible = isExpanded && !forceMiniPlayer) {
                     Column {
                         Spacer(modifier = Modifier.height(32.dp))
 
