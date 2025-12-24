@@ -77,8 +77,7 @@ class RadioRepository @Inject constructor(
                 SearchParams(
                     country = countryCode,
                     limit = 10,
-                    orderBy = "votes",
-                    hideBroken = true
+                    orderBy = "votes"
                 )
             )
 
