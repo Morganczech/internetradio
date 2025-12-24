@@ -182,7 +182,13 @@ class RadioService : Service() {
                 .setPrioritizeTimeOverSizeThresholds(true).build())
             .build()
         
+        
         setupPlayer()
+
+        // Restore volume
+        val prefs = getSharedPreferences("radio_prefs", Context.MODE_PRIVATE)
+        val savedVolume = prefs.getFloat("volume", 1.0f)
+        exoPlayer.volume = savedVolume
         
         // Inicializace Media3 MediaSession
         mediaSession = MediaSession.Builder(this, exoPlayer).build()
