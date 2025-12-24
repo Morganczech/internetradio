@@ -438,6 +438,22 @@ fun BrowseStationsScreen(
         }
     }
     }
+    val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
+    if (showMaxFavoritesError) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissMaxFavoritesError() },
+            title = { Text(stringResource(R.string.msg_favorites_limit)) },
+            text = { 
+                val maxFavorites by viewModel.maxFavorites.collectAsState()
+                Text(stringResource(R.string.msg_favorites_limit_description, maxFavorites)) 
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissMaxFavoritesError() }) {
+                    Text(stringResource(R.string.action_close))
+                }
+            }
+        )
+    }
 }
 
 @Composable

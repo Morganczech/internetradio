@@ -266,7 +266,7 @@ class RadioViewModel @Inject constructor(
             if (radio.isFavorite) {
                 radioRepository.removeFavorite(radio.id)
             } else {
-                if (radio.category == RadioCategory.VLASTNI && radioRepository.getFavoriteRadios().first().size >= maxFavorites.value) {
+                if (radioRepository.getFavoriteRadios().first().size >= maxFavorites.value) {
                     _showMaxFavoritesError.value = true
                     return@launch
                 }

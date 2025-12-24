@@ -320,14 +320,14 @@ fun AllStationsScreen(
     if (showMaxFavoritesError) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissMaxFavoritesError() },
-            title = { Text("Maximální počet oblíbených") },
+            title = { Text(stringResource(R.string.msg_favorites_limit)) },
             text = { 
                 val maxFavorites by viewModel.maxFavorites.collectAsState()
-                Text("Můžete mít maximálně $maxFavorites oblíbených stanic. Prosím, odeberte některou stanici z oblíbených před přidáním nové, nebo zvyšte limit v nastavení aplikace.") 
+                Text(stringResource(R.string.msg_favorites_limit_description, maxFavorites)) 
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissMaxFavoritesError() }) {
-                    Text("OK")
+                    Text(stringResource(R.string.action_close))
                 }
             }
         )

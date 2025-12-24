@@ -114,6 +114,7 @@
 
     <!-- Messages -->
     <string name="msg_favorites_limit">Dosažen maximální počet oblíbených</string>
+    <string name="msg_favorites_limit_description">Můžete mít maximálně %d oblíbených stanic. Prosím, odeberte některou stanici z oblíbených před přidáním nové, nebo zvyšte limit v nastavení aplikace.</string>
     <string name="msg_song_saved">Skladba byla uložena do oblíbených</string>
     <string name="msg_station_added">Stanice byla přidána do oblíbených</string>
     <string name="msg_station_removed">Stanice byla odebrána z oblíbených</string>
