@@ -274,17 +274,17 @@ fun BrowseStationsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        FilterChip(
+                        SearchFilterChip(
                             selected = selectedOrder == "votes",
                             onClick = { selectedOrder = "votes" },
                             text = stringResource(R.string.filter_sort_by_popularity)
                         )
-                        FilterChip(
+                        SearchFilterChip(
                             selected = selectedOrder == "name",
                             onClick = { selectedOrder = "name" },
                             text = stringResource(R.string.filter_sort_by_name)
                         )
-                        FilterChip(
+                        SearchFilterChip(
                             selected = selectedOrder == "bitrate",
                             onClick = { selectedOrder = "bitrate" },
                             text = stringResource(R.string.filter_sort_by_quality)
@@ -304,19 +304,29 @@ fun BrowseStationsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        FilterChip(
+                        SearchFilterChip(
+                            selected = minBitrate == null,
+                            onClick = { minBitrate = null },
+                            text = stringResource(R.string.list_all)
+                        )
+                        SearchFilterChip(
                             selected = minBitrate == 64,
-                            onClick = { minBitrate = if (minBitrate != 64) 64 else null },
+                            onClick = { minBitrate = 64 },
                             text = stringResource(R.string.filter_quality_64)
                         )
-                        FilterChip(
+                        SearchFilterChip(
                             selected = minBitrate == 128,
-                            onClick = { minBitrate = if (minBitrate != 128) 128 else null },
+                            onClick = { minBitrate = 128 },
                             text = stringResource(R.string.filter_quality_128)
                         )
-                        FilterChip(
+                        SearchFilterChip(
+                            selected = minBitrate == 192,
+                            onClick = { minBitrate = 192 },
+                            text = "192 kbps"
+                        )
+                        SearchFilterChip(
                             selected = minBitrate == 256,
-                            onClick = { minBitrate = if (minBitrate != 256) 256 else null },
+                            onClick = { minBitrate = 256 },
                             text = stringResource(R.string.filter_quality_256)
                         )
                     }
@@ -558,7 +568,7 @@ private fun StationItem(
 }
 
 @Composable
-private fun FilterChip(
+private fun SearchFilterChip(
     selected: Boolean,
     onClick: () -> Unit,
     text: String
@@ -584,4 +594,4 @@ private fun FilterChip(
             )
         }
     }
-}}
+}
