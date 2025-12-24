@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.ColorUtils
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -600,16 +601,32 @@ fun PlayerControls(
                                     val tint = if (remainingMinutes != null) MaterialTheme.colors.secondary else Color.White.copy(alpha = 0.7f)
                                     Icon(Icons.Default.Timer, "Časovač", tint = tint)
                                 }
-                                DropdownMenu(
-                                    expanded = showTimerDropdown,
-                                    onDismissRequest = { showTimerDropdown = false }
+
+                                val menuBackgroundColor = remember(visualGradient) {
+                                    Color(
+                                        androidx.core.graphics.ColorUtils.blendARGB(
+                                            android.graphics.Color.parseColor("#1E1E1E"), // Dark surface fallback
+                                            visualGradient.first.toArgb(),
+                                            0.15f
+                                        )
+                                    )
+                                }
+
+                                MaterialTheme(
+                                    colors = MaterialTheme.colors.copy(surface = menuBackgroundColor),
+                                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(12.dp))
                                 ) {
-                                    DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
-                                        Text(stringResource(R.string.sleep_timer_off))
-                                    }
-                                    listOf(5, 15, 30, 45, 60).forEach { m ->
-                                        DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
-                                            Text(stringResource(R.string.sleep_timer_minutes, m))
+                                    DropdownMenu(
+                                        expanded = showTimerDropdown,
+                                        onDismissRequest = { showTimerDropdown = false }
+                                    ) {
+                                        DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
+                                            Text(stringResource(R.string.sleep_timer_off), color = Color.White)
+                                        }
+                                        listOf(5, 15, 30, 45, 60).forEach { m ->
+                                            DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
+                                                Text(stringResource(R.string.sleep_timer_minutes, m), color = Color.White)
+                                            }
                                         }
                                     }
                                 }
@@ -621,16 +638,37 @@ fun PlayerControls(
                                 IconButton(onClick = { showVolume = true }) {
                                     Icon(Icons.Default.VolumeUp, "Hlasitost", tint = Color.White.copy(alpha = 0.7f))
                                 }
-                                DropdownMenu(
-                                    expanded = showVolume,
-                                    onDismissRequest = { showVolume = false }
-                                ) {
-                                    Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
-                                        Slider(
-                                            value = volume,
-                                            onValueChange = { viewModel.setVolume(it) },
-                                            modifier = Modifier.align(Alignment.Center)
+
+                                val volumeMenuColor = remember(visualGradient) {
+                                    Color(
+                                        androidx.core.graphics.ColorUtils.blendARGB(
+                                            android.graphics.Color.parseColor("#1E1E1E"),
+                                            visualGradient.first.toArgb(),
+                                            0.15f
                                         )
+                                    ).copy(alpha = 0.95f)
+                                }
+                                
+                                MaterialTheme(
+                                    colors = MaterialTheme.colors.copy(surface = volumeMenuColor),
+                                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(12.dp))
+                                ) {
+                                    DropdownMenu(
+                                        expanded = showVolume,
+                                        onDismissRequest = { showVolume = false }
+                                    ) {
+                                        Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
+                                            Slider(
+                                                value = volume,
+                                                onValueChange = { viewModel.setVolume(it) },
+                                                modifier = Modifier.align(Alignment.Center),
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color.White,
+                                                    activeTrackColor = Color.White,
+                                                    inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }
