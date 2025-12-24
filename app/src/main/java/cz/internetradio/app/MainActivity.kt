@@ -459,14 +459,11 @@ fun PlayerControls(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .animateContentSize()
-            .fillMaxWidth()
-            .padding(16.dp)
+            .then(if (forceMiniPlayer) Modifier else Modifier.padding(16.dp))
             .animateContentSize()
             .clickable(enabled = !isExpanded && !forceMiniPlayer) { isExpanded = true },
         elevation = if (isExpanded) 12.dp else 4.dp,
-        shape = RoundedCornerShape(16.dp)
+        shape = if (forceMiniPlayer) androidx.compose.ui.graphics.RectangleShape else RoundedCornerShape(16.dp)
     ) {
         Box(modifier = Modifier.background(brush = Brush.verticalGradient(listOf(visualGradient.first, visualGradient.second)))) {
             cz.internetradio.app.components.AudioVisualizer(

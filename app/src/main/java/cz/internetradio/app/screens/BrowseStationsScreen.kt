@@ -335,35 +335,38 @@ fun BrowseStationsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
-                )
-            } else if (searchQuery.length < 3) {
-                Text(
-                    text = stringResource(R.string.search_min_chars),
-                    style = MaterialTheme.typography.body1,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                )
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(
-                        items = stations,
-                        key = { it.stationuuid ?: it.url }
-                    ) { station ->
-                        StationItem(
-                            station = station,
-                            onAddToFavorites = {
-                                selectedStation = station
-                                selectedCategory = null
-                                scope.launch {
-                                    sheetState.show()
-                                }
-                            },
-                            isCompact = isCompactMode
-                        )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator()
+                } else if (searchQuery.length < 3) {
+                    Text(
+                        text = stringResource(R.string.search_min_chars),
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(
+                            items = stations,
+                            key = { it.stationuuid ?: it.url }
+                        ) { station ->
+                            StationItem(
+                                station = station,
+                                onAddToFavorites = {
+                                    selectedStation = station
+                                    selectedCategory = null
+                                    scope.launch {
+                                        sheetState.show()
+                                    }
+                                },
+                                isCompact = isCompactMode
+                            )
+                        }
                     }
                 }
             }
