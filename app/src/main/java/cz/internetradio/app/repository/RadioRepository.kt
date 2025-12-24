@@ -75,6 +75,7 @@ class RadioRepository @Inject constructor(
         return try {
             val stations = radioBrowserApi.searchStations(
                 SearchParams(
+                    name = "", // Search by country only
                     country = countryCode,
                     limit = 10,
                     orderBy = "votes"
