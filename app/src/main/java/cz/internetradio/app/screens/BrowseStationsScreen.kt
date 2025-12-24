@@ -78,9 +78,8 @@ fun BrowseStationsScreen(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Načtení místních stanic a spolehlivý automatický focus
+    // Spolehlivý automatický focus
     LaunchedEffect(Unit) {
-        viewModel.refreshLocalStations()
         delay(150) // Prodleva pro spolehlivé vysunutí klávesnice po animaci navigace
         focusRequester.requestFocus()
         keyboardController?.show()
@@ -362,55 +361,13 @@ fun BrowseStationsScreen(
                     modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
                 )
             } else if (searchQuery.length < 3) {
-                val localStations by viewModel.localStations.collectAsState()
-                val countryCode = viewModel.currentCountryCode.collectAsState().value
-                
-                localStations?.let { stations ->
-                    if (stations.isNotEmpty()) {
-                        Text(
-                            text = countryCode?.let { RadioCategory.getLocalizedTitle(it) } ?: stringResource(R.string.category_local),
-                            style = MaterialTheme.typography.h6,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(
-                                items = stations,
-                                key = { it.stationuuid ?: it.url }
-                            ) { station ->
-                                StationItem(
-                                    station = station.apply { 
-                                        isFromRadioBrowser = false
-                                        category = RadioCategory.MISTNI
-                                    },
-                                    onAddToFavorites = {
-                                        selectedStation = station
-                                        selectedCategory = null
-                                        scope.launch {
-                                            sheetState.show()
-                                        }
-                                    },
-                                    isCompact = isCompactMode
-                                )
-                            }
-                        }
-                    } else {
-                        Text(
-                            text = stringResource(R.string.search_min_chars),
-                            style = MaterialTheme.typography.body1,
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                        )
-                    }
-                } ?: run {
-                    Text(
-                        text = stringResource(R.string.search_min_chars),
-                        style = MaterialTheme.typography.body1,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.search_min_chars),
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(androidx.compose.ui.Alignment.CenterHorizontally)
+                )
             } else {
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(
