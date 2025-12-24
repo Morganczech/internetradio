@@ -239,7 +239,7 @@ fun PopularStationsScreen(
                     RadioItem(
                         radio = radio,
                         isSelected = radio.id == currentRadio?.id,
-                        onRadioClick = { viewModel.playRadio(radio) },
+                        onRadioClick = { viewModel.playRadio(radio, RadioCategory.MISTNI) },
                         onFavoriteClick = { viewModel.toggleFavorite(radio) },
                         onEditClick = { onNavigateToEdit(radio.id) },
                         onDeleteClick = { viewModel.removeStation(radio.id) },

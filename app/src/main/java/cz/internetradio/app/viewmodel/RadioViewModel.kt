@@ -314,14 +314,16 @@ class RadioViewModel @Inject constructor(
         }
     }
 
-    fun playRadio(radio: Radio, context: RadioCategory? = null) {
+    fun playRadio(radio: Radio, categoryContext: RadioCategory? = null) {
         if (!isNetworkAvailable()) {
             _message.value = context.getString(R.string.error_no_internet)
             return
         }
         viewModelScope.launch {
             _currentRadio.value = radio
-            _playbackContext.value = context
+            if (categoryContext != null) {
+                _playbackContext.value = categoryContext
+            }
             _currentCategory.value = radio.category
             prefs.edit().putString("last_radio_id", radio.id).apply()
             val intent = Intent(context, RadioService::class.java).apply {

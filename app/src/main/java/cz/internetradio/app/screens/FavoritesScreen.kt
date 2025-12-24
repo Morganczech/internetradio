@@ -25,6 +25,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import cz.internetradio.app.model.Radio
+import cz.internetradio.app.model.RadioCategory
 
 @Composable
 fun FavoritesScreen(
@@ -176,7 +177,7 @@ fun FavoritesScreen(
                     RadioItem(
                         radio = radio,
                         isSelected = radio.id == currentRadio?.id,
-                        onRadioClick = { viewModel.playRadio(radio) },
+                        onRadioClick = { viewModel.playRadio(radio, RadioCategory.VLASTNI) },
                         onFavoriteClick = { viewModel.toggleFavorite(radio) },
                         onEditClick = { onNavigateToEdit(radio.id) },
                         onDeleteClick = { showDeleteDialog = radio },
