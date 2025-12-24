@@ -437,6 +437,7 @@ fun BrowseStationsScreen(
             }
         }
     }
+    }
 }
 
 @Composable
