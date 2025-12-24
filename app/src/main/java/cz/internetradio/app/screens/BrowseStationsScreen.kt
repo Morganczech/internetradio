@@ -1,3 +1,5 @@
+package cz.internetradio.app.screens
+
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import coil.compose.AsyncImage
