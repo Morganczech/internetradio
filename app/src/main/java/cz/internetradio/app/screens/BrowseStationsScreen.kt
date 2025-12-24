@@ -207,9 +207,9 @@ fun BrowseStationsScreen(
                         )
                     ) {
                         Text(
-                            text = stringResource(R.string.action_save_to_category),
+                            text = stringResource(R.string.action_save).uppercase(),
                             style = MaterialTheme.typography.button,
-                            color = MaterialTheme.colors.onPrimary
+                            color = Color.White
                         )
                     }
                 }
