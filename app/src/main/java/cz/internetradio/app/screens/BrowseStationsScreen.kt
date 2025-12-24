@@ -418,14 +418,19 @@ private fun StationItem(
     onAddToFavorites: () -> Unit,
     isCompact: Boolean = false
 ) {
-    val colors = when (val category = station.category) {
-        null -> {
-            val defaultGradient = Gradients.getGradientForCategory(RadioCategory.OSTATNI)
-            listOf(defaultGradient.first, defaultGradient.second)
-        }
-        else -> {
-            val gradient = Gradients.getGradientForCategory(category)
-            listOf(gradient.first, gradient.second)
+    val colors = if (station.isFromRadioBrowser) {
+        val unified = Gradients.UNIFIED_COLOR_PAIR
+        listOf(unified.first, unified.second)
+    } else {
+        when (val category = station.category) {
+            null -> {
+                val defaultGradient = Gradients.getGradientForCategory(RadioCategory.OSTATNI)
+                listOf(defaultGradient.first, defaultGradient.second)
+            }
+            else -> {
+                val gradient = Gradients.getGradientForCategory(category)
+                listOf(gradient.first, gradient.second)
+            }
         }
     }
     
