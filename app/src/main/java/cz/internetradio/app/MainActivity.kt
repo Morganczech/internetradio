@@ -437,8 +437,12 @@ fun PlayerControls(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { isExpanded = !isExpanded }.animateContentSize(),
-        elevation = if (isExpanded) 12.dp else 6.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .animateContentSize()
+            .clickable(enabled = !isExpanded) { isExpanded = true },
+        elevation = if (isExpanded) 12.dp else 4.dp,
         shape = RoundedCornerShape(16.dp)
     ) {
         Box(modifier = Modifier.background(brush = Brush.verticalGradient(listOf(visualGradient.first, visualGradient.second)))) {
@@ -448,132 +452,231 @@ fun PlayerControls(
                 baseColor2 = Color.White.copy(alpha = 0.5f),
                 isPlaying = isPlaying
             )
+            
             Column(modifier = Modifier.padding(16.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                
+                // --- LAYER 1: INFO & MINI-CONTROLS ---
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Info Section
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = radio.name, style = MaterialTheme.typography.h6, color = Color.White)
-                        currentMetadata?.let { Text(text = it, style = MaterialTheme.typography.body2, color = Color.White.copy(alpha = 0.7f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
-
+                        Text(
+                            text = radio.name,
+                            style = MaterialTheme.typography.h6,
+                            color = Color.White
+                        )
+                        currentMetadata?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.body2,
+                                color = Color.White.copy(alpha = 0.7f),
+                                maxLines = if (isExpanded) 2 else 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                        
+                        // Chips (Visible only in Expanded)
                         AnimatedVisibility(visible = isExpanded) {
-                            Row(modifier = Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                modifier = Modifier.padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Card(
                                     shape = RoundedCornerShape(12.dp),
-                                    backgroundColor = Color.White.copy(alpha = 0.05f),
+                                    backgroundColor = Color.White.copy(alpha = 0.15f),
                                     elevation = 0.dp
                                 ) {
                                     Text(
                                         text = stringResource(radio.category.getTitleRes()),
                                         style = MaterialTheme.typography.caption,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                        color = Color.White.copy(alpha = 0.7f)
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        color = Color.White
                                     )
                                 }
                                 radio.bitrate?.let { bitrate ->
                                     Card(
                                         shape = RoundedCornerShape(12.dp),
-                                        backgroundColor = Color.White.copy(alpha = 0.05f),
+                                        backgroundColor = Color.White.copy(alpha = 0.15f),
                                         elevation = 0.dp
                                     ) {
                                         Text(
                                             text = stringResource(R.string.player_bitrate_format, bitrate),
                                             style = MaterialTheme.typography.caption,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                            color = Color.White.copy(alpha = 0.7f)
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            color = Color.White
                                         )
                                     }
                                 }
                             }
                         }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { viewModel.togglePlayPause() }) {
-                            Icon(imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
+
+                    // Mini Controls (Hidden when Expanded)
+                    if (!isExpanded) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { viewModel.togglePlayPause() }) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                            IconButton(onClick = { isExpanded = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                    contentDescription = "Rozbalit",
+                                    tint = Color.White
+                                )
+                            }
                         }
-                        IconButton(onClick = { isExpanded = !isExpanded }, modifier = Modifier.size(48.dp)) {
+                    }
+                }
+
+                // --- EXPANDED CONTENT ---
+                AnimatedVisibility(visible = isExpanded) {
+                    Column {
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        // --- LAYER 2: CORE CONTROLS (Prev / Play / Next) ---
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = { viewModel.playPreviousStation() },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SkipPrevious,
+                                    contentDescription = "Předchozí",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+
+                            // Big Play/Pause
+                            IconButton(
+                                onClick = { viewModel.togglePlayPause() },
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .background(Color.White.copy(alpha = 0.2f), androidx.compose.foundation.shape.CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (isPlaying) "Pauza" else "Přehrát",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { viewModel.playNextStation() },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SkipNext,
+                                    contentDescription = "Další",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        // --- LAYER 3: SECONDARY CONTROLS ---
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Sleep Timer
+                            Box {
+                                IconButton(onClick = { showTimerDropdown = true }) {
+                                    val tint = if (remainingMinutes != null) MaterialTheme.colors.secondary else Color.White.copy(alpha = 0.7f)
+                                    Icon(Icons.Default.Timer, "Časovač", tint = tint)
+                                }
+                                DropdownMenu(
+                                    expanded = showTimerDropdown,
+                                    onDismissRequest = { showTimerDropdown = false }
+                                ) {
+                                    DropdownMenuItem(onClick = { viewModel.setSleepTimer(null); showTimerDropdown = false }) {
+                                        Text(stringResource(R.string.sleep_timer_off))
+                                    }
+                                    listOf(5, 15, 30, 45, 60).forEach { m ->
+                                        DropdownMenuItem(onClick = { viewModel.setSleepTimer(m); showTimerDropdown = false }) {
+                                            Text(stringResource(R.string.sleep_timer_minutes, m))
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Volume
+                            Box {
+                                var showVolume by remember { mutableStateOf(false) }
+                                IconButton(onClick = { showVolume = true }) {
+                                    Icon(Icons.Default.VolumeUp, "Hlasitost", tint = Color.White.copy(alpha = 0.7f))
+                                }
+                                DropdownMenu(
+                                    expanded = showVolume,
+                                    onDismissRequest = { showVolume = false }
+                                ) {
+                                    Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
+                                        Slider(
+                                            value = volume,
+                                            onValueChange = { viewModel.setVolume(it) },
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Save Song
+                            IconButton(
+                                onClick = { if (currentMetadata != null) viewModel.saveSongToFavorites() },
+                                enabled = currentMetadata != null
+                            ) {
+                                Icon(
+                                    Icons.Default.PlaylistAdd,
+                                    "Uložit skladbu",
+                                    tint = if (currentMetadata != null) Color.White.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.3f)
+                                )
+                            }
+
+                            // Favorite Songs List
+                            IconButton(onClick = onNavigateToFavoriteSongs) {
+                                Icon(Icons.Default.QueueMusic, "Seznam skladeb", tint = Color.White.copy(alpha = 0.7f))
+                            }
+                        }
+
+                        // Countdown display
+                        if ((remainingMinutes ?: 0) > 0 || (remainingSeconds ?: 0) > 0) {
+                            Text(
+                                text = stringResource(R.string.player_time_remaining, remainingMinutes ?: 0, remainingSeconds ?: 0),
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp),
+                                color = MaterialTheme.colors.secondary
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Collapse Button
+                        IconButton(
+                            onClick = { isExpanded = false },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
                             Icon(
-                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = if (isExpanded) "Sbalit" else "Rozbalit",
-                                tint = Color.White
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Sbalit",
+                                tint = Color.White.copy(alpha = 0.5f)
                             )
                         }
                     }
-                }
-                
-                AnimatedVisibility(visible = isExpanded) {
-                    Column(modifier = Modifier.padding(top = 16.dp).fillMaxWidth().background(Color.Black.copy(alpha = 0.15f), RoundedCornerShape(12.dp)).padding(8.dp)) {
-
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                IconButton(onClick = { viewModel.playPreviousStation() }) { Icon(Icons.Default.SkipPrevious, null, tint = Color.White) }
-                                IconButton(onClick = { viewModel.playNextStation() }) { Icon(Icons.Default.SkipNext, null, tint = Color.White) }
-                            }
-                            
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Box {
-                                    var showVolume by remember { mutableStateOf(false) }
-                                    IconButton(onClick = { showVolume = true }) {
-                                        Icon(Icons.Default.VolumeUp, stringResource(R.string.player_volume), tint = Color.White)
-                                    }
-                                    DropdownMenu(
-                                        expanded = showVolume,
-                                        onDismissRequest = { showVolume = false }
-                                    ) {
-                                        Box(modifier = Modifier.size(width = 200.dp, height = 50.dp).padding(horizontal = 16.dp)) {
-                                            Slider(
-                                                value = volume,
-                                                onValueChange = { viewModel.setVolume(it) },
-                                                modifier = Modifier.align(Alignment.Center)
-                                            )
-                                        }
-                                    }
-                                }
-                                if (currentMetadata != null) {
-                                    IconButton(onClick = { viewModel.saveSongToFavorites() }) {
-                                        Icon(Icons.Default.PlaylistAdd, stringResource(R.string.action_save_song), tint = Color.White)
-                                    }
-                                }
-                                IconButton(onClick = onNavigateToFavoriteSongs) {
-                                    Icon(Icons.Default.QueueMusic, stringResource(R.string.nav_favorite_songs), tint = Color.White)
-                                }
-                                
-                                Box {
-                                    IconButton(onClick = { showTimerDropdown = true }) {
-                                        Icon(Icons.Default.Timer, stringResource(R.string.settings_sleep_timer), tint = Color.White)
-                                    }
-                                    DropdownMenu(
-                                        expanded = showTimerDropdown,
-                                        onDismissRequest = { showTimerDropdown = false }
-                                    ) {
-                                        DropdownMenuItem(onClick = {
-                                            viewModel.setSleepTimer(null)
-                                            showTimerDropdown = false
-                                        }) {
-                                            Text(stringResource(R.string.sleep_timer_off))
-                                        }
-                                        listOf(5, 15, 30, 45, 60).forEach { minutes ->
-                                            DropdownMenuItem(onClick = {
-                                                viewModel.setSleepTimer(minutes)
-                                                showTimerDropdown = false
-                                            }) {
-                                                Text(stringResource(R.string.sleep_timer_minutes, minutes))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                val minutes = remainingMinutes ?: 0
-                val seconds = remainingSeconds ?: 0
-                if (minutes > 0 || seconds > 0) {
-                    Text(
-                        text = stringResource(R.string.player_time_remaining, minutes, seconds),
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(top = 8.dp),
-                        color = Color.White
-                    )
                 }
             }
         }
