@@ -32,7 +32,7 @@ import dagger.hilt.components.SingletonComponent
 import dagger.hilt.android.EntryPointAccessors
 import android.util.Log
 
-class RadioWidgetProvider : AppWidgetProvider() {
+open class RadioWidgetProvider : AppWidgetProvider() {
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
@@ -52,21 +52,29 @@ class RadioWidgetProvider : AppWidgetProvider() {
         fun updateWidgets(context: Context, playing: Boolean, radioId: String?) {
             Log.d("RadioWidgetProvider", "updateWidgets volán: playing=$playing, radioId=$radioId, isInitialized=$isInitialized")
             
-            // Aktualizujeme widgety pouze pokud jsou již inicializovány
             if (isInitialized) {
                 isPlaying = playing
                 currentRadioId = radioId
                 
-                val intent = Intent(context, RadioWidgetProvider::class.java).apply {
-                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val widgetClasses = listOf(
+                    RadioWidgetProvider::class.java,
+                    CompactWidgetProvider::class.java,
+                    ControlWidgetProvider::class.java,
+                    LargeWidgetProvider::class.java
+                )
+
+                widgetClasses.forEach { cls ->
+                    val ids = appWidgetManager.getAppWidgetIds(ComponentName(context, cls))
+                    if (ids.isNotEmpty()) {
+                        Log.d("RadioWidgetProvider", "Aktualizuji ${ids.size} widgetů třídy ${cls.simpleName}")
+                        val intent = Intent(context, cls).apply {
+                            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                        }
+                        context.sendBroadcast(intent)
+                    }
                 }
-                val widgetIds = AppWidgetManager.getInstance(context)
-                    .getAppWidgetIds(ComponentName(context, RadioWidgetProvider::class.java))
-                Log.d("RadioWidgetProvider", "Nalezeno ${widgetIds.size} widgetů pro aktualizaci: ${widgetIds.joinToString()}")
-                
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
-                context.sendBroadcast(intent)
-                Log.d("RadioWidgetProvider", "Broadcast odeslán pro aktualizaci widgetů")
             } else {
                 Log.d("RadioWidgetProvider", "Widgety nejsou inicializovány, aktualizace přeskočena")
             }
@@ -130,6 +138,8 @@ class RadioWidgetProvider : AppWidgetProvider() {
             }
         }
     }
+
+    open fun getLayoutId(): Int = R.layout.widget_player
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
@@ -202,7 +212,7 @@ class RadioWidgetProvider : AppWidgetProvider() {
     ) {
         Log.d("RadioWidgetProvider", "updateAppWidget volán pro ID: $appWidgetId, radio: ${radio?.name ?: "null"}")
         
-        val views = RemoteViews(context.packageName, R.layout.widget_player)
+        val views = RemoteViews(context.packageName, getLayoutId())
 
         // Nastavení kliknutí na celý widget pro otevření aplikace
         val pendingIntent = PendingIntent.getActivity(

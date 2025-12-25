@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="8dp">
+
+    <!-- Hidden Views for Compatibility -->
+    <TextView android:id="@+id/widget_radio_name" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/widget_metadata" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageButton android:id="@+id/widget_previous" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageButton android:id="@+id/widget_next" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/widget_radio_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:contentDescription="@string/widget_radio_name"
+        android:scaleType="fitCenter" />
+
+    <ImageButton
+        android:id="@+id/widget_play_pause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:background="@drawable/rounded_button_background_semi_transparent"
+        android:contentDescription="@string/player_play"
+        android:src="@drawable/ic_play_arrow"
+        android:tint="@android:color/white" />
+
+</FrameLayout>

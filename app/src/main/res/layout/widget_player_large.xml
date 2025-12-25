@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/widget_radio_icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/widget_radio_name"
+            android:scaleType="centerCrop"
+            android:background="#20FFFFFF"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_radio_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:text="@string/widget_radio_name" />
+
+            <TextView
+                android:id="@+id/widget_metadata"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#AAAAAA"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="16sp"
+                android:layout_marginTop="4dp"
+                android:text="@string/widget_metadata" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="12dp">
+
+        <Space android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+
+        <ImageButton
+            android:id="@+id/widget_previous"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/player_previous"
+            android:src="@drawable/ic_skip_previous"
+            android:tint="#FFFFFF"/>
+
+        <Space android:layout_width="24dp" android:layout_height="wrap_content"/>
+
+        <ImageButton
+            android:id="@+id/widget_play_pause"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/player_play"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play_arrow"
+            android:tint="#FFFFFF"/>
+
+        <Space android:layout_width="24dp" android:layout_height="wrap_content"/>
+
+        <ImageButton
+            android:id="@+id/widget_next"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/player_next"
+            android:src="@drawable/ic_skip_next"
+            android:tint="#FFFFFF"/>
+
+        <Space android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</LinearLayout>

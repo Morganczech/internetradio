@@ -178,4 +178,7 @@
     <string name="permission_notifications_rationale">Oprávnění k oznámení je vyžadováno pro ovládání rádia, když je aplikace na pozadí. Prosím, povolte jej v dalším kroku.</string>
 
 <string name="msg_station_saved_to_category">Stanice uložena do kategorie %s</string>
+    <string name="widget_compact_name">Přehrávač (Mini)</string>
+    <string name="widget_control_name">Přehrávač (Jemný)</string>
+    <string name="widget_large_name">Přehrávač (Velký)</string>
 </resources>
