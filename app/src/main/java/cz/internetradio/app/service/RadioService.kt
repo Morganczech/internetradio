@@ -451,8 +451,12 @@ class RadioService : Service() {
         serviceScope.launch {
             val radio = _currentRadio.value ?: return@launch
             val radios = radioRepository.getRadiosByCategory(radio.category).first().sortedBy { it.name.lowercase() }
+            if (radios.isEmpty()) return@launch
             val index = radios.indexOfFirst { it.id == radio.id }
-            if (index < radios.size - 1) playRadio(radios[index + 1])
+            if (index != -1) {
+                val nextRadio = if (index < radios.size - 1) radios[index + 1] else radios.first()
+                playRadio(nextRadio)
+            }
         }
     }
 
@@ -460,8 +464,12 @@ class RadioService : Service() {
         serviceScope.launch {
             val radio = _currentRadio.value ?: return@launch
             val radios = radioRepository.getRadiosByCategory(radio.category).first().sortedBy { it.name.lowercase() }
+            if (radios.isEmpty()) return@launch
             val index = radios.indexOfFirst { it.id == radio.id }
-            if (index > 0) playRadio(radios[index - 1])
+            if (index != -1) {
+                val prevRadio = if (index > 0) radios[index - 1] else radios.last()
+                playRadio(prevRadio)
+            }
         }
     }
 
