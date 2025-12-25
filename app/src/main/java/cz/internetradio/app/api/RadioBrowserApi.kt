@@ -24,63 +24,66 @@ data class SearchParams(
 
 @Singleton
 class RadioBrowserApi @Inject constructor() {
-    private val baseUrl = "https://de1.api.radio-browser.info/json"
+    private val baseUrls = listOf(
+        "https://at1.api.radio-browser.info/json",
+        "https://de1.api.radio-browser.info/json",
+        "https://nl1.api.radio-browser.info/json"
+    )
+    
     private val client = OkHttpClient.Builder()
-        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
         .build()
     private val gson = Gson()
 
     suspend fun searchStations(params: SearchParams): List<RadioStation>? {
         return withContext(Dispatchers.IO) {
-            try {
-                val queryParams = mutableListOf<String>()
-                
-                // Přidání parametrů do URL
-                if (params.name.isNotBlank()) {
-                    queryParams.add("name=${java.net.URLEncoder.encode(params.name.trim(), "UTF-8").replace("+", "%20")}")
+            val queryParams = mutableListOf<String>()
+            
+            // Přidání parametrů do URL
+            if (params.name.isNotBlank()) {
+                queryParams.add("name=${java.net.URLEncoder.encode(params.name.trim(), "UTF-8").replace("+", "%20")}")
+            }
+            params.country?.let { 
+                if (it.length == 2) {
+                    queryParams.add("countrycode=${java.net.URLEncoder.encode(it, "UTF-8")}")
+                } else {
+                    queryParams.add("country=${java.net.URLEncoder.encode(it, "UTF-8")}")
                 }
-                params.country?.let { 
-                    if (it.length == 2) {
-                        queryParams.add("countrycode=${java.net.URLEncoder.encode(it, "UTF-8")}")
+            }
+            params.minBitrate?.let {
+                queryParams.add("minBitrate=$it")
+            }
+            queryParams.add("order=${params.orderBy}")
+            queryParams.add("reverse=${params.reverse}")
+            queryParams.add("limit=${params.limit}")
+            queryParams.add("hidebroken=${params.hideBroken}")
+
+            val queryString = queryParams.joinToString("&")
+            
+            for (baseUrl in baseUrls) {
+                try {
+                    val url = "$baseUrl/stations/search?$queryString"
+                    Log.d("RadioBrowserApi", "Volám API: $url")
+
+                    val request = Request.Builder()
+                        .url(url)
+                        .addHeader("User-Agent", "InternetRadio/1.0")
+                        .build()
+
+                    val response = client.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        val json = response.body?.string()
+                        if (json != null) {
+                            val listType = object : TypeToken<List<RadioStation>>() {}.type
+                            val stations = gson.fromJson<List<RadioStation>>(json, listType)
+                            Log.d("RadioBrowserApi", "Počet nalezených stanic: ${stations?.size ?: 0}")
+                            return@withContext stations
+                        }
                     } else {
-                        queryParams.add("country=${java.net.URLEncoder.encode(it, "UTF-8")}")
+                        Log.e("RadioBrowserApi", "API Error: ${response.code} on $baseUrl")
                     }
-                }
-                params.minBitrate?.let {
-                    queryParams.add("minBitrate=$it")
-                }
-                queryParams.add("order=${params.orderBy}")
-                queryParams.add("reverse=${params.reverse}")
-                queryParams.add("limit=${params.limit}")
-                queryParams.add("hidebroken=${params.hideBroken}")
-
-                val url = "$baseUrl/stations/search?${queryParams.joinToString("&")}"
-                Log.d("RadioBrowserApi", "Volám API: $url")
-                
-                val request = Request.Builder()
-                    .url(url)
-                    .addHeader("User-Agent", "InternetRadio/1.0")
-                    .build()
-
-                val response = client.newCall(request).execute()
-
-                if (!response.isSuccessful) {
-                    Log.e("RadioBrowserApi", "API vrátilo chybu: ${response.code}")
-                    return@withContext null
-                }
-
-                val responseBody = response.body?.string()
-                Log.d("RadioBrowserApi", "Odpověď API: ${responseBody?.take(200)}...")
-                
-                val type = object : TypeToken<List<RadioStation>>() {}.type
-                val stations = gson.fromJson<List<RadioStation>>(responseBody, type)
-                Log.d("RadioBrowserApi", "Počet nalezených stanic: ${stations?.size ?: 0}")
-                stations
-            } catch (e: Exception) {
-                Log.e("RadioBrowserApi", "Chyba při vyhledávání stanic", e)
-                null
             }
         }
     }
