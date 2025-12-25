@@ -23,6 +23,7 @@
         android:layout_marginHorizontal="8dp"
         android:contentDescription="@string/widget_radio_name"
         android:background="@drawable/bg_widget_icon_rounded"
+        android:src="@mipmap/ic_launcher"
         android:clipToOutline="true"
         android:scaleType="centerCrop" />
 
