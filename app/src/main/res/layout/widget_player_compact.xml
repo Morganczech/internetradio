@@ -8,6 +8,9 @@
     <!-- Hidden compat views -->
     <TextView android:id="@+id/widget_radio_name" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView android:id="@+id/widget_metadata" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <!-- Hidden controls for compact 1x1 mode -->
+    <ImageButton android:id="@+id/widget_previous" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageButton android:id="@+id/widget_next" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/widget_radio_icon"
@@ -19,46 +22,16 @@
         android:clipToOutline="true"
         android:scaleType="centerCrop" />
 
-    <!-- Controls Overlay -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!-- Play/Pause Button Only -->
+    <ImageButton
+        android:id="@+id/widget_play_pause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <ImageButton
-            android:id="@+id/widget_previous"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="@drawable/rounded_button_background_semi_transparent"
-            android:src="@drawable/ic_skip_previous"
-            android:tint="#FFFFFF"
-            android:padding="6dp"
-            android:scaleType="fitCenter"
-            android:contentDescription="@string/player_previous"/>
-
-        <ImageButton
-            android:id="@+id/widget_play_pause"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginHorizontal="2dp"
-            android:background="@drawable/rounded_button_background_semi_transparent"
-            android:src="@drawable/ic_play_arrow"
-            android:tint="#FFFFFF"
-            android:contentDescription="@string/player_play"/>
-
-        <ImageButton
-            android:id="@+id/widget_next"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="@drawable/rounded_button_background_semi_transparent"
-            android:src="@drawable/ic_skip_next"
-            android:tint="#FFFFFF"
-            android:padding="6dp"
-            android:scaleType="fitCenter"
-            android:contentDescription="@string/player_next"/>
-
-    </LinearLayout>
+        android:background="@drawable/rounded_button_background_semi_transparent"
+        android:src="@drawable/ic_play_arrow"
+        android:tint="#FFFFFF"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/player_play"/>
 
 </FrameLayout>
