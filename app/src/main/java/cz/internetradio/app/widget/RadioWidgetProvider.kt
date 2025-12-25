@@ -114,12 +114,7 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         radioRepository = RadioRepository(database.radioDao(), entryPoint.getRadioBrowserApi())
         Log.d("RadioWidgetProvider", "Repository úspěšně inicializován")
 
-        // Nejdříve zobrazíme widget s výchozími hodnotami
-        Log.d("RadioWidgetProvider", "Zobrazuji widgety s výchozími hodnotami")
-        appWidgetIds.forEach { appWidgetId ->
-            Log.d("RadioWidgetProvider", "Aktualizuji widget ID: $appWidgetId s výchozími hodnotami")
-            updateAppWidget(context, appWidgetManager, appWidgetId, null)
-        }
+
 
         scope.launch {
             try {
