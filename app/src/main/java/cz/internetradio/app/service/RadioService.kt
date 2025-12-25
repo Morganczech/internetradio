@@ -357,7 +357,13 @@ class RadioService : Service() {
 
     private fun playRadio(radio: Radio) {
         if (!requestAudioFocus()) return
+        
+        // Stop previous playback immediately to avoid confusion if new load fails
+        exoPlayer.stop()
+        
         try {
+            if (radio.streamUrl.isBlank()) throw IllegalArgumentException("Empty stream URL")
+            
             exoPlayer.setMediaItem(MediaItem.fromUri(radio.streamUrl))
             exoPlayer.prepare()
             exoPlayer.play()
@@ -367,7 +373,12 @@ class RadioService : Service() {
             broadcastPlaybackState()
             if (!wakeLock.isHeld) wakeLock.acquire()
             RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
-        } catch (e: Exception) { abandonAudioFocus() }
+        } catch (e: Exception) { 
+            if (BuildConfig.DEBUG) Log.e(TAG, "Play error", e)
+            abandonAudioFocus() 
+            broadcastPlaybackError()
+            _isPlaying.value = false
+        }
     }
 
     private fun pausePlayback() {
