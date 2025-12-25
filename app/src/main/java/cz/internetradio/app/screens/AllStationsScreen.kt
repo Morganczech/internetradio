@@ -88,12 +88,21 @@ fun AllStationsScreen(
         } + listOf(RadioCategory.OSTATNI)
     }
 
-    val pagerState = rememberPagerState()
+    val savedSelectedCategory by viewModel.selectedListCategory.collectAsState()
+    val pagerState = rememberPagerState(initialPage = categories.indexOf(savedSelectedCategory).coerceAtLeast(0))
     val lazyRowState = rememberLazyListState()
-    var selectedCategory by rememberSaveable { mutableStateOf(categories[0]) }
+    
+    val selectedCategory = categories.getOrElse(pagerState.currentPage) { categories[0] }
 
     LaunchedEffect(pagerState.currentPage) {
-        selectedCategory = categories[pagerState.currentPage]
+        viewModel.setSelectedListCategory(selectedCategory)
+    }
+
+    LaunchedEffect(savedSelectedCategory) {
+        val index = categories.indexOf(savedSelectedCategory)
+        if (index >= 0 && index != pagerState.currentPage) {
+            pagerState.scrollToPage(index)
+        }
     }
 
     LaunchedEffect(pagerState.currentPage, pagerState.currentPageOffset) {

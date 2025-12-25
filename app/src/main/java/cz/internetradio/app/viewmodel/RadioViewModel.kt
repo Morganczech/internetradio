@@ -130,6 +130,14 @@ class RadioViewModel @Inject constructor(
     private val _currentCategory = MutableStateFlow<RadioCategory?>(null)
     val currentCategory: StateFlow<RadioCategory?> = _currentCategory
 
+    private val _selectedListCategory = MutableStateFlow(RadioCategory.MISTNI)
+    val selectedListCategory: StateFlow<RadioCategory> = _selectedListCategory
+
+    fun setSelectedListCategory(category: RadioCategory) {
+        _selectedListCategory.value = category
+        prefs.edit().putString("last_list_category", category.name).apply()
+    }
+
     private val _currentLanguage = MutableStateFlow(Language.SYSTEM)
     val currentLanguage: StateFlow<Language> = _currentLanguage
 
@@ -275,6 +283,14 @@ class RadioViewModel @Inject constructor(
             _volume.value = prefs.getFloat("volume", 1.0f)
             _isCompactMode.value = prefs.getBoolean("compact_mode", false)
             _useUnifiedAccentColor.value = prefs.getBoolean(PREFS_USE_UNIFIED_ACCENT_COLOR, false)
+            
+            val savedCatName = prefs.getString("last_list_category", RadioCategory.MISTNI.name)
+            try {
+                _selectedListCategory.value = RadioCategory.valueOf(savedCatName ?: RadioCategory.MISTNI.name)
+            } catch (e: Exception) {
+                _selectedListCategory.value = RadioCategory.MISTNI
+            }
+
             val lastId = prefs.getString("last_radio_id", null)
             if (lastId != null) {
                 _currentRadio.value = radioRepository.getRadioById(lastId)
