@@ -49,12 +49,17 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         private var isPlaying = false
         private var isInitialized = false // Přidáno pro kontrolu inicializace
 
-        fun updateWidgets(context: Context, playing: Boolean, radioId: String?) {
-            Log.d("RadioWidgetProvider", "updateWidgets volán: playing=$playing, radioId=$radioId, isInitialized=$isInitialized")
+        fun updateWidgets(context: Context, playing: Boolean, radioId: String?, metadata: String? = null) {
+            Log.d("RadioWidgetProvider", "updateWidgets volán: playing=$playing, radioId=$radioId, metadata=$metadata")
             
             if (isInitialized) {
                 isPlaying = playing
                 currentRadioId = radioId
+                
+                context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("current_metadata", metadata)
+                    .apply()
                 
                 val appWidgetManager = AppWidgetManager.getInstance(context)
                 val widgetClasses = listOf(
@@ -280,10 +285,8 @@ open class RadioWidgetProvider : AppWidgetProvider() {
     }
 
     private fun getCurrentMetadata(context: Context): String? {
-        // Zde byste měli implementovat získání aktuálních metadat
-        // Prozatím vracíme null, aby se zobrazila výchozí hodnota
-        Log.d("RadioWidgetProvider", "getCurrentMetadata volán - vracím null")
-        return null
+        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+        return prefs.getString("current_metadata", null)
     }
 
     private fun setButtonClickListeners(context: Context, views: RemoteViews) {

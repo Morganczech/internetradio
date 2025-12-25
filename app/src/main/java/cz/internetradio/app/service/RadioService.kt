@@ -260,7 +260,7 @@ class RadioService : Service() {
                     updateNotification()
                 }
                 broadcastPlaybackState()
-                RadioWidgetProvider.updateWidgets(applicationContext, isPlaying, _currentRadio.value?.id)
+                RadioWidgetProvider.updateWidgets(applicationContext, isPlaying, _currentRadio.value?.id, _currentMetadata.value)
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -316,6 +316,7 @@ class RadioService : Service() {
                 }
 
                 serviceScope.launch { kotlinx.coroutines.delay(200); updateNotification() }
+                RadioWidgetProvider.updateWidgets(applicationContext, _isPlaying.value, _currentRadio.value?.id, _currentMetadata.value)
                 broadcastPlaybackState()
             }
         })
@@ -330,6 +331,7 @@ class RadioService : Service() {
                         val fullTitle = regexMatch.groupValues[1]
                         _currentMetadata.value = fullTitle
                         updateNotification()
+                        RadioWidgetProvider.updateWidgets(applicationContext, _isPlaying.value, _currentRadio.value?.id, _currentMetadata.value)
                         broadcastPlaybackState()
                     }
                 }
@@ -409,7 +411,7 @@ class RadioService : Service() {
             updateNotification()
             broadcastPlaybackState()
             if (!wakeLock.isHeld) wakeLock.acquire()
-            RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id)
+            RadioWidgetProvider.updateWidgets(applicationContext, true, radio.id, _currentMetadata.value)
         } catch (e: Exception) { 
             if (BuildConfig.DEBUG) Log.e(TAG, "Play error", e)
             abandonAudioFocus() 
@@ -425,7 +427,7 @@ class RadioService : Service() {
             updateNotification()
             broadcastPlaybackState()
             if (wakeLock.isHeld) wakeLock.release()
-            RadioWidgetProvider.updateWidgets(applicationContext, false, _currentRadio.value?.id)
+            RadioWidgetProvider.updateWidgets(applicationContext, false, _currentRadio.value?.id, _currentMetadata.value)
         }
     }
 
