@@ -23,8 +23,12 @@ data class SearchParams(
 
 @Singleton
 class RadioBrowserApi @Inject constructor() {
-    private val baseUrl = "https://de1.api.radio-browser.info/json"
-    private val client = OkHttpClient()
+    private val baseUrl = "https://at1.api.radio-browser.info/json"
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
     private val gson = Gson()
 
     suspend fun searchStations(params: SearchParams): List<RadioStation>? {
@@ -37,7 +41,11 @@ class RadioBrowserApi @Inject constructor() {
                     queryParams.add("name=${java.net.URLEncoder.encode(params.name.trim(), "UTF-8").replace("+", "%20")}")
                 }
                 params.country?.let { 
-                    queryParams.add("country=${java.net.URLEncoder.encode(it, "UTF-8")}")
+                    if (it.length == 2) {
+                        queryParams.add("countrycode=${java.net.URLEncoder.encode(it, "UTF-8")}")
+                    } else {
+                        queryParams.add("country=${java.net.URLEncoder.encode(it, "UTF-8")}")
+                    }
                 }
                 params.minBitrate?.let {
                     queryParams.add("minBitrate=$it")

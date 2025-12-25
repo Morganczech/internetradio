@@ -145,6 +145,29 @@ class RadioViewModel @Inject constructor(
     private val _playbackContext = MutableStateFlow<RadioCategory?>(null)
     val playbackContext: StateFlow<RadioCategory?> = _playbackContext
 
+    private val _isOnline = MutableStateFlow(false)
+    val isOnline: StateFlow<Boolean> = _isOnline
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: android.net.Network) {
+             _isOnline.value = true
+             viewModelScope.launch(Dispatchers.IO) {
+                 // Wait for stability
+                 delay(3000)
+                 
+                 repeat(3) {
+                     if (prefs.getBoolean("favorites_initialized", false)) return@repeat
+                     ensureDatabaseInitialized()
+                     if (prefs.getBoolean("favorites_initialized", false)) return@repeat
+                     delay(3000)
+                 }
+             }
+        }
+        override fun onLost(network: android.net.Network) {
+             _isOnline.value = false
+        }
+    }
+
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context == null || intent == null) return
@@ -211,6 +234,12 @@ class RadioViewModel @Inject constructor(
         }
 
         loadLocalStations()
+        _isOnline.value = isNetworkAvailable()
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        try {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        } catch (e: Exception) { Log.e("RadioViewModel", "NetworkCallback error", e) }
+
         viewModelScope.launch { ensureDatabaseInitialized() }
         
         // Synchronize state with service
@@ -317,6 +346,7 @@ class RadioViewModel @Inject constructor(
                 val success = radioRepository.initializeFromApi(targetCountry)
                 if (success) {
                     prefs.edit().putBoolean("favorites_initialized", true).apply()
+                    refreshLocalStations()
                 }
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
@@ -617,6 +647,10 @@ class RadioViewModel @Inject constructor(
         equalizerManager.release()
         Wearable.getDataClient(context).removeListener(this)
         context.unregisterReceiver(serviceReceiver)
+        try {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        } catch (e: Exception) {}
     }
 
     fun exportSettings(uri: Uri) {

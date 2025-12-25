@@ -67,6 +67,7 @@ fun AllStationsScreen(
 ) {
     val currentRadio by viewModel.currentRadio.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
+    val isOnline by viewModel.isOnline.collectAsState()
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
     val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
     
@@ -183,7 +184,7 @@ fun AllStationsScreen(
             )
         }
 
-        val showOfflineEmptyState = allRadios.isEmpty() && !viewModel.isNetworkAvailable()
+        val showOfflineEmptyState = allRadios.isEmpty() && !isOnline
 
         if (showOfflineEmptyState) {
             Box(
