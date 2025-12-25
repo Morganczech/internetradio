@@ -18,7 +18,8 @@ data class SearchParams(
     val minBitrate: Int? = null,
     val orderBy: String = "votes", // votes, name, bitrate, clickcount
     val reverse: Boolean = true,
-    val limit: Int = 100
+    val limit: Int = 100,
+    val hideBroken: Boolean = true
 )
 
 @Singleton
@@ -53,6 +54,7 @@ class RadioBrowserApi @Inject constructor() {
                 queryParams.add("order=${params.orderBy}")
                 queryParams.add("reverse=${params.reverse}")
                 queryParams.add("limit=${params.limit}")
+                queryParams.add("hidebroken=${params.hideBroken}")
 
                 val url = "$baseUrl/stations/search?${queryParams.joinToString("&")}"
                 Log.d("RadioBrowserApi", "Volám API: $url")
