@@ -38,7 +38,7 @@ class RadioRepository @Inject constructor(
                     name = "", // Search by country only
                     country = countryCode,
                     limit = 10,
-                    orderBy = "votes"
+                    orderBy = "clickcount"
                 )
             )
 
