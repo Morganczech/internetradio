@@ -6,5 +6,5 @@
     android:initialLayout="@layout/widget_player"
     android:resizeMode="horizontal"
     android:widgetCategory="home_screen"
-    android:previewImage="@drawable/widget_preview"
+    android:previewLayout="@layout/widget_player"
     android:description="@string/widget_description" /> 
