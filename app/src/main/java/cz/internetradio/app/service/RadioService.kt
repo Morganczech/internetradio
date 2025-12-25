@@ -210,6 +210,11 @@ class RadioService : Service() {
         val forwardingPlayer = object : ForwardingPlayer(exoPlayer) {
             override fun seekToNext() { playNextRadio() }
             override fun seekToPrevious() { playPreviousRadio() }
+            
+            // Force system to think there are items to skip to so buttons appear on Wear OS
+            override fun hasNextMediaItem(): Boolean = true
+            override fun hasPreviousMediaItem(): Boolean = true
+
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands().buildUpon()
                     .add(Player.COMMAND_SEEK_TO_NEXT)
