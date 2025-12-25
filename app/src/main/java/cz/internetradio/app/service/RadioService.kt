@@ -35,6 +35,9 @@ import androidx.media3.exoplayer.analytics.AnalyticsListener
 import cz.internetradio.app.audio.EqualizerManager
 import cz.internetradio.app.BuildConfig
 import androidx.media3.common.PlaybackException
+import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 
 @AndroidEntryPoint
 class RadioService : Service() {
@@ -170,6 +173,27 @@ class RadioService : Service() {
         }
     }
 
+    private val mediaSessionCallback = object : MediaSession.Callback {
+        override fun onConnect(session: MediaSession, controller: MediaSession.ControllerInfo): MediaSession.ConnectionResult {
+            val playerCommands = MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS.buildUpon()
+                .add(Player.COMMAND_SKIP_TO_NEXT)
+                .add(Player.COMMAND_SKIP_TO_PREVIOUS)
+                .add(Player.COMMAND_PLAY_PAUSE)
+                .build()
+            return MediaSession.ConnectionResult.accept(MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS, playerCommands)
+        }
+
+        override fun onSkipToNext(session: MediaSession): ListenableFuture<SessionResult> {
+            playNextRadio()
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
+
+        override fun onSkipToPrevious(session: MediaSession): ListenableFuture<SessionResult> {
+            playPreviousRadio()
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -190,8 +214,10 @@ class RadioService : Service() {
         val savedVolume = prefs.getFloat("volume", 1.0f)
         exoPlayer.volume = savedVolume
         
-        // Inicializace Media3 MediaSession
-        mediaSession = MediaSession.Builder(this, exoPlayer).build()
+        // Inicializace Media3 MediaSession s custom callbackem pro podporu tlačítek
+        mediaSession = MediaSession.Builder(this, exoPlayer)
+            .setCallback(mediaSessionCallback)
+            .build()
 
         radioNotificationManager = RadioNotificationManager(this, mediaSession)
         
