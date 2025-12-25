@@ -17,7 +17,9 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:contentDescription="@string/widget_radio_name"
-        android:scaleType="fitCenter" />
+        android:background="@drawable/bg_widget_icon_rounded"
+        android:clipToOutline="true"
+        android:scaleType="centerCrop" />
 
     <ImageButton
         android:id="@+id/widget_play_pause"

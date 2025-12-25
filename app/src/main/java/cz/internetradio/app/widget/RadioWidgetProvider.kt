@@ -14,7 +14,6 @@ import androidx.room.Room
 import coil.Coil
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import coil.transform.RoundedCornersTransformation
 import cz.internetradio.app.MainActivity
 import cz.internetradio.app.R
 import cz.internetradio.app.data.RadioDatabase
@@ -248,7 +247,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
             if (radio.id != cachedRadioId || cachedBitmap == null) {
                 val request = ImageRequest.Builder(context)
                     .data(radio.imageUrl)
-                    .transformations(RoundedCornersTransformation(16f))
                     .target(
                         onSuccess = { result ->
                             // V callbacku ověříme, zda je tato odpověď stále aktuální
