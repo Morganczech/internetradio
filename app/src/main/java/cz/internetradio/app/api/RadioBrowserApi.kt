@@ -29,6 +29,7 @@ class RadioBrowserApi @Inject constructor() {
         "https://de1.api.radio-browser.info/json",
         "https://nl1.api.radio-browser.info/json"
     )
+    private val baseUrl get() = baseUrls[1]
     
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
@@ -73,18 +74,28 @@ class RadioBrowserApi @Inject constructor() {
                         .build()
 
                     val response = client.newCall(request).execute()
-                    if (response.isSuccessful) {
-                        val json = response.body?.string()
-                        if (json != null) {
-                            val listType = object : TypeToken<List<RadioStation>>() {}.type
-                            val stations = gson.fromJson<List<RadioStation>>(json, listType)
-                            Log.d("RadioBrowserApi", "Počet nalezených stanic: ${stations?.size ?: 0}")
-                            return@withContext stations
+                    try {
+                        if (response.isSuccessful) {
+                            val json = response.body?.string()
+                            if (json != null) {
+                                val listType = object : TypeToken<List<RadioStation>>() {}.type
+                                val stations = gson.fromJson<List<RadioStation>>(json, listType)
+                                Log.d("RadioBrowserApi", "Počet nalezených stanic: ${stations?.size ?: 0}")
+                                return@withContext stations
+                            }
+                        } else {
+                            Log.e("RadioBrowserApi", "API Error: ${response.code} on $baseUrl")
                         }
-                    } else {
-                        Log.e("RadioBrowserApi", "API Error: ${response.code} on $baseUrl")
+                    } finally {
+                        response.close()
                     }
+                } catch (e: Exception) {
+                    Log.e("RadioBrowserApi", "Chyba při komunikaci se serverem $baseUrl: ${e.message}")
+                    // Pokračujeme na další server
+                }
             }
+            Log.e("RadioBrowserApi", "Všechny servery selhaly")
+            null
         }
     }
 
