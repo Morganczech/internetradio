@@ -5,30 +5,30 @@
     android:background="@drawable/widget_background"
     android:padding="4dp">
 
-    <!-- Hidden Views for Compatibility -->
+    <!-- Hidden Views -->
     <TextView android:id="@+id/widget_radio_name" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView android:id="@+id/widget_metadata" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/widget_radio_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="12dp"
         android:background="@drawable/bg_widget_icon_rounded"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
         android:contentDescription="@string/widget_radio_name" />
 
-    <!-- Controls Group (Small) -->
+    <!-- Controls -->
     <ImageButton
         android:id="@+id/widget_next"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="12dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_skip_next"
         android:tint="#FFFFFF"
@@ -37,8 +37,8 @@
 
     <ImageButton
         android:id="@+id/widget_play_pause"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_toStartOf="@id/widget_next"
         android:layout_centerVertical="true"
         android:background="?android:attr/selectableItemBackgroundBorderless"
@@ -50,8 +50,8 @@
 
     <ImageButton
         android:id="@+id/widget_previous"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_toStartOf="@id/widget_play_pause"
         android:layout_centerVertical="true"
         android:background="?android:attr/selectableItemBackgroundBorderless"
