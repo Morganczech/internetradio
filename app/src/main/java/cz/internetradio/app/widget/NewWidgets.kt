@@ -13,3 +13,7 @@ class ControlWidgetProvider : RadioWidgetProvider() {
 class LargeWidgetProvider : RadioWidgetProvider() {
     override fun getLayoutId() = R.layout.widget_player_large
 }
+
+class MediumWidgetProvider : RadioWidgetProvider() {
+    override fun getLayoutId() = R.layout.widget_player_medium
+}

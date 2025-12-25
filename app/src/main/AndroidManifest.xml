@@ -70,6 +70,18 @@
         </receiver>
 
         <receiver
+            android:name=".widget.MediumWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_medium_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_medium_info" />
+        </receiver>
+
+        <receiver
             android:name=".widget.ControlWidgetProvider"
             android:exported="true"
             android:label="@string/widget_control_name">

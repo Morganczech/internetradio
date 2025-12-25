@@ -66,6 +66,7 @@ open class RadioWidgetProvider : AppWidgetProvider() {
                     RadioWidgetProvider::class.java,
                     CompactWidgetProvider::class.java,
                     ControlWidgetProvider::class.java,
+                    MediumWidgetProvider::class.java,
                     LargeWidgetProvider::class.java
                 )
 

@@ -179,6 +179,7 @@
 
 <string name="msg_station_saved_to_category">Stanice uložena do kategorie %s</string>
     <string name="widget_compact_name">Přehrávač (Mini)</string>
+    <string name="widget_medium_name">Přehrávač (Střední)</string>
     <string name="widget_control_name">Přehrávač (Jemný)</string>
     <string name="widget_large_name">Přehrávač (Velký)</string>
 </resources>
