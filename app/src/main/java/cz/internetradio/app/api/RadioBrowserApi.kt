@@ -23,7 +23,7 @@ data class SearchParams(
 
 @Singleton
 class RadioBrowserApi @Inject constructor() {
-    private val baseUrl = "https://at1.api.radio-browser.info/json"
+    private val baseUrl = "https://de1.api.radio-browser.info/json"
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
         .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
