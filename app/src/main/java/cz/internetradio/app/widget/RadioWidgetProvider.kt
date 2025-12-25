@@ -238,46 +238,50 @@ open class RadioWidgetProvider : AppWidgetProvider() {
 
         // Aktualizace vzhledu - pouze pokud máme rádio
         if (radio != null) {
-            Log.d("RadioWidgetProvider", "Aktualizuji widget s rádiem: ${radio.name}")
             views.setTextViewText(R.id.widget_radio_name, radio.name)
             
-            val reuseCache = radio.id == cachedRadioId && cachedBitmap != null
-            if (reuseCache) {
-                 views.setImageViewBitmap(R.id.widget_radio_icon, cachedBitmap)
-                 Log.d("RadioWidgetProvider", "Použita cache pro obrázek")
+            // 1. VŽDY zobrazíme nejdříve to, co máme v paměti (i když je to stará ikona),
+            // abychom zabránili probliknutí na placeholder.
+            // Placeholder použijeme jen při úplně prvním načtení.
+            if (cachedBitmap != null) {
+                views.setImageViewBitmap(R.id.widget_radio_icon, cachedBitmap)
             } else {
-                 views.setImageViewResource(R.id.widget_radio_icon, R.drawable.ic_radio_default)
+                views.setImageViewResource(R.id.widget_radio_icon, R.drawable.ic_radio_default)
             }
 
-            if (!reuseCache) {
-                // Načtení obrázku pomocí Coil pouze pokud nemáme cache
+            // 2. Pokud se změnilo ID (nebo cache chybí), spustíme načítání
+            if (radio.id != cachedRadioId || cachedBitmap == null) {
                 val request = ImageRequest.Builder(context)
                     .data(radio.imageUrl)
                     .transformations(RoundedCornersTransformation(16f))
                     .target(
                         onSuccess = { result ->
-                            val bitmap = (result as BitmapDrawable).bitmap
-                            cachedBitmap = bitmap
-                            cachedRadioId = radio.id
-                            
-                            // Vyvoláme aktualizaci widgetu přes broadcast, abychom zajistili konzistentní stav
-                            // a využili nově nakešovanou bitmapu bez přepsání textů starým RemoteViews objektem
-                            try {
-                                val provider = appWidgetManager.getAppWidgetInfo(appWidgetId).provider
-                                val intent = Intent().apply {
-                                    component = provider
-                                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                            // V callbacku ověříme, zda je tato odpověď stále aktuální
+                            // (zda uživatel mezitím nepřepnul dál)
+                            // Použijeme 'currentRadioId' z Companion, který reprezentuje nejnovější požadavek
+                            if (radio.id == currentRadioId) {
+                                val bitmap = (result as BitmapDrawable).bitmap
+                                cachedBitmap = bitmap
+                                cachedRadioId = radio.id
+                                
+                                // Vyvoláme bezpečný update widgetu
+                                try {
+                                    val provider = appWidgetManager.getAppWidgetInfo(appWidgetId).provider
+                                    val intent = Intent().apply {
+                                        component = provider
+                                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                                    }
+                                    context.sendBroadcast(intent)
+                                } catch (e: Exception) {
+                                    views.setImageViewBitmap(R.id.widget_radio_icon, bitmap)
+                                    appWidgetManager.updateAppWidget(appWidgetId, views)
                                 }
-                                context.sendBroadcast(intent)
-                            } catch (e: Exception) {
-                                // Fallback pokud se nepodaří získat provider info
-                                views.setImageViewBitmap(R.id.widget_radio_icon, bitmap)
-                                appWidgetManager.updateAppWidget(appWidgetId, views)
                             }
                         },
                         onError = {
-                             // Necháme default
+                             // Při chybě neděláme nic - necháme zobrazenou starou ikonu nebo placeholder
+                             // To je lepší než probliknutí
                         }
                     )
                     .build()
