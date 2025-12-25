@@ -6,15 +6,6 @@
     android:gravity="center"
     android:background="@drawable/widget_background">
 
-    <ImageButton
-        android:id="@+id/widget_previous"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/player_previous"
-        android:src="@drawable/ic_skip_previous"
-        android:tint="#FFFFFF" />
-
     <ImageView
         android:id="@+id/widget_radio_icon"
         android:layout_width="48dp"
@@ -25,6 +16,15 @@
         android:src="@mipmap/ic_launcher"
         android:clipToOutline="true"
         android:scaleType="centerCrop" />
+
+    <ImageButton
+        android:id="@+id/widget_previous"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/player_previous"
+        android:src="@drawable/ic_skip_previous"
+        android:tint="#FFFFFF" />
 
     <LinearLayout
         android:layout_width="0dp"
