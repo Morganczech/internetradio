@@ -1,50 +1,70 @@
-# Strategie Místních Stanic a Offline Handling
+# Strategie Místních Stanic a Offline Handling (Aktualizováno)
 
-Tento dokument popisuje logiku určení regionu pro načítání stanic a chování aplikace v režimu bez internetového připojení. Tato strategie byla implementována ve Fázi 8.
+Cíl: Upravit strategii inicializace stanic a offline chování aplikace podle nových UX pravidel. Zjednodušit logiku, odstranit offline fallbacky a zajistit jasnou zpětnou vazbu uživateli.
 
-## 1. Určení Regionu (Země)
+## 1. Zrušení Seed JSON souborů (Důležité)
 
-Aplikace striktně rolišuje mezi **jazykem UI** a **regionem obsahu**.
-
-*   **Jazyk UI (UI Language):** Používá se výhradně pro překlady textů v aplikaci (strings.xml).
-*   **Region Obsahu (Content Region):** Určuje, které stanice se zobrazí v kategorii "Místní".
-    *   **Zdroj:** `Locale.getDefault().country` (např. "CZ", "SK", "DE", "US").
-    *   **Fallback:** Pokud je locale prázdné nebo neplatné, použije se výchozí "CZ".
-    *   **Zákaz:** Nepoužívá se jazyk (`Locale.language`) ani IP adresa pro určení obsahu během inicializace databáze.
+*   **Odstranění:** Seed JSON soubory (`stations_cz.json`, `stations_sk.json` atd.) se kompletně přestanou používat a budou odstraněny z projektu.
+*   **Žádná lokální data:** Aplikace již nebude mít žádnou offline databázi předpřipravených stanic. Inicializace probíhá výhradně online.
+*   **Důvod:** Zjednodušení údržby a zajištění aktuálnosti stanic.
 
 ## 2. Inicializace Databáze ("Místní stanice")
 
-Při prvním spuštění aplikace (nebo po vymazání dat) se seznam místních stanic naplní podle následující priority:
+Proces načítání prvních stanic při startu (tzv. onboarding):
 
-1.  **Seed JSON (Offline Ready)**
-    *   Aplikace zkontroluje existenci souboru `stations_{region}.json` v assets (pro region získaný v bodě 1).
-    *   Pokud soubor existuje (např. `stations_cz.json`, `stations_sk.json`), obsah se načte do databáze.
-    *   Toto funguje i **bez internetu**.
+1.  **Určení Regionu:**
+    *   Výhradně podle `Locale.getDefault().country`.
+    *   Žádné odhadování podle IP nebo jazyka.
 
-2.  **RadioBrowser API (Online Fallback)**
-    *   Pokud seed JSON pro daný region neexistuje (např. uživatel má region "DE"), aplikace ověří dostupnost internetu.
-    *   **Pokud je online:** Stáhne top 10 stanic pro danou zemi (řazeno dle hlasů) z API a uloží je do databáze.
-    *   **Pokud je offline:** Místní stanice zůstanou **prázdné**. Aplikace nezobrazuje žádné náhodné ani globální stanice. Uživatel uvidí prázdný seznam, což je korektní a očekávané chování.
+2.  **Pouze Online (RadioBrowser API):**
+    *   Pokus o načtení seznamu stanic proběhne **POUZE pokud je dostupný internet**.
+    *   Volá se RadioBrowser API pro daný kód země.
 
-**Důležité:** Flag `favorites_initialized` se nastaví na `true` pouze po **úspěšném** načtení (ze seedu nebo API). Pokud se inicializace nezdaří (např. offline bez seedu), pokus se bude opakovat při dalším startu aplikace.
+3.  **Offline Stav při inicializaci:**
+    *   Pokud **není internet** při prvním spuštění, databáze stanic zůstává **PRÁZDNÁ**.
+    *   Nenačtou se žádné náhodné ani globální fallback stanice.
+    *   Flag `favorites_initialized` zůstává `false` -> pokus o inicializaci se zopakuje při příštím startu aplikace.
 
-## 3. Offline Handling (Řízení přehrávání)
+## 3. Offline UX – Empty State (Trvalá hláška)
 
-Aby aplikace působila robustně, je vynucena striktní kontrola konektivity.
+Zobrazování trvalé hlášky (např. uprostřed obrazovky místo seznamu):
 
-### Start Přehrávání
-1.  Uživatel klikne na **Play** (nebo vybere stanici).
-2.  Aplikace okamžitě zkontroluje `isNetworkAvailable()`.
-3.  **Pokud je offline:**
-    *   Přehrávání se **vůbec nespustí** (nevolá se `RadioService`).
-    *   Uživateli se zobrazí hláška (Snackbar): *"Nejste připojeni k internetu"*.
-    *   UI zůstane ve stavu "Zastaveno".
+*   **Podmínka zobrazení:**
+    1.  Detekován stav **Offline** (žádný internet).
+    2.  **A ZÁROVEŇ** uživatel nemá v databázi uloženou **ANI JEDNU stanici** (DB je prázdná).
 
-### Během Přehrávání
-1.  Pokud dojde k chybě přehrávání (loss of connection, stream error), `ExoPlayer` vyvolá chybu.
-2.  Služba zachytí chybu a pošle broadcast s `EXTRA_ERROR`.
-3.  UI zobrazí chybovou hlášku a přepne stav na "Zastaveno".
+*   **Obsah hlášky:**
+    *   Text: *„Nejste připojeni k internetu. Bez připojení nelze načíst ani vyhledávat stanice.“*
+    *   Vizuál: Ikona offline + Text.
 
-## 4. Uživatelské Změny
+*   **Pokud má uživatel stanice:**
+    *   Pokud uživatel má alespoň jednu stanici (načtenou z minula), tato trvalá hláška se **NEZOBRAZÍ**. Seznam stanic je viditelný.
 
-Pokud uživatel ručně přidá, odebere nebo změní pořadí stanic v kategorii "Místní", aplikace tyto změny respektuje a při dalším startu se již nepokouší o re-inicializaci (díky flagu `favorites_initialized` a kontrole obsazenosti DB).
+## 4. Offline Handling – Playback
+
+Chování při kliknutí na stanici v seznamu:
+
+1.  **Kliknutí (Play):**
+2.  **Kontrola:** Okamžitá kontrola konektivity (`isNetworkAvailable`).
+3.  **Pokud je OFFLINE:**
+    *   **STOP:** Přehrávání se **NESPUSTÍ**.
+    *   **Zákaz volání:** `RadioService` se vůbec nevolá.
+    *   **Stav UI:** UI zůstává ve stavu "Zastaveno" (žádný loading spinner).
+    *   **Feedback:** Zobrazí se **okamžitá hláška** (Snackbar/Toast): *„Nejste připojeni k internetu“*.
+
+## 5. Offline Handling – Search (Vyhledávání)
+
+Chování na obrazovce vyhledávání (`BrowseStationsScreen`):
+
+*   **Offline:** API se nesmí volat.
+*   **Chování:** Okamžitě zobrazit textovou informaci: *„Bez připojení k internetu nelze vyhledávat stanice“*.
+*   **Stav:** Žádný loading indikátor (spinner), který by běžel do timeoutu.
+
+## 6. Flag `favorites_initialized`
+
+*   **TRUE:** Nastaví se až ve chvíli, kdy se **úspěšně** stáhnou a uloží stanice z API.
+*   **FALSE:** Zůstává po celou dobu, dokud se inicializace nepovede (např. trvalý offline). To zajistí, že aplikace se bude pokoušet získat základní sadu stanic, dokud se to nepovede.
+
+---
+**Shrnutí pro vývoj:**
+Tato strategie eliminuje "stavy neurčitosti". Uživatel buď vidí data z internetu, data z cache (svoje uložené), nebo jasnou informaci, že bez internetu to nejde.
