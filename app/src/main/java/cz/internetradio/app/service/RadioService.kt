@@ -38,6 +38,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import androidx.media3.common.ForwardingPlayer
 
 @AndroidEntryPoint
 class RadioService : Service() {
@@ -182,16 +183,6 @@ class RadioService : Service() {
                 .build()
             return MediaSession.ConnectionResult.accept(MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS, playerCommands)
         }
-
-        override fun onSkipToNext(session: MediaSession): ListenableFuture<SessionResult> {
-            playNextRadio()
-            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
-        }
-
-        override fun onSkipToPrevious(session: MediaSession): ListenableFuture<SessionResult> {
-            playPreviousRadio()
-            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
-        }
     }
 
     override fun onCreate() {
@@ -215,7 +206,22 @@ class RadioService : Service() {
         exoPlayer.volume = savedVolume
         
         // Inicializace Media3 MediaSession s custom callbackem pro podporu tlačítek
-        mediaSession = MediaSession.Builder(this, exoPlayer)
+        
+        val forwardingPlayer = object : ForwardingPlayer(exoPlayer) {
+            override fun seekToNext() { playNextRadio() }
+            override fun seekToPrevious() { playPreviousRadio() }
+            override fun getAvailableCommands(): Player.Commands {
+                return super.getAvailableCommands().buildUpon()
+                    .add(Player.COMMAND_SEEK_TO_NEXT)
+                    .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+                    .build()
+            }
+            override fun isCommandAvailable(command: Int): Boolean {
+                 return command == Player.COMMAND_SEEK_TO_NEXT || command == Player.COMMAND_SEEK_TO_PREVIOUS || super.isCommandAvailable(command)
+            }
+        }
+
+        mediaSession = MediaSession.Builder(this, forwardingPlayer)
             .setCallback(mediaSessionCallback)
             .build()
 
