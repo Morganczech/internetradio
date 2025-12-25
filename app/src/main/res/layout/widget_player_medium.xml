@@ -5,16 +5,13 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/widget_background"
-    android:padding="8dp">
-
-    <!-- Hidden Views -->
-    <ImageButton android:id="@+id/widget_previous" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <ImageButton android:id="@+id/widget_next" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="8dp">
 
     <ImageView
         android:id="@+id/widget_radio_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:layout_marginEnd="8dp"
         android:contentDescription="@string/widget_radio_name"
         android:background="#20FFFFFF"
@@ -49,14 +46,35 @@
             android:text="@string/widget_metadata" />
     </LinearLayout>
 
+    <!-- Controls visible -->
+    <ImageButton
+        android:id="@+id/widget_previous"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/player_previous"
+        android:src="@drawable/ic_skip_previous"
+        android:tint="#FFFFFF"
+        android:layout_marginEnd="4dp"/>
+
     <ImageButton
         android:id="@+id/widget_play_pause"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/player_play"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_play_arrow"
         android:tint="#FFFFFF"/>
+
+    <ImageButton
+        android:id="@+id/widget_next"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/player_next"
+        android:src="@drawable/ic_skip_next"
+        android:tint="#FFFFFF"
+        android:layout_marginStart="4dp"/>
 
 </LinearLayout>

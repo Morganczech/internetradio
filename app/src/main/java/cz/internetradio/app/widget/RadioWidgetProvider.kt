@@ -14,6 +14,7 @@ import androidx.room.Room
 import coil.Coil
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import coil.transform.RoundedCornersTransformation
 import cz.internetradio.app.MainActivity
 import cz.internetradio.app.R
 import cz.internetradio.app.data.RadioDatabase
@@ -252,14 +253,28 @@ open class RadioWidgetProvider : AppWidgetProvider() {
                 // Načtení obrázku pomocí Coil pouze pokud nemáme cache
                 val request = ImageRequest.Builder(context)
                     .data(radio.imageUrl)
+                    .transformations(RoundedCornersTransformation(16f))
                     .target(
                         onSuccess = { result ->
                             val bitmap = (result as BitmapDrawable).bitmap
                             cachedBitmap = bitmap
                             cachedRadioId = radio.id
-                            views.setImageViewBitmap(R.id.widget_radio_icon, bitmap)
-                            appWidgetManager.updateAppWidget(appWidgetId, views)
-                            Log.d("RadioWidgetProvider", "Obrázek načten z sítě a aktualizován")
+                            
+                            // Vyvoláme aktualizaci widgetu přes broadcast, abychom zajistili konzistentní stav
+                            // a využili nově nakešovanou bitmapu bez přepsání textů starým RemoteViews objektem
+                            try {
+                                val provider = appWidgetManager.getAppWidgetInfo(appWidgetId).provider
+                                val intent = Intent().apply {
+                                    component = provider
+                                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                                }
+                                context.sendBroadcast(intent)
+                            } catch (e: Exception) {
+                                // Fallback pokud se nepodaří získat provider info
+                                views.setImageViewBitmap(R.id.widget_radio_icon, bitmap)
+                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                            }
                         },
                         onError = {
                              // Necháme default
