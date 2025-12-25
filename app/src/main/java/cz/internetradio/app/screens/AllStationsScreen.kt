@@ -182,120 +182,155 @@ fun AllStationsScreen(
             )
         }
 
-        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
-            LazyRow(
-                state = lazyRowState,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
+        val showOfflineEmptyState = allRadios.isEmpty() && !viewModel.isNetworkAvailable()
+
+        if (showOfflineEmptyState) {
+            Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.Center
             ) {
-                items(categories) { category ->
-                    CategoryChip(
-                        category = category,
-                        isSelected = selectedCategory == category,
-                        useUnifiedColor = useUnifiedAccentColor,
-                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(categories.indexOf(category)) } }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp).padding(bottom = 16.dp),
+                        tint = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                    )
+                    Text(
+                        text = stringResource(R.string.empty_state_offline_title),
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.empty_state_offline_desc),
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
-        }
-
-        HorizontalPager(
-            count = categories.size,
-            state = pagerState,
-            modifier = Modifier.weight(1f),
-            userScrollEnabled = !isReorderMode
-        ) { page ->
-            val category = categories[page]
-            
-            // OPRAVA: Inteligentní filtrování bez diakritiky
-            val pageRadios = remember(allRadios, category, searchQuery) {
-                val filtered = if (searchQuery.isNotEmpty()) {
-                    val normalizedQuery = searchQuery.normalizeForSearch()
-                    allRadios.filter { it.name.normalizeForSearch().contains(normalizedQuery) }
-                        .sortedBy { it.name.lowercase() }
-                } else {
-                    allRadios.filter { radio ->
-                        when (category) {
-                            RadioCategory.VSE -> true
-                            RadioCategory.VLASTNI -> radio.isFavorite
-                            else -> radio.category == category
-                        }
+        } else {
+            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+                LazyRow(
+                    state = lazyRowState,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(categories) { category ->
+                        CategoryChip(
+                            category = category,
+                            isSelected = selectedCategory == category,
+                            useUnifiedColor = useUnifiedAccentColor,
+                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(categories.indexOf(category)) } }
+                        )
                     }
                 }
-                mutableStateListOf<Radio>().apply { addAll(filtered) }
             }
 
-            val pageDragDropState = rememberDragDropState(
-                onMove = { from, to ->
-                    if (from in pageRadios.indices && to in pageRadios.indices) {
-                        val item = pageRadios.removeAt(from)
-                        pageRadios.add(to, item)
+            HorizontalPager(
+                count = categories.size,
+                state = pagerState,
+                modifier = Modifier.weight(1f),
+                userScrollEnabled = !isReorderMode
+            ) { page ->
+                val category = categories[page]
+                
+                // OPRAVA: Inteligentní filtrování bez diakritiky
+                val pageRadios = remember(allRadios, category, searchQuery) {
+                    val filtered = if (searchQuery.isNotEmpty()) {
+                        val normalizedQuery = searchQuery.normalizeForSearch()
+                        allRadios.filter { it.name.normalizeForSearch().contains(normalizedQuery) }
+                            .sortedBy { it.name.lowercase() }
+                    } else {
+                        allRadios.filter { radio ->
+                            when (category) {
+                                RadioCategory.VSE -> true
+                                RadioCategory.VLASTNI -> radio.isFavorite
+                                else -> radio.category == category
+                            }
+                        }
                     }
-                    viewModel.updateStationOrder(category, from, to)
+                    mutableStateListOf<Radio>().apply { addAll(filtered) }
                 }
-            )
 
-            key(category.name) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    userScrollEnabled = pageDragDropState.draggingItemId == null
-                ) {
-                    itemsIndexed(
-                        items = pageRadios,
-                        key = { _, radio -> radio.id }
-                    ) { index, radio ->
-                        DraggableRadioItem(
-                            dragDropState = pageDragDropState,
-                            index = index,
-                            radio = radio
-                        ) { isDragging ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                if (isReorderMode) {
-                                    Icon(
-                                        imageVector = Icons.Default.DragHandle,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .padding(start = 16.dp)
-                                            .size(32.dp)
-                                            .pointerInput(Unit) {
-                                                detectDragGestures(
-                                                    onDragStart = { _ ->
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        pageDragDropState.onDragStart(index, radio.id)
-                                                    },
-                                                    onDragEnd = { 
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        pageDragDropState.onDragEnd() 
-                                                    },
-                                                    onDragCancel = { pageDragDropState.onDragCancel() },
-                                                    onDrag = { change, dragAmount ->
-                                                        change.consume()
-                                                        pageDragDropState.onDragged(dragAmount.y, pageRadios.size) {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                val pageDragDropState = rememberDragDropState(
+                    onMove = { from, to ->
+                        if (from in pageRadios.indices && to in pageRadios.indices) {
+                            val item = pageRadios.removeAt(from)
+                            pageRadios.add(to, item)
+                        }
+                        viewModel.updateStationOrder(category, from, to)
+                    }
+                )
+
+                key(category.name) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        userScrollEnabled = pageDragDropState.draggingItemId == null
+                    ) {
+                        itemsIndexed(
+                            items = pageRadios,
+                            key = { _, radio -> radio.id }
+                        ) { index, radio ->
+                            DraggableRadioItem(
+                                dragDropState = pageDragDropState,
+                                index = index,
+                                radio = radio
+                            ) { isDragging ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (isReorderMode) {
+                                        Icon(
+                                            imageVector = Icons.Default.DragHandle,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .padding(start = 16.dp)
+                                                .size(32.dp)
+                                                .pointerInput(Unit) {
+                                                    detectDragGestures(
+                                                        onDragStart = { _ ->
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            pageDragDropState.onDragStart(index, radio.id)
+                                                        },
+                                                        onDragEnd = { 
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            pageDragDropState.onDragEnd() 
+                                                        },
+                                                        onDragCancel = { pageDragDropState.onDragCancel() },
+                                                        onDrag = { change, dragAmount ->
+                                                            change.consume()
+                                                            pageDragDropState.onDragged(dragAmount.y, pageRadios.size) {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                            }
                                                         }
-                                                    }
-                                                )
-                                            },
-                                        tint = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                                                    )
+                                                },
+                                            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                                        )
+                                    }
+                                    
+                                    RadioItem(
+                                        radio = radio,
+                                        isSelected = radio.id == currentRadio?.id,
+                                        onRadioClick = { if (!isReorderMode) viewModel.playRadio(radio, category) },
+                                        onFavoriteClick = { viewModel.toggleFavorite(radio) },
+                                        onEditClick = { onNavigateToEdit(radio.id) },
+                                        onDeleteClick = { viewModel.removeStation(radio.id) },
+                                        modifier = Modifier.weight(1f),
+                                        useUnifiedColor = useUnifiedAccentColor
                                     )
                                 }
-                                
-                                RadioItem(
-                                    radio = radio,
-                                    isSelected = radio.id == currentRadio?.id,
-                                    onRadioClick = { if (!isReorderMode) viewModel.playRadio(radio, category) },
-                                    onFavoriteClick = { viewModel.toggleFavorite(radio) },
-                                    onEditClick = { onNavigateToEdit(radio.id) },
-                                    onDeleteClick = { viewModel.removeStation(radio.id) },
-                                    modifier = Modifier.weight(1f),
-                                    useUnifiedColor = useUnifiedAccentColor
-                                )
                             }
                         }
                     }

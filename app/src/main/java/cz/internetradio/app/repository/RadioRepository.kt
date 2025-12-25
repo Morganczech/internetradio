@@ -23,52 +23,12 @@ class RadioRepository @Inject constructor(
     private val radioDao: RadioDao,
     private val radioBrowserApi: RadioBrowserApi
 ) {
-    private data class CountryData(val stations: List<StationSeed>)
-    private data class StationSeed(
-        val id: String,
-        val name: String,
-        val streamUrl: String,
-        val imageUrl: String,
-        val description: String,
-        val bitrate: Int? = null
-    )
-
     suspend fun existsByName(name: String): Boolean {
         return radioDao.existsByName(name)
     }
 
     suspend fun existsByStreamUrl(url: String): Boolean {
         return radioDao.existsByStreamUrl(url)
-    }
-
-    suspend fun initializeDefaultStations(jsonString: String): Boolean {
-        return try {
-            val countryData = Gson().fromJson(jsonString, CountryData::class.java)
-            val currentMaxOrder = getNextOrderIndex(RadioCategory.MISTNI)
-            
-            if (countryData.stations.isEmpty()) return false
-
-            countryData.stations.take(10).forEachIndexed { index, seed ->
-                val radio = Radio(
-                    id = seed.id,
-                    name = seed.name,
-                    streamUrl = seed.streamUrl,
-                    imageUrl = seed.imageUrl,
-                    description = seed.description,
-                    category = RadioCategory.MISTNI,
-                    originalCategory = RadioCategory.MISTNI,
-                    startColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).first,
-                    endColor = Gradients.getGradientForCategory(RadioCategory.MISTNI).second,
-                    isFavorite = false,
-                    bitrate = seed.bitrate
-                )
-                val entity = RadioEntity.fromRadio(radio).copy(orderIndex = currentMaxOrder + index)
-                radioDao.insertRadio(entity)
-            }
-            true
-        } catch (e: Exception) {
-            false
-        }
     }
 
     suspend fun initializeFromApi(countryCode: String): Boolean {

@@ -311,38 +311,25 @@ class RadioViewModel @Inject constructor(
         // Ochrana proti prázdnému locale (např. emulátor), default CZ
         val targetCountry = if (countryCode.isBlank()) "CZ" else countryCode
         
-        var success = false
-
-        try {
-            // 1. Zkusíme Seed JSON (stations_XX.json)
-            val seedFileName = "stations_${targetCountry.lowercase()}.json"
-            val assetsList = context.assets.list("") ?: emptyArray()
-
-            if (assetsList.contains(seedFileName)) {
-                val json = context.assets.open(seedFileName).bufferedReader().use { it.readText() }
-                success = radioRepository.initializeDefaultStations(json)
-            } else {
-                // 2. Pokud nemáme seed, zkusíme API (pouze pokud jsme online)
-                if (isNetworkAvailable()) {
-                     success = radioRepository.initializeFromApi(targetCountry)
+        // Strict Online Initialization
+        if (isNetworkAvailable()) {
+            try {
+                val success = radioRepository.initializeFromApi(targetCountry)
+                if (success) {
+                    prefs.edit().putBoolean("favorites_initialized", true).apply()
                 }
-                // 3. Offline + No Seed -> Zůstane prázdné (správné chování)
+            } catch (e: Exception) {
+                if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
             }
-
-            // Flag nastavíme POUZE při úspěchu
-            if (success) {
-                prefs.edit().putBoolean("favorites_initialized", true).apply()
-            }
-
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
         }
+        // If OFFline -> DB stays empty, favorites_initialized stays false.
+        // User will see Empty State in UI.
     }
 
     fun playRadio(radio: Radio, categoryContext: RadioCategory? = null) {
         // Strict Offline Check
         if (!isNetworkAvailable()) {
-             _message.value = context.getString(R.string.error_no_internet)
+             _message.value = context.getString(R.string.empty_state_offline_title)
              return
         }
         viewModelScope.launch {
@@ -371,10 +358,9 @@ class RadioViewModel @Inject constructor(
     fun togglePlayPause() {
         // Strict Offline Check
         if (!isNetworkAvailable()) {
-            _message.value = context.getString(R.string.error_no_internet)
+            _message.value = context.getString(R.string.empty_state_offline_title)
             return
         }
-        // ... zbytek logiky
         val intent = Intent(context, RadioService::class.java).apply {
             action = if (_isPlaying.value) RadioService.ACTION_PAUSE else RadioService.ACTION_PLAY
             if (!_isPlaying.value) putExtra(RadioService.EXTRA_RADIO_ID, _currentRadio.value?.id)
@@ -703,15 +689,7 @@ class RadioViewModel @Inject constructor(
         prefs.edit().putBoolean("compact_mode", enabled).apply()
     }
 
-    fun loadMoreStations() {
-        viewModelScope.launch {
-            try {
-                val code = locationService.getCurrentCountry() ?: if (context.resources.configuration.locales[0].language == "cs") "CZ" else "SK"
-                val json = context.assets.open(if (code == "CZ") "stations_cz.json" else "stations_sk.json").bufferedReader().use { it.readText() }
-                radioRepository.initializeDefaultStations(json)
-            } catch (e: Exception) { _message.value = "Chyba načítání" }
-        }
-    }
+
 
     fun updateStationOrder(category: RadioCategory, from: Int, to: Int) { viewModelScope.launch { radioRepository.updateStationOrder(category, from, to) } }
     fun getNextOrderIndex(category: RadioCategory, onResult: (Int) -> Unit) { viewModelScope.launch { onResult(radioRepository.getNextOrderIndex(category)) } }

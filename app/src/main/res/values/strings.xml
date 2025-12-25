@@ -142,6 +142,9 @@
     <string name="list_all">Vše</string>
     <string name="list_no_favorite_songs">Zatím nemáte žádné oblíbené skladby</string>
     <string name="list_no_favorite_stations">Zatím nemáte žádné oblíbené stanice</string>
+    <string name="empty_state_offline_title">Nejste připojeni k internetu</string>
+    <string name="empty_state_offline_desc">Bez připojení nelze načíst ani vyhledávat stanice.</string>
+    <string name="search_error_offline">Bez připojení k internetu nelze vyhledávat stanice</string>
 
     <!-- Settings Notes -->
     <string name="settings_favorites_note">Poznámka: Tento limit platí pouze pro kategorii Oblíbené. Ostatní kategorie jsou bez omezení.</string>

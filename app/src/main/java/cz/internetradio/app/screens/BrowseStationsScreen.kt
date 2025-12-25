@@ -338,15 +338,19 @@ fun BrowseStationsScreen(
                 onValueChange = { query ->
                     searchQuery = query
                     if (query.length >= 3) {
-                        isLoading = true
-                        viewModel.searchStations(
-                            query = query,
-                            country = selectedCountry,
-                            minBitrate = minBitrate,
-                            orderBy = selectedOrder
-                        ) { result: List<RadioStation>? ->
-                            stations = result ?: emptyList()
-                            isLoading = false
+                        if (!viewModel.isNetworkAvailable()) {
+                             stations = emptyList()
+                        } else {
+                            isLoading = true
+                            viewModel.searchStations(
+                                query = query,
+                                country = selectedCountry,
+                                minBitrate = minBitrate,
+                                orderBy = selectedOrder
+                            ) { result: List<RadioStation>? ->
+                                stations = result ?: emptyList()
+                                isLoading = false
+                            }
                         }
                     } else {
                         stations = emptyList()
@@ -386,7 +390,14 @@ fun BrowseStationsScreen(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                if (searchQuery.length < 3) {
+                if (!viewModel.isNetworkAvailable()) {
+                     Text(
+                        text = stringResource(R.string.search_error_offline),
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else if (searchQuery.length < 3) {
                     Text(
                         text = stringResource(R.string.search_min_chars),
                         style = MaterialTheme.typography.body1,
