@@ -48,6 +48,8 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         private var currentRadioId: String? = null
         private var isPlaying = false
         private var isInitialized = false // Přidáno pro kontrolu inicializace
+        private var cachedBitmap: Bitmap? = null
+        private var cachedRadioId: String? = null
 
         fun updateWidgets(context: Context, playing: Boolean, radioId: String?, metadata: String? = null) {
             Log.d("RadioWidgetProvider", "updateWidgets volán: playing=$playing, radioId=$radioId, metadata=$metadata")
@@ -237,20 +239,35 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         if (radio != null) {
             Log.d("RadioWidgetProvider", "Aktualizuji widget s rádiem: ${radio.name}")
             views.setTextViewText(R.id.widget_radio_name, radio.name)
-            views.setImageViewResource(R.id.widget_radio_icon, R.drawable.ic_radio_default)
             
-            // Načtení obrázku pomocí Coil
-            val request = ImageRequest.Builder(context)
-                .data(radio.imageUrl)
-                .target { drawable ->
-                    if (drawable is BitmapDrawable) {
-                        views.setImageViewBitmap(R.id.widget_radio_icon, drawable.bitmap)
-                        appWidgetManager.updateAppWidget(appWidgetId, views)
-                        Log.d("RadioWidgetProvider", "Obrázek rádia načten a nastaven")
-                    }
-                }
-                .build()
-            Coil.imageLoader(context).enqueue(request)
+            val reuseCache = radio.id == cachedRadioId && cachedBitmap != null
+            if (reuseCache) {
+                 views.setImageViewBitmap(R.id.widget_radio_icon, cachedBitmap)
+                 Log.d("RadioWidgetProvider", "Použita cache pro obrázek")
+            } else {
+                 views.setImageViewResource(R.id.widget_radio_icon, R.drawable.ic_radio_default)
+            }
+
+            if (!reuseCache) {
+                // Načtení obrázku pomocí Coil pouze pokud nemáme cache
+                val request = ImageRequest.Builder(context)
+                    .data(radio.imageUrl)
+                    .target(
+                        onSuccess = { result ->
+                            val bitmap = (result as BitmapDrawable).bitmap
+                            cachedBitmap = bitmap
+                            cachedRadioId = radio.id
+                            views.setImageViewBitmap(R.id.widget_radio_icon, bitmap)
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                            Log.d("RadioWidgetProvider", "Obrázek načten z sítě a aktualizován")
+                        },
+                        onError = {
+                             // Necháme default
+                        }
+                    )
+                    .build()
+                Coil.imageLoader(context).enqueue(request)
+            }
         } else {
             // Výchozí stav - žádné rádio
             Log.d("RadioWidgetProvider", "Aktualizuji widget s výchozími hodnotami")
