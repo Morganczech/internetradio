@@ -78,6 +78,7 @@ fun BrowseStationsScreen(
     var minBitrate by remember { mutableStateOf<Int?>(null) }
 
     val currentRadio by viewModel.currentRadio.collectAsState()
+    val isOnline by viewModel.isOnline.collectAsState()
     val isCompactMode by viewModel.isCompactMode.collectAsState()
     
     val focusRequester = remember { FocusRequester() }
@@ -338,7 +339,7 @@ fun BrowseStationsScreen(
                 onValueChange = { query ->
                     searchQuery = query
                     if (query.length >= 3) {
-                        if (!viewModel.isNetworkAvailable()) {
+                        if (!isOnline) {
                              stations = emptyList()
                         } else {
                             isLoading = true
@@ -390,7 +391,7 @@ fun BrowseStationsScreen(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                if (!viewModel.isNetworkAvailable()) {
+                if (!isOnline) {
                      Text(
                         text = stringResource(R.string.search_error_offline),
                         style = MaterialTheme.typography.body1,
