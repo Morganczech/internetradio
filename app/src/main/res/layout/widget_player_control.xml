@@ -50,10 +50,11 @@
             android:text="@string/widget_metadata" />
     </LinearLayout>
 
-    <Space
+    <TextView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:visibility="invisible" />
 
     <ImageButton
         android:id="@+id/widget_previous"
