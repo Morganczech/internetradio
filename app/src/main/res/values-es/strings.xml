@@ -48,7 +48,7 @@
     <string name="player_previous">Emisora anterior</string>
     <string name="player_volume">Volumen</string>
     <string name="player_bitrate_format">%d kbps</string>
-    <string name="player_time_remaining">Restante: %d:%02d</string>
+    <string name="player_time_remaining">Restante: %1$d:%2$02d</string>
     <string name="player_app_name">Radio Internet</string>
 
     <!-- Settings -->
@@ -149,7 +149,7 @@
     <string name="radio_default_description">Radio por Internet</string>
     <string name="sleep_timer_off">Desactivar temporizador</string>
     <string name="sleep_timer_minutes">%d minutos</string>
-    <string name="sleep_timer_remaining">Restante: %d:%s</string>
+    <string name="sleep_timer_remaining">Restante: %1$d:%2$s</string>
 
     <!-- Equalizer -->
     <string name="equalizer_band_60hz">60Hz</string>
@@ -158,4 +158,12 @@
     <string name="equalizer_band_3_6khz">3.6kHz</string>
     <string name="equalizer_band_14khz">14kHz</string>
  <string name="msg_station_saved_to_category">Estación guardada en la categoría %s</string>
+
+    <!-- New Settings -->
+    <string name="settings_unified_color_title">Color de categoría unificado</string>
+    <string name="settings_unified_color_desc">Modo de color relajado para todas las categorías</string>
+    <string name="settings_clear_data_desc">Eliminar todos los datos y configuraciones</string>
+    <string name="dialog_clear_data_message">¿Realmente quieres eliminar todos los datos de la aplicación? Esta acción es irreversible.</string>
+    <string name="dialog_fade_out_title">Duración del desvanecimiento</string>
+    <string name="dialog_fade_out_desc">Establezca la duración del desvanecimiento antes de detenerse.</string>
 </resources>

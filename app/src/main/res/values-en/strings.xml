@@ -48,7 +48,7 @@
     <string name="player_previous">Previous station</string>
     <string name="player_volume">Volume</string>
     <string name="player_bitrate_format">%d kbps</string>
-    <string name="player_time_remaining">Remaining: %d:%02d</string>
+    <string name="player_time_remaining">Remaining: %1$d:%2$02d</string>
     <string name="player_app_name">Internet Radio</string>
 
     <!-- Settings -->
@@ -153,7 +153,7 @@
     <string name="radio_default_description">Internet Radio</string>
     <string name="sleep_timer_off">Turn off timer</string>
     <string name="sleep_timer_minutes">%d minutes</string>
-    <string name="sleep_timer_remaining">Remaining: %d:%s</string>
+    <string name="sleep_timer_remaining">Remaining: %1$d:%2$s</string>
 
     <!-- Add Radio Screen -->
     <string name="add_station_name">Station name</string>
@@ -172,4 +172,12 @@
     <string name="welcome_message">To provide the best experience, we need the following permissions:\n\n• <b>Notifications</b>: To control the player from lock screen and notification shade.\n• <b>Location</b>: To automatically suggest local radio stations near you.</string>
     <string name="action_continue">Continue</string>
     <string name="permission_notifications_rationale">Notification permission is required to control the radio when app is in background. Please allow it in the next step.</string>
+
+    <!-- New Settings -->
+    <string name="settings_unified_color_title">Unified category color</string>
+    <string name="settings_unified_color_desc">Relaxed color mode for all categories</string>
+    <string name="settings_clear_data_desc">Delete all data and settings</string>
+    <string name="dialog_clear_data_message">Do you really want to delete all app data? This action is irreversible.</string>
+    <string name="dialog_fade_out_title">Fade out duration</string>
+    <string name="dialog_fade_out_desc">Set the fade out duration before stopping.</string>
 </resources>

@@ -131,7 +131,7 @@
 
     <!-- Player -->
     <string name="player_bitrate_format">%d kbps</string>
-    <string name="player_time_remaining">Zbývá: %d:%02d</string>
+    <string name="player_time_remaining">Zbývá: %1$d:%2$02d</string>
     <string name="player_app_name">Internetové rádio</string>
 
     <!-- Lists -->
@@ -162,5 +162,13 @@
     <string name="radio_default_description">Internetové rádio</string>
     <string name="sleep_timer_off">Vypnout časovač</string>
     <string name="sleep_timer_minutes">%d minut</string>
-    <string name="sleep_timer_remaining">Zbývá: %d:%s</string>
+    <string name="sleep_timer_remaining">Zbývá: %1$d:%2$s</string>
+
+    <!-- New Settings -->
+    <string name="settings_unified_color_title">Jednotná barva kategorií</string>
+    <string name="settings_unified_color_desc">Klidný režim barev pro všechny kategorie</string>
+    <string name="settings_clear_data_desc">Vymaže všechna data a nastavení</string>
+    <string name="dialog_clear_data_message">Opravdu chcete vymazat všechna data aplikace? Tato akce je nevratná.</string>
+    <string name="dialog_fade_out_title">Doba zeslabení zvuku</string>
+    <string name="dialog_fade_out_desc">Nastavte dobu zeslabení před vypnutím.</string>
 </resources> 

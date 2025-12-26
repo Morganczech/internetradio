@@ -406,7 +406,7 @@ fun BrowseStationsScreen(
                     )
                 } else if (!isLoading && stations.isEmpty()) { // Show "No results" only if not loading and list is empty
                      Text(
-                        text = "Žádné stanice nenalezeny", // TODO: Move to strings.xml
+                        text = stringResource(R.string.search_no_results),
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.padding(16.dp)
                     )

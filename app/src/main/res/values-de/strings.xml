@@ -118,7 +118,7 @@
 
     <!-- Player -->
     <string name="player_bitrate_format">%d kbps</string>
-    <string name="player_time_remaining">Verbleibend: %d:%02d</string>
+    <string name="player_time_remaining">Verbleibend: %1$d:%2$02d</string>
     <string name="player_app_name">Internetradio</string>
 
     <!-- Lists -->
@@ -149,7 +149,7 @@
     <string name="radio_default_description">Internetradio</string>
     <string name="sleep_timer_off">Sleep-Timer ausschalten</string>
     <string name="sleep_timer_minutes">%d Minuten</string>
-    <string name="sleep_timer_remaining">Verbleibend: %d:%s</string>
+    <string name="sleep_timer_remaining">Verbleibend: %1$d:%2$s</string>
 
     <!-- Equalizer -->
     <string name="equalizer_band_60hz">60Hz</string>
@@ -157,4 +157,12 @@
     <string name="equalizer_band_910hz">910Hz</string>
     <string name="equalizer_band_3_6khz">3.6kHz</string>
     <string name="equalizer_band_14khz">14kHz</string>
+
+    <!-- New Settings -->
+    <string name="settings_unified_color_title">Einheitliche Kategoriefarbe</string>
+    <string name="settings_unified_color_desc">Entspannter Farbmodus für alle Kategorien</string>
+    <string name="settings_clear_data_desc">Alle Daten und Einstellungen löschen</string>
+    <string name="dialog_clear_data_message">Möchten Sie wirklich alle App-Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="dialog_fade_out_title">Ausblenddauer</string>
+    <string name="dialog_fade_out_desc">Stellen Sie die Ausblenddauer vor dem Stoppen ein.</string>
 </resources> 

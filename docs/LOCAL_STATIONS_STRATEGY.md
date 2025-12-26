@@ -1,70 +1,70 @@
-# Strategie Místních Stanic a Offline Handling (Aktualizováno)
+# Local Stations Strategy & Offline Handling
 
-Cíl: Upravit strategii inicializace stanic a offline chování aplikace podle nových UX pravidel. Zjednodušit logiku, odstranit offline fallbacky a zajistit jasnou zpětnou vazbu uživateli.
+**Goal:** Define the station initialization strategy and offline behavior according to current UX rules. Clarify logic, remove offline fallbacks, and ensure clear user feedback.
 
-## 1. Zrušení Seed JSON souborů (Důležité)
+## 1. No Seed JSON Files
 
-*   **Odstranění:** Seed JSON soubory (`stations_cz.json`, `stations_sk.json` atd.) se kompletně přestanou používat a budou odstraněny z projektu.
-*   **Žádná lokální data:** Aplikace již nebude mít žádnou offline databázi předpřipravených stanic. Inicializace probíhá výhradně online.
-*   **Důvod:** Zjednodušení údržby a zajištění aktuálnosti stanic.
+*   **Removal:** Seed JSON files (`stations_cz.json`, etc.) are not used.
+*   **No Local Data:** The app does not have an offline database of pre-filled stations. Initialization is purely online.
+*   **Reason:** Simplified maintenance and data freshness.
 
-## 2. Inicializace Databáze ("Místní stanice")
+## 2. Database Initialization ("Local Stations")
 
-Proces načítání prvních stanic při startu (tzv. onboarding):
+Process for loading initial stations on first start (Onboarding):
 
-1.  **Určení Regionu:**
-    *   Výhradně podle `Locale.getDefault().country`.
-    *   Žádné odhadování podle IP nebo jazyka.
+1.  **Region Determination:**
+    *   Strictly based on `Locale.getDefault().country`.
+    *   No IP or language guessing.
 
-2.  **Pouze Online (RadioBrowser API):**
-    *   Pokus o načtení seznamu stanic proběhne **POUZE pokud je dostupný internet**.
-    *   Volá se RadioBrowser API pro daný kód země.
+2.  **Online Only (RadioBrowser API):**
+    *   Station list fetch occurs **ONLY if internet is available**.
+    *   Calls RadioBrowser API for the specific country code.
 
-3.  **Offline Stav při inicializaci:**
-    *   Pokud **není internet** při prvním spuštění, databáze stanic zůstává **PRÁZDNÁ**.
-    *   Nenačtou se žádné náhodné ani globální fallback stanice.
-    *   Flag `favorites_initialized` zůstává `false` -> pokus o inicializaci se zopakuje při příštím startu aplikace.
+3.  **Offline State during Initialization:**
+    *   If **no internet** at first launch, the station database remains **EMPTY**.
+    *   No random or global fallback stations are loaded.
+    *   Flag `favorites_initialized` remains `false` -> initialization retry will happen on next app launch.
 
-## 3. Offline UX – Empty State (Trvalá hláška)
+## 3. Offline UX – Empty State (Permanent Message)
 
-Zobrazování trvalé hlášky (např. uprostřed obrazovky místo seznamu):
+Displaying a permanent message (e.g., in the center of the screen instead of a list):
 
-*   **Podmínka zobrazení:**
-    1.  Detekován stav **Offline** (žádný internet).
-    2.  **A ZÁROVEŇ** uživatel nemá v databázi uloženou **ANI JEDNU stanici** (DB je prázdná).
+*   **Display Condition:**
+    1.  **Offline** status detected.
+    2.  **AND** user has **NO stations** in the database (DB is empty).
 
-*   **Obsah hlášky:**
-    *   Text: *„Nejste připojeni k internetu. Bez připojení nelze načíst ani vyhledávat stanice.“*
-    *   Vizuál: Ikona offline + Text.
+*   **Message Content:**
+    *   Text: *"You are not connected to the internet. Stations cannot be loaded or searched without a connection."*
+    *   Visual: Offline Icon + Text.
 
-*   **Pokud má uživatel stanice:**
-    *   Pokud uživatel má alespoň jednu stanici (načtenou z minula), tato trvalá hláška se **NEZOBRAZÍ**. Seznam stanic je viditelný.
+*   **If user has stations:**
+    *   If the user has at least one station (loaded previously), this permanent message is **NOT SHOWN**. The station list remains visible.
 
 ## 4. Offline Handling – Playback
 
-Chování při kliknutí na stanici v seznamu:
+Behavior when clicking a station in the list:
 
-1.  **Kliknutí (Play):**
-2.  **Kontrola:** Okamžitá kontrola konektivity (`isNetworkAvailable`).
-3.  **Pokud je OFFLINE:**
-    *   **STOP:** Přehrávání se **NESPUSTÍ**.
-    *   **Zákaz volání:** `RadioService` se vůbec nevolá.
-    *   **Stav UI:** UI zůstává ve stavu "Zastaveno" (žádný loading spinner).
-    *   **Feedback:** Zobrazí se **okamžitá hláška** (Snackbar/Toast): *„Nejste připojeni k internetu“*.
+1.  **Click (Play):**
+2.  **Check:** Immediate connectivity check (`isNetworkAvailable`).
+3.  **If OFFLINE:**
+    *   **STOP:** Playback does **NOT START**.
+    *   **No Call:** `RadioService` is not called.
+    *   **UI State:** UI remains in "Stopped" state (no loading spinner).
+    *   **Feedback:** Show **immediate message** (Snackbar/Toast): *"No internet connection"*.
 
-## 5. Offline Handling – Search (Vyhledávání)
+## 5. Offline Handling – Search
 
-Chování na obrazovce vyhledávání (`BrowseStationsScreen`):
+Behavior on the Search screen (`BrowseStationsScreen`):
 
-*   **Offline:** API se nesmí volat.
-*   **Chování:** Okamžitě zobrazit textovou informaci: *„Bez připojení k internetu nelze vyhledávat stanice“*.
-*   **Stav:** Žádný loading indikátor (spinner), který by běžel do timeoutu.
+*   **Offline:** API must not be called.
+*   **Behavior:** Immediately display text info: *"Cannot search stations without internet connection"*.
+*   **State:** No loading indicator (spinner) running until timeout.
 
 ## 6. Flag `favorites_initialized`
 
-*   **TRUE:** Nastaví se až ve chvíli, kdy se **úspěšně** stáhnou a uloží stanice z API.
-*   **FALSE:** Zůstává po celou dobu, dokud se inicializace nepovede (např. trvalý offline). To zajistí, že aplikace se bude pokoušet získat základní sadu stanic, dokud se to nepovede.
+*   **TRUE:** Set only when stations are **successfully** downloaded and saved from the API.
+*   **FALSE:** Remains false until initialization succeeds (e.g., during persistent offline state). This ensures the app attempts to get the basic station set until successful.
 
 ---
-**Shrnutí pro vývoj:**
-Tato strategie eliminuje "stavy neurčitosti". Uživatel buď vidí data z internetu, data z cache (svoje uložené), nebo jasnou informaci, že bez internetu to nejde.
+**Summary:**
+This strategy eliminates "uncertain states". The user either sees data from the internet, cached data (saved stations), or clear information that operation is impossible without internet.

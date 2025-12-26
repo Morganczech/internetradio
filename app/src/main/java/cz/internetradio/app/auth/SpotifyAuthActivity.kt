@@ -19,7 +19,7 @@ class SpotifyAuthActivity : ComponentActivity() {
         // Zpracování callback URL od Spotify
         val uri = intent?.data
         if (uri != null) {
-            // TODO: Implementovat zpracování autentizace
+            // Zpracování autentizace není implementováno
             // Pro nyní jen zavřeme aktivitu
             finish()
         }

@@ -276,12 +276,12 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Jednotná barva kategorií",
+                        text = stringResource(R.string.settings_unified_color_title),
                         style = MaterialTheme.typography.subtitle1,
                         color = MaterialTheme.colors.onSurface
                     )
                     Text(
-                        text = "Klidný režim barev pro všechny kategorie",
+                        text = stringResource(R.string.settings_unified_color_desc),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
@@ -349,8 +349,8 @@ fun SettingsScreen(
                     Icon(Icons.Default.Delete, null, tint = Color.Red, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text("Vymazat data aplikace", style = MaterialTheme.typography.subtitle1, color = Color.Red)
-                        Text("Vymaže všechna data a nastavení", style = MaterialTheme.typography.caption, color = Color.Red.copy(alpha = 0.7f))
+                        Text(stringResource(R.string.action_clear_data), style = MaterialTheme.typography.subtitle1, color = Color.Red)
+                        Text(stringResource(R.string.settings_clear_data_desc), style = MaterialTheme.typography.caption, color = Color.Red.copy(alpha = 0.7f))
                     }
                 }
                 Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.Red.copy(alpha = 0.7f))
@@ -362,19 +362,19 @@ fun SettingsScreen(
     if (showFadeOutDialog) {
         AlertDialog(
             onDismissRequest = { showFadeOutDialog = false },
-            title = { Text("Doba zeslabení zvuku") },
+            title = { Text(stringResource(R.string.dialog_fade_out_title)) },
             text = {
                 Column {
-                    Text("Nastavte dobu zeslabení před vypnutím.", style = MaterialTheme.typography.body2)
+                    Text(stringResource(R.string.dialog_fade_out_desc), style = MaterialTheme.typography.body2)
                     listOf(30, 60, 90, 120).forEach { seconds ->
                         Row(Modifier.fillMaxWidth().clickable { viewModel.setFadeOutDuration(seconds); showFadeOutDialog = false }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = fadeOutDuration == seconds, onClick = { viewModel.setFadeOutDuration(seconds); showFadeOutDialog = false })
-                            Text("$seconds sekund", modifier = Modifier.padding(start = 8.dp))
+                            Text(stringResource(R.string.settings_seconds_format, seconds), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showFadeOutDialog = false }) { Text("Zavřít") } }
+            confirmButton = { TextButton(onClick = { showFadeOutDialog = false }) { Text(stringResource(R.string.action_close)) } }
         )
     }
 
@@ -400,10 +400,10 @@ fun SettingsScreen(
     if (showClearDataDialog) {
         AlertDialog(
             onDismissRequest = { showClearDataDialog = false },
-            title = { Text("Vymazat data aplikace") },
-            text = { Text("Opravdu chcete vymazat všechna data aplikace? Tato akce je nevratná.", style = MaterialTheme.typography.body1) },
-            confirmButton = { TextButton(onClick = { viewModel.clearAllData(); showClearDataDialog = false }, colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)) { Text("Vymazat") } },
-            dismissButton = { TextButton(onClick = { showClearDataDialog = false }) { Text("Zrušit") } }
+            title = { Text(stringResource(R.string.action_clear_data)) },
+            text = { Text(stringResource(R.string.dialog_clear_data_message), style = MaterialTheme.typography.body1) },
+            confirmButton = { TextButton(onClick = { viewModel.clearAllData(); showClearDataDialog = false }, colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)) { Text(stringResource(R.string.action_clear)) } },
+            dismissButton = { TextButton(onClick = { showClearDataDialog = false }) { Text(stringResource(R.string.action_cancel)) } }
         )
     }
 }

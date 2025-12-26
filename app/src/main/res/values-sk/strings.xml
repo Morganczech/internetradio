@@ -110,7 +110,7 @@
 
     <!-- Player -->
     <string name="player_bitrate_format">%d kbps</string>
-    <string name="player_time_remaining">Zostáva: %d:%02d</string>
+    <string name="player_time_remaining">Zostáva: %1$d:%2$02d</string>
     <string name="player_app_name">Internetové rádio</string>
 
     <!-- Lists -->
@@ -141,7 +141,7 @@
     <string name="radio_default_description">Internetové rádio</string>
     <string name="sleep_timer_off">Vypnúť časovač</string>
     <string name="sleep_timer_minutes">%d minút</string>
-    <string name="sleep_timer_remaining">Zostáva: %d:%s</string>
+    <string name="sleep_timer_remaining">Zostáva: %1$d:%2$s</string>
 
     <!-- Equalizer -->
     <string name="equalizer_band_60hz">60Hz</string>
@@ -149,4 +149,12 @@
     <string name="equalizer_band_910hz">910Hz</string>
     <string name="equalizer_band_3_6khz">3.6kHz</string>
     <string name="equalizer_band_14khz">14kHz</string>
+
+    <!-- New Settings -->
+    <string name="settings_unified_color_title">Jednotná farba kategórií</string>
+    <string name="settings_unified_color_desc">Kľudný režim farieb pre všetky kategórie</string>
+    <string name="settings_clear_data_desc">Vymazať všetky dáta a nastavenia</string>
+    <string name="dialog_clear_data_message">Naozaj chcete vymazať všetky dáta aplikácie? Táto akcia je nevratná.</string>
+    <string name="dialog_fade_out_title">Doba zoslabenia zvuku</string>
+    <string name="dialog_fade_out_desc">Nastavte dobu zoslabenia pred vypnutím.</string>
 </resources> 
