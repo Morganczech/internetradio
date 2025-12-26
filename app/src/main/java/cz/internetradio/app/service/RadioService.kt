@@ -14,6 +14,7 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import cz.internetradio.app.data.RadioDatabase
 import cz.internetradio.app.model.Radio
+import cz.internetradio.app.model.RadioCategory
 import cz.internetradio.app.repository.RadioRepository
 import cz.internetradio.app.widget.RadioWidgetProvider
 import kotlinx.coroutines.CoroutineScope
@@ -92,10 +93,13 @@ class RadioService : Service() {
         const val EXTRA_ERROR = "error_message"
         const val EXTRA_CURRENT_RADIO = "current_radio"
         const val EXTRA_AUDIO_SESSION_ID = "audio_session_id"
+        const val EXTRA_CONTEXT_CATEGORY = "context_category"
         private const val WAKELOCK_TAG = "RadioService::WakeLock"
 
         const val ACTION_PLAYBACK_STATE_CHANGED = "cz.internetradio.app.action.PLAYBACK_STATE_CHANGED"
     }
+
+    private var playbackContext: RadioCategory? = null
 
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -368,6 +372,16 @@ class RadioService : Service() {
         when (intent?.action) {
             ACTION_PLAY -> {
                 val radioId = intent.getStringExtra(EXTRA_RADIO_ID)
+                val contextName = intent.getStringExtra(EXTRA_CONTEXT_CATEGORY)
+                
+                if (contextName != null) {
+                    try {
+                        playbackContext = RadioCategory.valueOf(contextName)
+                    } catch (e: Exception) {
+                        playbackContext = null
+                    }
+                }
+
                 if (radioId != null) {
                     serviceScope.launch { radioRepository.getRadioById(radioId)?.let { playRadio(it) } }
                 } else {
@@ -450,12 +464,23 @@ class RadioService : Service() {
     private fun playNextRadio() {
         serviceScope.launch {
             val radio = _currentRadio.value ?: return@launch
-            val radios = radioRepository.getRadiosByCategory(radio.category).first().sortedBy { it.name.lowercase() }
+            
+            val radiosFlow = when (playbackContext) {
+                RadioCategory.VLASTNI -> radioRepository.getFavoriteRadios()
+                RadioCategory.VSE -> radioRepository.getAllRadios()
+                null -> radioRepository.getRadiosByCategory(radio.category)
+                else -> radioRepository.getRadiosByCategory(playbackContext!!)
+            }
+
+            val radios = radiosFlow.first().sortedBy { it.name.lowercase() }
             if (radios.isEmpty()) return@launch
             val index = radios.indexOfFirst { it.id == radio.id }
             if (index != -1) {
                 val nextRadio = if (index < radios.size - 1) radios[index + 1] else radios.first()
                 playRadio(nextRadio)
+            } else if (radios.isNotEmpty()) {
+                 // Fallback if current not found in context (e.g. removed from favorites while playing)
+                 playRadio(radios.first())
             }
         }
     }
@@ -463,12 +488,22 @@ class RadioService : Service() {
     private fun playPreviousRadio() {
         serviceScope.launch {
             val radio = _currentRadio.value ?: return@launch
-            val radios = radioRepository.getRadiosByCategory(radio.category).first().sortedBy { it.name.lowercase() }
+            
+            val radiosFlow = when (playbackContext) {
+                RadioCategory.VLASTNI -> radioRepository.getFavoriteRadios()
+                RadioCategory.VSE -> radioRepository.getAllRadios()
+                null -> radioRepository.getRadiosByCategory(radio.category)
+                else -> radioRepository.getRadiosByCategory(playbackContext!!)
+            }
+
+            val radios = radiosFlow.first().sortedBy { it.name.lowercase() }
             if (radios.isEmpty()) return@launch
             val index = radios.indexOfFirst { it.id == radio.id }
             if (index != -1) {
                 val prevRadio = if (index > 0) radios[index - 1] else radios.last()
                 playRadio(prevRadio)
+            } else if (radios.isNotEmpty()) {
+                 playRadio(radios.last())
             }
         }
     }

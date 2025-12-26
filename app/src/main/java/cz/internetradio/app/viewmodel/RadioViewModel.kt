@@ -388,6 +388,9 @@ class RadioViewModel @Inject constructor(
             val intent = Intent(context, RadioService::class.java).apply {
                 action = RadioService.ACTION_PLAY
                 putExtra(RadioService.EXTRA_RADIO_ID, radio.id)
+                if (categoryContext != null) {
+                    putExtra(RadioService.EXTRA_CONTEXT_CATEGORY, categoryContext.name)
+                }
             }
             context.startForegroundService(intent)
         }
@@ -642,19 +645,31 @@ class RadioViewModel @Inject constructor(
 
     fun playNextStation() {
         viewModelScope.launch {
-            val cat = _currentCategory.value
-            val list = if (cat != null) radioRepository.getRadiosByCategory(cat).first() else radioRepository.getAllRadios().first()
+            val context = _playbackContext.value
+            val list = when (context) {
+                RadioCategory.VLASTNI -> radioRepository.getFavoriteRadios().first()
+                RadioCategory.VSE -> radioRepository.getAllRadios().first()
+                null -> if (_currentCategory.value != null) radioRepository.getRadiosByCategory(_currentCategory.value!!).first() else radioRepository.getAllRadios().first()
+                else -> radioRepository.getRadiosByCategory(context).first()
+            }
             val i = list.indexOfFirst { it.id == _currentRadio.value?.id }
             if (i < list.size - 1) playRadio(list[i + 1])
+            else if (list.isNotEmpty()) playRadio(list[0])
         }
     }
 
     fun playPreviousStation() {
         viewModelScope.launch {
-            val cat = _currentCategory.value
-            val list = if (cat != null) radioRepository.getRadiosByCategory(cat).first() else radioRepository.getAllRadios().first()
+            val context = _playbackContext.value
+            val list = when (context) {
+                RadioCategory.VLASTNI -> radioRepository.getFavoriteRadios().first()
+                RadioCategory.VSE -> radioRepository.getAllRadios().first()
+                null -> if (_currentCategory.value != null) radioRepository.getRadiosByCategory(_currentCategory.value!!).first() else radioRepository.getAllRadios().first()
+                else -> radioRepository.getRadiosByCategory(context).first()
+            }
             val i = list.indexOfFirst { it.id == _currentRadio.value?.id }
             if (i > 0) playRadio(list[i - 1])
+            else if (list.isNotEmpty()) playRadio(list.last())
         }
     }
 
