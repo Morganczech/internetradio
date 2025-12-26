@@ -21,6 +21,7 @@ app/schemas/
 build/
 app/build/
 wear/build/
+app/release/
 
 # Local configuration file (sdk path, etc)
 local.properties
