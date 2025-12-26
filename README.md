@@ -8,7 +8,7 @@ A modern Android application for streaming internet radio stations from around t
 
 ## Screenshots
 
-![App Screenshot](screenshots/app.png)
+<img src="screenshots/app.png" width="360">
 
 ## What the App DOES
 
