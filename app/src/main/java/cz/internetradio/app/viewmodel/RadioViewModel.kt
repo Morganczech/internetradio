@@ -631,12 +631,22 @@ class RadioViewModel @Inject constructor(
                 if (isCurrent) {
                     if (isPlayingNow && nextStation != null) {
                         // Case C: Switching to next station while playing
-                        // This uses playRadio() which handles transition internally
                         playRadio(nextStation)
                     } else {
                         // Case B (Paused) or Case D (Last station)
-                        // Clean up player, UI, and Service
-                        stopPlayback()
+                        // Stop the service completely to handle resource cleanup
+                        context.stopService(Intent(context, RadioService::class.java))
+                        _isPlaying.value = false
+                        _currentMetadata.value = null
+                        try { equalizerManager.release() } catch (e: Exception) {}
+
+                        // If there is a next station, select it in the UI (Paused state).
+                        // If not (last station deleted), clear the UI.
+                        if (nextStation != null) {
+                             _currentRadio.value = nextStation
+                        } else {
+                             _currentRadio.value = null
+                        }
                     }
                 }
             } catch (e: Exception) {
