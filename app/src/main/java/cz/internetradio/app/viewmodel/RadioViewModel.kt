@@ -36,7 +36,6 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import cz.internetradio.app.model.RadioCategory
-import cz.internetradio.app.location.LocationService
 import com.google.gson.Gson
 import android.content.Intent
 import cz.internetradio.app.service.RadioService
@@ -67,8 +66,8 @@ class RadioViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val equalizerManager: EqualizerManager,
     private val audioSpectrumProcessor: AudioSpectrumProcessor,
-    @ApplicationContext private val context: Context,
-    private val locationService: LocationService
+
+    @ApplicationContext private val context: Context
 ) : ViewModel(), DataClient.OnDataChangedListener {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("radio_prefs", Context.MODE_PRIVATE)
@@ -136,6 +135,9 @@ class RadioViewModel @Inject constructor(
     fun setSelectedListCategory(category: RadioCategory) {
         _selectedListCategory.value = category
         prefs.edit().putString("last_list_category", category.name).apply()
+        
+        // NO automatic permission request here.
+        // If category is MISTNI and permission is missing, UI will show a banner.
     }
 
     private val _currentLanguage = MutableStateFlow(Language.SYSTEM)
@@ -143,6 +145,8 @@ class RadioViewModel @Inject constructor(
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
+
+
 
     private val _isCompactMode = MutableStateFlow(false)
     val isCompactMode: StateFlow<Boolean> = _isCompactMode
@@ -153,8 +157,11 @@ class RadioViewModel @Inject constructor(
     private val _playbackContext = MutableStateFlow<RadioCategory?>(null)
     val playbackContext: StateFlow<RadioCategory?> = _playbackContext
 
+
     private val _isOnline = MutableStateFlow(false)
     val isOnline: StateFlow<Boolean> = _isOnline
+
+
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: android.net.Network) {
@@ -255,7 +262,7 @@ class RadioViewModel @Inject constructor(
             val intent = Intent(context, RadioService::class.java).apply {
                 action = RadioService.ACTION_REQUEST_STATE
             }
-            context.startForegroundService(intent)
+            context.startService(intent)
         } catch (e: Exception) {
             // Service might not be running or permission issue
         }
@@ -332,9 +339,8 @@ class RadioViewModel @Inject constructor(
 
     private fun loadLocalStations() {
         viewModelScope.launch {
-            // Přísná strategie: Region pouze podle "Locale.country"
+            // Simplified: Always use Locale
             val countryCode = java.util.Locale.getDefault().country.uppercase()
-            
             if (countryCode.isNotEmpty()) {
                 _currentCountryCode.value = countryCode
                 RadioCategory.setCurrentCountryCode(countryCode)
@@ -342,6 +348,9 @@ class RadioViewModel @Inject constructor(
             }
         }
     }
+    
+
+
 
     fun refreshLocalStations() { loadLocalStations() }
 

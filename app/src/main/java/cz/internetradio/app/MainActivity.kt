@@ -126,9 +126,8 @@ class MainActivity : ComponentActivity() {
             }
 
             val prefs = remember { getSharedPreferences("radio_prefs", Context.MODE_PRIVATE) }
-            var showWelcomeDialog by remember { 
-                mutableStateOf(!prefs.getBoolean("welcome_shown", false)) 
-            }
+            // Welcome Dialog logic removed - App starts directly with main UI
+
             
             val notificationPermissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -136,17 +135,38 @@ class MainActivity : ComponentActivity() {
                 Log.d("MainActivity", "Notification permission granted: $isGranted")
             }
 
-            if (showWelcomeDialog) {
-                WelcomeDialog(
-                    onDismiss = {
-                        showWelcomeDialog = false
-                        prefs.edit().putBoolean("welcome_shown", true).apply()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
+
+            
+            val isPlaying by viewModel.isPlaying.collectAsState()
+            
+            LaunchedEffect(isPlaying) {
+                // Request notification permission ONLY when user actually starts playback
+                if (isPlaying && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                    
+                    val permissionRequested = prefs.getBoolean("notification_permission_requested", false)
+                    
+                    // Lazy request: Only if playing and not requested before (or if we want to retry sparingly)
+                    // Currently we respect "false" if user denied once, we don't spam.
+                    if (!hasPermission && !permissionRequested) {
+                         // We delay slightly to not interrupt the playback start UI feeling
+                         delay(500)
+                         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                         prefs.edit().putBoolean("notification_permission_requested", true).apply()
                     }
-                )
+                }
             }
+
+
+
+
+            
+            val isOnline by viewModel.isOnline.collectAsState()
+
+
 
             MaterialTheme(
                 colors = if (isSystemInDarkTheme()) {
@@ -302,34 +322,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun WelcomeDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = { },
-        title = { 
-            Text(
-                text = stringResource(R.string.welcome_title),
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold
-            ) 
-        },
-        text = { 
-            Text(
-                text = stringResource(R.string.welcome_message),
-                style = MaterialTheme.typography.body1
-            ) 
-        },
-        confirmButton = {
-            Button(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(R.string.action_continue))
-            }
-        },
-        shape = RoundedCornerShape(16.dp)
-    )
-}
+
 
 @Composable
 fun RadioItem(

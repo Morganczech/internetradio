@@ -152,4 +152,10 @@
     <string name="dialog_clear_data_message">Voulez-vous vraiment supprimer toutes les données de l\'application ? Cette action est irréversible.</string>
     <string name="dialog_fade_out_title">Durée du fondu</string>
     <string name="dialog_fade_out_desc">Réglez la durée du fondu avant l\'arrêt.</string>
+
+    <!-- Onboarding & Permissions -->
+    <string name="welcome_title">Bienvenue sur Touch Radio</string>
+    <string name="welcome_message">Pour vous offrir la meilleure expérience, nous avons besoin des autorisations suivantes :\n\n• <b>Notifications</b> : Pour contrôler le lecteur depuis l\'écran de verrouillage et la barre de notification.\n• <b>Localisation</b> : Pour suggérer automatiquement des stations de radio locales près de chez vous.</string>
+    <string name="action_continue">Continuer</string>
+    <string name="permission_notifications_rationale">L\'autorisation de notification est requise pour contrôler la radio lorsque l\'application est en arrière-plan. Veuillez l\'autoriser à l\'étape suivante.</string>
 </resources> 

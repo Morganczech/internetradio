@@ -165,4 +165,10 @@
     <string name="dialog_clear_data_message">Czy na pewno chcesz usunąć wszystkie dane aplikacji? Ta akcja jest nieodwracalna.</string>
     <string name="dialog_fade_out_title">Czas wyciszania</string>
     <string name="dialog_fade_out_desc">Ustaw czas wyciszania przed zatrzymaniem.</string>
+
+    <!-- Onboarding & Permissions -->
+    <string name="welcome_title">Witamy w Touch Radio</string>
+    <string name="welcome_message">Aby zapewnić najlepsze wrażenia, potrzebujemy następujących uprawnień:\n\n• <b>Powiadomienia</b>: Do sterowania odtwarzaczem z ekranu blokady i paska powiadomień.\n• <b>Lokalizacja</b>: Do automatycznego sugerowania lokalnych stacji radiowych w Twojej okolicy.</string>
+    <string name="action_continue">Kontynuuj</string>
+    <string name="permission_notifications_rationale">Uprawnienie do powiadomień jest wymagane do sterowania radiem, gdy aplikacja działa w tle. Proszę zezwolić na to w następnym kroku.</string>
 </resources> 

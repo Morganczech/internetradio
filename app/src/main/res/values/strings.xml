@@ -190,4 +190,8 @@
     <string name="dialog_clear_data_message">Opravdu chcete vymazat všechna data aplikace? Tato akce je nevratná.</string>
     <string name="dialog_fade_out_title">Doba zeslabení zvuku</string>
     <string name="dialog_fade_out_desc">Nastavte dobu zeslabení před vypnutím.</string>
+
+    <!-- Location Feature -->
+    <string name="msg_location_improves_accuracy">Zpřesnit výběr stanic podle polohy</string>
+    <string name="action_enable_location">Povolit polohu</string>
 </resources>

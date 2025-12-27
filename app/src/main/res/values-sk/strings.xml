@@ -157,4 +157,10 @@
     <string name="dialog_clear_data_message">Naozaj chcete vymazať všetky dáta aplikácie? Táto akcia je nevratná.</string>
     <string name="dialog_fade_out_title">Doba zoslabenia zvuku</string>
     <string name="dialog_fade_out_desc">Nastavte dobu zoslabenia pred vypnutím.</string>
+
+    <!-- Onboarding & Permissions -->
+    <string name="welcome_title">Vitajte v Touch Radio</string>
+    <string name="welcome_message">Aby sme vám mohli ponúknuť ten najlepší zážitok, potrebujeme nasledujúce oprávnenia:\n\n• <b>Oznámenia</b>: Na ovládanie prehrávača zo zamknutej obrazovky a oznamovacej lišty.\n• <b>Poloha</b>: Na automatické navrhovanie miestnych rozhlasových staníc vo vašom okolí.</string>
+    <string name="action_continue">Pokračovať</string>
+    <string name="permission_notifications_rationale">Oprávnenie na oznámenia je vyžadované na ovládanie rádia, keď je aplikácia na pozadí. Prosím, povoľte ho v ďalšom kroku.</string>
 </resources> 

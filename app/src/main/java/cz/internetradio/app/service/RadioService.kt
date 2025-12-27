@@ -97,6 +97,9 @@ class RadioService : Service() {
         private const val WAKELOCK_TAG = "RadioService::WakeLock"
 
         const val ACTION_PLAYBACK_STATE_CHANGED = "cz.internetradio.app.action.PLAYBACK_STATE_CHANGED"
+        
+        // Internal flag to track if foreground is active
+        private var isForegroundService = false
     }
 
     private var playbackContext: RadioCategory? = null
@@ -246,7 +249,10 @@ class RadioService : Service() {
             screenWakeLock.acquire()
         }
         
-        startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
+        
+        // DELAYED START_FOREGROUND: We do NOT call startForeground here.
+        // It will be called in onStartCommand (for ACTION_PLAY) or if restoring state.
+        // startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
         
         registerReceiver(batteryReceiver, IntentFilter().apply { addAction(Intent.ACTION_POWER_CONNECTED); addAction(Intent.ACTION_POWER_DISCONNECTED) })
         registerReceiver(audioOutputReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
@@ -374,6 +380,12 @@ class RadioService : Service() {
                 val radioId = intent.getStringExtra(EXTRA_RADIO_ID)
                 val contextName = intent.getStringExtra(EXTRA_CONTEXT_CATEGORY)
                 
+                // Ensure foreground immediately
+                if (!isForegroundService) {
+                    startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
+                    isForegroundService = true
+                }
+
                 if (contextName != null) {
                     try {
                         playbackContext = RadioCategory.valueOf(contextName)
@@ -391,10 +403,22 @@ class RadioService : Service() {
             ACTION_PAUSE -> pausePlayback()
             ACTION_NEXT -> playNextRadio()
             ACTION_PREVIOUS -> playPreviousRadio()
-            ACTION_PREVIOUS -> playPreviousRadio()
+            // Remove duplicate ACTION_PREVIOUS case if exists
             ACTION_STOP -> stopPlayback()
             ACTION_SET_VOLUME -> exoPlayer.volume = intent.getFloatExtra(EXTRA_VOLUME, 1.0f)
-            ACTION_REQUEST_STATE -> broadcastPlaybackState()
+            ACTION_REQUEST_STATE -> {
+                broadcastPlaybackState()
+                // If not playing and not foreground, we can stop to save resources
+                // But only if we are sure we are not needed.
+                if (!_isPlaying.value && !isForegroundService) {
+                    stopSelf()
+                } else if (_isPlaying.value && !isForegroundService) {
+                     // If we are playing but somehow lost foreground (unlikely), restore it
+                     startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
+                     isForegroundService = true
+                     updateNotification() // Update with real data
+                }
+            }
         }
         return START_STICKY
     }
@@ -457,6 +481,7 @@ class RadioService : Service() {
             if (wakeLock.isHeld) wakeLock.release()
             if (screenWakeLock.isHeld) screenWakeLock.release()
             stopForeground(true)
+            isForegroundService = false
             stopSelf()
         }
     }

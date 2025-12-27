@@ -165,5 +165,11 @@
     <string name="settings_clear_data_desc">Eliminar todos los datos y configuraciones</string>
     <string name="dialog_clear_data_message">¿Realmente quieres eliminar todos los datos de la aplicación? Esta acción es irreversible.</string>
     <string name="dialog_fade_out_title">Duración del desvanecimiento</string>
-    <string name="dialog_fade_out_desc">Establezca la duración del desvanecimiento antes de detenerse.</string>
+    <string name="dialog_fade_out_desc">Establezca la duración del desvanecimiento antes de detener.</string>
+
+    <!-- Onboarding & Permissions -->
+    <string name="welcome_title">Bienvenido a Touch Radio</string>
+    <string name="welcome_message">Para ofrecerle la mejor experiencia, necesitamos los siguientes permisos:\n\n• <b>Notificaciones</b>: Para controlar el reproductor desde la pantalla de bloqueo y la barra de notificaciones.\n• <b>Ubicación</b>: Para sugerir automáticamente estaciones de radio locales cerca de usted.</string>
+    <string name="action_continue">Continuar</string>
+    <string name="permission_notifications_rationale">Se requiere permiso de notificación para controlar la radio cuando la aplicación está en segundo plano. Por favor, permítalo en el siguiente paso.</string>
 </resources>

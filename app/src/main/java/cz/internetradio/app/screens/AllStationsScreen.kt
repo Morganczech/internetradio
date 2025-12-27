@@ -68,9 +68,10 @@ fun AllStationsScreen(
     val currentRadio by viewModel.currentRadio.collectAsState()
     val allRadios by viewModel.getAllRadios().collectAsState(initial = emptyList())
     val isOnline by viewModel.isOnline.collectAsState()
+
     val showMaxFavoritesError by viewModel.showMaxFavoritesError.collectAsState()
     val useUnifiedAccentColor by viewModel.useUnifiedAccentColor.collectAsState()
-    
+
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showSearch by rememberSaveable { mutableStateOf(false) }
     var isReorderMode by rememberSaveable { mutableStateOf(false) }
@@ -94,8 +95,13 @@ fun AllStationsScreen(
     
     val selectedCategory = categories.getOrElse(pagerState.currentPage) { categories[0] }
 
-    LaunchedEffect(pagerState.currentPage) {
-        viewModel.setSelectedListCategory(selectedCategory)
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.isScrollInProgress }
+            .collect { isScrolling ->
+                if (!isScrolling) {
+                    viewModel.setSelectedListCategory(categories[pagerState.currentPage])
+                }
+            }
     }
 
     LaunchedEffect(savedSelectedCategory) {
@@ -288,6 +294,8 @@ fun AllStationsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         userScrollEnabled = pageDragDropState.draggingItemId == null
                     ) {
+
+                        
                         itemsIndexed(
                             items = pageRadios,
                             key = { _, radio -> radio.id }
@@ -402,3 +410,5 @@ fun CategoryChip(category: RadioCategory, isSelected: Boolean, useUnifiedColor: 
         }
     }
 }
+
+

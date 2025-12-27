@@ -180,4 +180,7 @@
     <string name="dialog_clear_data_message">Do you really want to delete all app data? This action is irreversible.</string>
     <string name="dialog_fade_out_title">Fade out duration</string>
     <string name="dialog_fade_out_desc">Set the fade out duration before stopping.</string>
+    
+    <string name="msg_location_improves_accuracy">Refine station selection by location</string>
+    <string name="action_enable_location">Enable Location</string>
 </resources>

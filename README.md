@@ -16,7 +16,7 @@ A modern Android application for streaming internet radio stations from around t
 - 🗂️ **Categorization**: Stations organized by genre (Pop, Rock, Jazz, Dance, etc.).
 - ❤️ **Favorites**: Easy management of favorite stations.
 - 📑 **Custom Sorting**: Drag & Drop mode for organizing stations.
-- 📍 **Local Content**: Automatic discovery of stations based on your location.
+- 📍 **Local Content**: Automatic discovery of stations based on your device region (Locale).
 - 🔍 **Smart Search**: Search the Radio Browser database (diacritic-insensitive).
 - 🎚️ **Audio Enhancements**: 5-band Equalizer with presets.
 - ⏰ **Sleep Timer**: Fade-out volume support.

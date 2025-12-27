@@ -165,4 +165,10 @@
     <string name="dialog_clear_data_message">Möchten Sie wirklich alle App-Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="dialog_fade_out_title">Ausblenddauer</string>
     <string name="dialog_fade_out_desc">Stellen Sie die Ausblenddauer vor dem Stoppen ein.</string>
+
+    <!-- Onboarding & Permissions -->
+    <string name="welcome_title">Willkommen bei Touch Radio</string>
+    <string name="welcome_message">Um Ihnen das beste Erlebnis zu bieten, benötigen wir folgende Berechtigungen:\n\n• <b>Benachrichtigungen</b>: Zur Steuerung des Players vom Sperrbildschirm und der Benachrichtigungsleiste.\n• <b>Standort</b>: Um automatisch lokale Radiosender in Ihrer Nähe vorzuschlagen.</string>
+    <string name="action_continue">Weiter</string>
+    <string name="permission_notifications_rationale">Die Benachrichtigungsberechtigung ist erforderlich, um das Radio zu steuern, wenn die App im Hintergrund läuft. Bitte erlauben Sie dies im nächsten Schritt.</string>
 </resources> 

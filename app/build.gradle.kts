@@ -14,8 +14,8 @@ android {
         applicationId = "cz.internetradio.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -111,8 +111,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("io.coil-kt:coil:2.5.0")
 
-    // Hilt Navigation Compose
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    // No location permission required (region detected via system language)
+    // implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     // Media3
     implementation("androidx.media3:media3-exoplayer:1.2.1")
@@ -139,8 +139,8 @@ dependencies {
     // Wearable
     implementation("com.google.android.gms:play-services-wearable:18.1.0")
 
-    // Location Services
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Location Services (Removed for F-Droid compatibility)
+    // 📍 **Local Content**: Automatic discovery of stations based on your device region (Locale).
 
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
