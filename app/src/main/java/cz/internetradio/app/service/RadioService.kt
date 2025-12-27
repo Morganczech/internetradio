@@ -375,11 +375,27 @@ class RadioService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        if (intent == null) {
+            // Service restarted by system but we don't have enough state to resume playback automatically without intent
+            return START_NOT_STICKY
+        }
+
+        when (intent.action) {
             ACTION_PLAY -> {
                 val radioId = intent.getStringExtra(EXTRA_RADIO_ID)
                 val contextName = intent.getStringExtra(EXTRA_CONTEXT_CATEGORY)
                 
+                // Guard: If we have no radio ID and no currently loaded radio, we cannot play.
+                // But if we were started with startForegroundService, we MUST call startForeground or we crash.
+                if (radioId == null && _currentRadio.value == null) {
+                    Log.e(TAG, "ACTION_PLAY called without radioId and no current radio. Stopping.")
+                    // Satisfy foreground promise to avoid crash
+                    startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+
                 // Ensure foreground immediately
                 if (!isForegroundService) {
                     startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
@@ -395,7 +411,16 @@ class RadioService : Service() {
                 }
 
                 if (radioId != null) {
-                    serviceScope.launch { radioRepository.getRadioById(radioId)?.let { playRadio(it) } }
+                    serviceScope.launch { 
+                        val radio = radioRepository.getRadioById(radioId)
+                        if (radio != null) {
+                            playRadio(radio)
+                        } else {
+                             // ID exists in intent but radio not found in DB
+                             Log.e(TAG, "Radio not found: $radioId")
+                             stopSelf()
+                        }
+                    }
                 } else {
                     _currentRadio.value?.let { playRadio(it) }
                 }
