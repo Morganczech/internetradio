@@ -27,7 +27,10 @@ class RadioBrowserApi @Inject constructor() {
     private val baseUrls = listOf(
         "https://at1.api.radio-browser.info/json",
         "https://de1.api.radio-browser.info/json",
-        "https://nl1.api.radio-browser.info/json"
+        "https://nl1.api.radio-browser.info/json",
+        "https://fr1.api.radio-browser.info/json",
+        "https://us1.api.radio-browser.info/json",
+        "https://es1.api.radio-browser.info/json"
     )
     private val baseUrl get() = baseUrls[1]
     
