@@ -97,9 +97,6 @@ class RadioService : Service() {
         private const val WAKELOCK_TAG = "RadioService::WakeLock"
 
         const val ACTION_PLAYBACK_STATE_CHANGED = "cz.internetradio.app.action.PLAYBACK_STATE_CHANGED"
-        
-        // Internal flag to track if foreground is active
-        private var isForegroundService = false
     }
 
     private var playbackContext: RadioCategory? = null
@@ -374,10 +371,24 @@ class RadioService : Service() {
         } catch (e: Exception) { }
     }
 
+    // Instance flag to track if foreground is active for this service instance
+    private var isForegroundService = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) {
-            // Service restarted by system but we don't have enough state to resume playback automatically without intent
             return START_NOT_STICKY
+        }
+
+        // Safety Guard for non-PLAY actions started via startForegroundService
+        if (!isForegroundService && intent.action != ACTION_PLAY && intent.action != ACTION_REQUEST_STATE) {
+             // If we receive PAUSE, SET_VOLUME etc. but we are not running/foreground, 
+             // it means we were started fresh (zombie intent or race condition).
+             // We MUST call startForeground to satisfy system promise, then stop.
+             Log.w(TAG, "Received ${intent.action} on dead service. Preventing crash.")
+             startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
+             stopForeground(STOP_FOREGROUND_REMOVE)
+             stopSelf()
+             return START_NOT_STICKY
         }
 
         when (intent.action) {
@@ -386,10 +397,8 @@ class RadioService : Service() {
                 val contextName = intent.getStringExtra(EXTRA_CONTEXT_CATEGORY)
                 
                 // Guard: If we have no radio ID and no currently loaded radio, we cannot play.
-                // But if we were started with startForegroundService, we MUST call startForeground or we crash.
                 if (radioId == null && _currentRadio.value == null) {
                     Log.e(TAG, "ACTION_PLAY called without radioId and no current radio. Stopping.")
-                    // Satisfy foreground promise to avoid crash
                     startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
@@ -416,7 +425,6 @@ class RadioService : Service() {
                         if (radio != null) {
                             playRadio(radio)
                         } else {
-                             // ID exists in intent but radio not found in DB
                              Log.e(TAG, "Radio not found: $radioId")
                              stopSelf()
                         }
@@ -428,20 +436,16 @@ class RadioService : Service() {
             ACTION_PAUSE -> pausePlayback()
             ACTION_NEXT -> playNextRadio()
             ACTION_PREVIOUS -> playPreviousRadio()
-            // Remove duplicate ACTION_PREVIOUS case if exists
             ACTION_STOP -> stopPlayback()
             ACTION_SET_VOLUME -> exoPlayer.volume = intent.getFloatExtra(EXTRA_VOLUME, 1.0f)
             ACTION_REQUEST_STATE -> {
                 broadcastPlaybackState()
-                // If not playing and not foreground, we can stop to save resources
-                // But only if we are sure we are not needed.
                 if (!_isPlaying.value && !isForegroundService) {
                     stopSelf()
                 } else if (_isPlaying.value && !isForegroundService) {
-                     // If we are playing but somehow lost foreground (unlikely), restore it
                      startForeground(RadioNotificationManager.NOTIFICATION_ID, radioNotificationManager.getInitialNotification())
                      isForegroundService = true
-                     updateNotification() // Update with real data
+                     updateNotification()
                 }
             }
         }
