@@ -111,8 +111,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("io.coil-kt:coil:2.5.0")
 
-    // No location permission required (region detected via system language)
-    // implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    // Hilt Navigation Compose
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     // Media3
     implementation("androidx.media3:media3-exoplayer:1.2.1")
