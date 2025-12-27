@@ -611,18 +611,37 @@ class RadioViewModel @Inject constructor(
     fun removeStation(radioId: String) {
         viewModelScope.launch {
             try {
+                // Capture state before modification
                 val isCurrent = currentRadio.value?.id == radioId
+                val isPlayingNow = _isPlaying.value
                 val cat = currentRadio.value?.category
+                
+                // Get snapshot for navigation calculation
                 val list = if (cat != null) radioRepository.getRadiosByCategory(cat).first().sortedBy { it.name.lowercase() } else emptyList()
-                val i = list.indexOfFirst { it.id == radioId }
+                val index = list.indexOfFirst { it.id == radioId }
+
+                // Determine next station (Cyclic)
+                val nextStation = if (isCurrent && list.size > 1 && index != -1) {
+                    if (index < list.size - 1) list[index + 1] else list[0]
+                } else null
+
+                // Perform database deletion
                 radioRepository.removeStation(radioId)
+                
                 if (isCurrent) {
-                    context.startForegroundService(Intent(context, RadioService::class.java).apply { action = RadioService.ACTION_STOP })
-                    _currentRadio.value = null
-                    _isPlaying.value = false
-                    if (list.size > 1) playRadio(if (i < list.size - 1) list[i + 1] else list[0])
+                    if (isPlayingNow && nextStation != null) {
+                        // Case C: Switching to next station while playing
+                        // This uses playRadio() which handles transition internally
+                        playRadio(nextStation)
+                    } else {
+                        // Case B (Paused) or Case D (Last station)
+                        // Clean up player, UI, and Service
+                        stopPlayback()
+                    }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Error removing station", e)
+            }
         }
     }
 
