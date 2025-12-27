@@ -1,0 +1,1 @@
+Lightweight internet radio player with favorites, widgets and offline support.
