@@ -403,10 +403,21 @@ fun CategoryChip(category: RadioCategory, isSelected: Boolean, useUnifiedColor: 
         elevation = 0.dp
     ) {
         Box(modifier = Modifier.background(brush = Brush.horizontalGradient(colors = colors)).padding(horizontal = 12.dp), contentAlignment = Alignment.Center) {
-            Text(
-                text = stringResource(category.getTitleRes()), 
-                color = if (isSelected) Color.White else MaterialTheme.colors.onSurface
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (category == RadioCategory.VLASTNI) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = null,
+                        tint = if (isSelected) Color.White else MaterialTheme.colors.onSurface,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+                Text(
+                    text = stringResource(category.getTitleRes()), 
+                    color = if (isSelected) Color.White else MaterialTheme.colors.onSurface
+                )
+            }
         }
     }
 }
