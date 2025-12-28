@@ -32,13 +32,75 @@ class RadioBrowserApi @Inject constructor() {
         "https://us1.api.radio-browser.info/json",
         "https://es1.api.radio-browser.info/json"
     )
-    private val baseUrl get() = baseUrls[1]
-    
+
+    // Custom DNS that falls back to Google DNS-over-HTTPS (8.8.8.8) if System DNS fails
+    private inner class HybridDns : okhttp3.Dns {
+        override fun lookup(hostname: String): List<java.net.InetAddress> {
+            try {
+                // 1. Try System DNS first
+                return okhttp3.Dns.SYSTEM.lookup(hostname)
+            } catch (e: java.net.UnknownHostException) {
+                // 2. If System DNS fails, try Google DoH via generic IP (8.8.8.8)
+                Log.w("RadioDebug", "System DNS failed for $hostname, trying Google DoH...")
+                try {
+                    return resolveViaGoogleDoH(hostname)
+                } catch (e2: Exception) {
+                    // If fallback also fails, throw the original exception
+                    Log.e("RadioDebug", "Google DoH also failed for $hostname: $e2")
+                    throw e
+                }
+            }
+        }
+    }
+
+    private fun resolveViaGoogleDoH(hostname: String): List<java.net.InetAddress> {
+        // Construct request to Google Public DNS JSON API using raw IP to avoid DNS lookup for the resolver itself
+        val url = "https://8.8.8.8/resolve?name=$hostname&type=A"
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Accept", "application/json")
+            .build()
+
+        // We use a separate fresh client for DNS to avoid recursion loops
+        val dnsClient = OkHttpClient()
+        val response = dnsClient.newCall(request).execute()
+        
+        if (!response.isSuccessful) throw java.io.IOException("DoH HTTP Error: ${response.code}")
+
+        val body = response.body?.string() ?: throw java.io.IOException("Empty DoH response")
+        
+        // Simple manual JSON parsing to avoid overhead/complexity of creating data classes just for this
+        // We look for "data": "IP_ADDRESS" inside the "Answer" array
+        val gson = Gson()
+        val map = gson.fromJson(body, Map::class.java)
+        
+        @Suppress("UNCHECKED_CAST")
+        val answers = map["Answer"] as? List<Map<String, Any>> 
+            ?: throw java.net.UnknownHostException("No Answer section in DoH response")
+
+        val result = mutableListOf<java.net.InetAddress>()
+        for (ans in answers) {
+            val type = (ans["type"] as? Number)?.toInt()
+            val data = ans["data"] as? String
+            // Type 1 is A record (IPv4)
+            if (type == 1 && data != null) {
+                result.addAll(java.net.InetAddress.getAllByName(data).toList())
+            }
+        }
+
+        if (result.isEmpty()) throw java.net.UnknownHostException("No A records found via DoH for $hostname")
+        
+        Log.d("RadioDebug", "Resolved $hostname via DoH to: $result")
+        return result
+    }
+
     private val client = OkHttpClient.Builder()
+        .dns(HybridDns()) // Use our robust DNS
         .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
         .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
         .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
         .build()
+        
     private val gson = Gson()
 
     suspend fun searchStations(params: SearchParams): List<RadioStation>? {
@@ -108,7 +170,7 @@ class RadioBrowserApi @Inject constructor() {
         return withContext(Dispatchers.IO) {
             try {
                 val request = Request.Builder()
-                    .url("$baseUrl/tags")
+                    .url("${baseUrls[1]}/tags")
                     .addHeader("User-Agent", "InternetRadio/1.0")
                     .build()
 
@@ -132,7 +194,7 @@ class RadioBrowserApi @Inject constructor() {
             try {
                 val encodedTag = java.net.URLEncoder.encode(tag, "UTF-8")
                 val request = Request.Builder()
-                    .url("$baseUrl/stations/bytag/$encodedTag")
+                    .url("${baseUrls[1]}/stations/bytag/$encodedTag")
                     .addHeader("User-Agent", "InternetRadio/1.0")
                     .build()
 
@@ -156,7 +218,7 @@ class RadioBrowserApi @Inject constructor() {
             try {
                 val encodedCountry = java.net.URLEncoder.encode(country, "UTF-8")
                 val request = Request.Builder()
-                    .url("$baseUrl/stations/bycountry/$encodedCountry")
+                    .url("${baseUrls[1]}/stations/bycountry/$encodedCountry")
                     .addHeader("User-Agent", "InternetRadio/1.0")
                     .build()
 
