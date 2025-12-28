@@ -86,6 +86,7 @@ class EqualizerManager @Inject constructor(
                 }
             } catch (e: Exception) {
                 if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při nastavování enabled stavu", e)
+                Unit
             }
         }
     }
@@ -116,6 +117,7 @@ class EqualizerManager @Inject constructor(
                 }
             } catch (e: Exception) {
                  if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při aplikování presetu: ${e.message}")
+                 Unit
             }
         }
     }
@@ -146,6 +148,7 @@ class EqualizerManager @Inject constructor(
                 }
             } catch (e: Exception) {
                 if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při nastavování úrovně pásma", e)
+                Unit
             }
         }
     }
