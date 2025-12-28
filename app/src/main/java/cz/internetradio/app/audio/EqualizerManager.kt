@@ -21,30 +21,18 @@ class EqualizerManager @Inject constructor(
     private val lock = ReentrantLock()
 
     fun setupEqualizer(sessionId: Int) {
-        Log.d(TAG, """🎛️ Požadavek na setup equalizeru:
-            |  - session ID: $sessionId
-            |  - aktuální session ID: $audioSessionId
-            |  - equalizer inicializován: ${equalizer != null}
-            |  - isEnabled: $isEnabled
-            |  - uložené hodnoty pásem: $currentBandLevels
-            """.trimMargin())
-        
         if (sessionId == -1) {
-            Log.e(TAG, "❌ Neplatné session ID")
             return
         }
 
         lock.withLock {
             try {
                 if (audioSessionId != sessionId || equalizer == null) {
-                    Log.d(TAG, "🔄 Nastavuji nový equalizer")
-                    
                     // Uložení aktuálních hodnot před uvolněním
                     if (equalizer != null) {
                         currentBandLevels = (0 until equalizer!!.numberOfBands.toInt()).map { band ->
                             equalizer!!.getBandLevel(band.toShort()) / 100
                         }.toMutableList()
-                        Log.d(TAG, "📝 Uloženy hodnoty pásem: $currentBandLevels")
                     }
                     
                     releaseInternal()
@@ -53,44 +41,29 @@ class EqualizerManager @Inject constructor(
                     equalizer = try {
                         Equalizer(0, sessionId).also { eq ->
                             eq.enabled = isEnabled
-                            Log.d(TAG, """✅ Equalizer vytvořen:
-                                |  - enabled: $isEnabled
-                                |  - počet pásem: ${eq.numberOfBands}
-                                |  - rozsah: ${eq.bandLevelRange[0]/100}dB až ${eq.bandLevelRange[1]/100}dB
-                                |  - frekvence: ${(0 until eq.numberOfBands.toInt()).map { "${eq.getCenterFreq(it.toShort())/1000}Hz" }}
-                                """.trimMargin())
                             
                             // Obnovení uložených hodnot
                             if (currentBandLevels.isNotEmpty() && currentBandLevels.size == eq.numberOfBands.toInt()) {
-                                Log.d(TAG, "🔄 Obnovuji uložené hodnoty pásem")
                                 currentBandLevels.forEachIndexed { index, level ->
                                     val milliLevel = (level * 100).toShort()
                                     eq.setBandLevel(index.toShort(), milliLevel)
-                                    Log.d(TAG, "✅ Obnoveno pásmo $index na hodnotu ${level}dB")
                                 }
                             } else {
-                                Log.d(TAG, "⚠️ Žádné uložené hodnoty k obnovení")
                                 // Inicializace nových hodnot
                                 currentBandLevels = (0 until eq.numberOfBands.toInt()).map { 0 }.toMutableList()
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "❌ Chyba při vytváření equalizeru", e)
+                        if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při vytváření equalizeru", e)
                         null
                     }
                 } else {
-                    Log.d(TAG, "✅ Equalizer již nastaven pro toto audio session ID")
                     equalizer?.let { eq ->
                         eq.enabled = isEnabled
-                        Log.d(TAG, """📊 Aktuální stav equalizeru:
-                            |  - enabled: ${eq.enabled}
-                            |  - počet pásem: ${eq.numberOfBands}
-                            |  - hodnoty pásem: ${(0 until eq.numberOfBands.toInt()).map { "${eq.getBandLevel(it.toShort())/100}dB" }}
-                            """.trimMargin())
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Chyba při nastavování equalizeru", e)
+                if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při nastavování equalizeru", e)
                 releaseInternal()
                 throw e
             }
@@ -98,12 +71,6 @@ class EqualizerManager @Inject constructor(
     }
 
     fun setEnabled(enabled: Boolean) {
-        Log.d(TAG, """🎛️ Nastavuji enabled stav equalizeru:
-            |  - požadovaný stav: $enabled
-            |  - aktuální stav: $isEnabled
-            |  - equalizer inicializován: ${equalizer != null}
-            """.trimMargin())
-        
         lock.withLock {
             try {
                 isEnabled = enabled
@@ -116,32 +83,18 @@ class EqualizerManager @Inject constructor(
                             eq.setBandLevel(index.toShort(), milliLevel)
                         }
                     }
-                    Log.d(TAG, """✅ Stav equalizeru nastaven:
-                        |  - enabled: ${eq.enabled}
-                        |  - hodnoty pásem: ${(0 until eq.numberOfBands.toInt()).map { "${eq.getBandLevel(it.toShort())/100}dB" }}
-                        """.trimMargin())
-                } ?: run {
-                    Log.w(TAG, "⚠️ Equalizer není inicializován, ukládám pouze stav isEnabled=$enabled")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Chyba při nastavování enabled stavu", e)
+                if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při nastavování enabled stavu", e)
             }
         }
     }
 
     fun applyPreset(preset: EqualizerPreset) {
-        Log.d(TAG, """🎛️ Aplikuji preset:
-            |  - název: ${preset.title}
-            |  - hodnoty: ${preset.bands}
-            |  - equalizer enabled: ${equalizer?.enabled}
-            |  - equalizer inicializován: ${equalizer != null}
-            """.trimMargin())
-        
         lock.withLock {
             try {
                 equalizer?.let { eq ->
                     if (!eq.enabled) {
-                        Log.w(TAG, "⚠️ Equalizer není povolen, povoluji...")
                         eq.enabled = true
                         isEnabled = true
                     }
@@ -158,16 +111,11 @@ class EqualizerManager @Inject constructor(
                             if (index < currentBandLevels.size) {
                                 currentBandLevels[index] = gain.toInt()
                             }
-                            
-                            Log.d(TAG, """✅ Nastaveno pásmo $index:
-                                |  - frekvence: ${eq.getCenterFreq(index.toShort())/1000}Hz
-                                |  - hodnota: ${gain}dB (${milliGain}mB)
-                                """.trimMargin())
                         }
                     }
-                } ?: Log.w(TAG, "⚠️ Equalizer není inicializován")
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Chyba při aplikování presetu: ${e.message}")
+                 if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při aplikování presetu: ${e.message}")
             }
         }
     }
@@ -177,13 +125,11 @@ class EqualizerManager @Inject constructor(
             try {
                 equalizer?.let { eq ->
                     if (!eq.enabled) {
-                        Log.w(TAG, "⚠️ Nelze nastavit úroveň pásma - equalizer není enabled")
                         return@let
                     }
 
                     val bandRange = eq.bandLevelRange
                     if (bandRange == null) {
-                        Log.e(TAG, "❌ Nelze získat rozsah pásma")
                         return@let
                     }
 
@@ -197,17 +143,9 @@ class EqualizerManager @Inject constructor(
                     if (band < currentBandLevels.size) {
                         currentBandLevels[band] = level
                     }
-                    
-                    val freq = eq.getCenterFreq(band.toShort())
-                    Log.d(TAG, """✅ Nastaveno pásmo $band:
-                        |  - Frekvence: ${freq/1000}Hz
-                        |  - Požadovaná hodnota: ${level}dB
-                        |  - Skutečná hodnota: ${levelInMilliBels/100}dB
-                        |  - Rozsah: ${bandRange[0]/100}dB až ${bandRange[1]/100}dB
-                        """.trimMargin())
-                } ?: Log.w(TAG, "⚠️ Nelze nastavit úroveň pásma - equalizer není inicializován")
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Chyba při nastavování úrovně pásma", e)
+                if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při nastavování úrovně pásma", e)
             }
         }
     }
@@ -223,12 +161,11 @@ class EqualizerManager @Inject constructor(
             equalizer?.let { eq ->
                 eq.enabled = false
                 eq.release()
-                Log.d(TAG, "✅ Equalizer uvolněn")
             }
             equalizer = null
             audioSessionId = -1
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Chyba při uvolňování equalizeru", e)
+            if (cz.internetradio.app.BuildConfig.DEBUG) Log.e(TAG, "Chyba při uvolňování equalizeru", e)
         }
     }
 

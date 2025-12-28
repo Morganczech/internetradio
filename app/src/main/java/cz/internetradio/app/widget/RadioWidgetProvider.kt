@@ -52,7 +52,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         private var cachedRadioId: String? = null
 
         fun updateWidgets(context: Context, playing: Boolean, radioId: String?, metadata: String? = null) {
-            Log.d("RadioWidgetProvider", "updateWidgets volán: playing=$playing, radioId=$radioId, metadata=$metadata")
             
             if (isInitialized) {
                 isPlaying = playing
@@ -75,7 +74,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
                 widgetClasses.forEach { cls ->
                     val ids = appWidgetManager.getAppWidgetIds(ComponentName(context, cls))
                     if (ids.isNotEmpty()) {
-                        Log.d("RadioWidgetProvider", "Aktualizuji ${ids.size} widgetů třídy ${cls.simpleName}")
                         val intent = Intent(context, cls).apply {
                             action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
@@ -84,7 +82,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
                     }
                 }
             } else {
-                Log.d("RadioWidgetProvider", "Widgety nejsou inicializovány, aktualizace přeskočena")
             }
         }
     }
@@ -94,47 +91,35 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        Log.d("RadioWidgetProvider", "onUpdate volán pro ${appWidgetIds.size} widgetů: ${appWidgetIds.joinToString()}")
         
         // Získání závislostí přes EntryPoint
-        Log.d("RadioWidgetProvider", "Získávám závislosti přes EntryPoint")
         val entryPoint = EntryPointAccessors.fromApplication(
             context.applicationContext,
             RadioWidgetEntryPoint::class.java
         )
         
         // Inicializace repository
-        Log.d("RadioWidgetProvider", "Inicializuji repository")
         val database = Room.databaseBuilder(
             context.applicationContext,
             RadioDatabase::class.java,
             "radio_database"
         ).build()
         radioRepository = RadioRepository(database.radioDao(), entryPoint.getRadioBrowserApi())
-        Log.d("RadioWidgetProvider", "Repository úspěšně inicializován")
-
-
 
         scope.launch {
             try {
-                Log.d("RadioWidgetProvider", "Načítám data pro widgety...")
                 val favoriteRadios = radioRepository.getFavoriteRadios().first()
                 val currentRadio = currentRadioId?.let { radioRepository.getRadioById(it) } ?: favoriteRadios.firstOrNull()
                 
-                Log.d("RadioWidgetProvider", "Data načtena: currentRadio=${currentRadio?.name}, favoriteRadios=${favoriteRadios.size}")
-                
-                Log.d("RadioWidgetProvider", "Aktualizuji widgety s načtenými daty")
                 appWidgetIds.forEach { appWidgetId ->
-                    Log.d("RadioWidgetProvider", "Aktualizuji widget ID: $appWidgetId s daty: ${currentRadio?.name ?: "null"}")
                     updateAppWidget(context, appWidgetManager, appWidgetId, currentRadio)
                 }
                 
                 // Označíme widgety jako inicializované
                 isInitialized = true
-                Log.d("RadioWidgetProvider", "Widgety úspěšně inicializovány")
                 
             } catch (e: Exception) {
-                Log.e("RadioWidgetProvider", "Chyba při inicializaci widgetů: ${e.message}")
+                if (cz.internetradio.app.BuildConfig.DEBUG) Log.e("RadioWidgetProvider", "Chyba při inicializaci widgetů: ${e.message}")
                 e.printStackTrace()
                 // I při chybě označíme jako inicializované, aby se aplikace nezasekla
                 isInitialized = true
@@ -147,62 +132,48 @@ open class RadioWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         
-        Log.d("RadioWidgetProvider", "onReceive volán s akcí: ${intent.action}")
-
         when (intent.action) {
             AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {
-                Log.d("RadioWidgetProvider", "Přijata akce APPWIDGET_UPDATE")
                 val appWidgetManager = AppWidgetManager.getInstance(context)
                 val appWidgetIds = appWidgetManager.getAppWidgetIds(ComponentName(context, javaClass))
-                Log.d("RadioWidgetProvider", "Nalezeno ${appWidgetIds.size} widgetů pro aktualizaci: ${appWidgetIds.joinToString()}")
                 onUpdate(context, appWidgetManager, appWidgetIds)
             }
             AppWidgetManager.ACTION_APPWIDGET_ENABLED -> {
-                Log.d("RadioWidgetProvider", "Widget povolen")
             }
             AppWidgetManager.ACTION_APPWIDGET_DISABLED -> {
-                Log.d("RadioWidgetProvider", "Widget zakázán")
             }
             RadioService.ACTION_PLAY,
             RadioService.ACTION_PAUSE,
             RadioService.ACTION_NEXT,
             RadioService.ACTION_PREVIOUS -> {
                 // Spouštíme službu pouze pokud uživatel klikl na tlačítko
-                Log.d("RadioWidgetProvider", "Uživatel klikl na tlačítko: ${intent.action}")
                 val serviceIntent = Intent(context, RadioService::class.java).apply {
                     action = intent.action
                     putExtra(RadioService.EXTRA_RADIO_ID, currentRadioId)
                 }
-                Log.d("RadioWidgetProvider", "Spouštím službu s akcí: ${intent.action}")
                 context.startForegroundService(serviceIntent)
             }
             else -> {
-                Log.d("RadioWidgetProvider", "Neznámá akce: ${intent.action}")
             }
         }
     }
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
-        Log.d("RadioWidgetProvider", "Widget povolen - první widget přidán na plochu")
         isInitialized = true
         
         // Získáme všechny widgety a aktualizujeme je
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val appWidgetIds = appWidgetManager.getAppWidgetIds(ComponentName(context, javaClass))
-        Log.d("RadioWidgetProvider", "onEnabled: Nalezeno ${appWidgetIds.size} widgetů: ${appWidgetIds.joinToString()}")
         
         if (appWidgetIds.isNotEmpty()) {
-            Log.d("RadioWidgetProvider", "onEnabled: Spouštím onUpdate pro nalezené widgety")
             onUpdate(context, appWidgetManager, appWidgetIds)
         } else {
-            Log.d("RadioWidgetProvider", "onEnabled: Žádné widgety nenalezeny")
         }
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
-        Log.d("RadioWidgetProvider", "Widget zakázán - poslední widget odebrán z plochy")
         isInitialized = false
         job.cancel()
     }
@@ -225,7 +196,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_radio_icon, pendingIntent)
-        Log.d("RadioWidgetProvider", "Click listener pro ikonu rádia nastaven")
 
         // Nastavení tlačítek pro ovládání
         setButtonClickListeners(context, views)
@@ -282,7 +252,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
             }
         } else {
             // Výchozí stav - žádné rádio
-            Log.d("RadioWidgetProvider", "Aktualizuji widget s výchozími hodnotami")
             views.setTextViewText(R.id.widget_radio_name, context.getString(R.string.widget_radio_name))
             views.setImageViewResource(R.id.widget_radio_icon, R.drawable.ic_radio_default)
         }
@@ -291,27 +260,15 @@ open class RadioWidgetProvider : AppWidgetProvider() {
         val metadata = getCurrentMetadata(context)
         if (!metadata.isNullOrBlank()) {
             views.setTextViewText(R.id.widget_metadata, metadata)
-            Log.d("RadioWidgetProvider", "Metadata nastavena: $metadata")
         } else {
             views.setTextViewText(R.id.widget_metadata, context.getString(R.string.widget_metadata))
-            Log.d("RadioWidgetProvider", "Metadata nastavena na výchozí hodnotu")
         }
 
         // Nastavení ikon podle stavu přehrávání
         val playPauseIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow
         views.setImageViewResource(R.id.widget_play_pause, playPauseIcon)
-        Log.d("RadioWidgetProvider", "Ikona play/pause nastavena: ${if (isPlaying) "pause" else "play"}")
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
-        Log.d("RadioWidgetProvider", "Widget aktualizován pro ID: $appWidgetId")
-        
-        // Kontrola, zda se widget správně zobrazuje
-        val widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
-        Log.d("RadioWidgetProvider", "Widget info pro ID $appWidgetId:")
-        Log.d("RadioWidgetProvider", "  - MinWidth: ${widgetInfo.minWidth}")
-        Log.d("RadioWidgetProvider", "  - MinHeight: ${widgetInfo.minHeight}")
-        Log.d("RadioWidgetProvider", "  - Layout: ${widgetInfo.initialLayout}")
-        Log.d("RadioWidgetProvider", "  - Provider: ${widgetInfo.provider.className}")
     }
 
     private fun getCurrentMetadata(context: Context): String? {
@@ -320,7 +277,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
     }
 
     private fun setButtonClickListeners(context: Context, views: RemoteViews) {
-        Log.d("RadioWidgetProvider", "Nastavuji click listenery pro tlačítka")
         
         // Přehrát/Pozastavit
         val playPauseIntent = Intent(context, RadioWidgetProvider::class.java).apply {
@@ -333,7 +289,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_play_pause, playPausePendingIntent)
-        Log.d("RadioWidgetProvider", "Play/Pause tlačítko nastaveno")
 
         // Předchozí stanice
         val previousIntent = Intent(context, RadioWidgetProvider::class.java).apply {
@@ -346,7 +301,6 @@ open class RadioWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_previous, previousPendingIntent)
-        Log.d("RadioWidgetProvider", "Předchozí tlačítko nastaveno")
 
         // Další stanice
         val nextIntent = Intent(context, RadioWidgetProvider::class.java).apply {
@@ -359,8 +313,5 @@ open class RadioWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_next, nextPendingIntent)
-        Log.d("RadioWidgetProvider", "Další tlačítko nastaveno")
-        
-        Log.d("RadioWidgetProvider", "Všechna tlačítka úspěšně nastavena")
     }
 }

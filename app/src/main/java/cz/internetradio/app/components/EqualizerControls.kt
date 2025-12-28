@@ -45,7 +45,6 @@ fun EqualizerControls(
             Switch(
                 checked = equalizerEnabled,
                 onCheckedChange = { 
-                    Log.d("EqualizerControls", "Přepínám equalizer na: $it")
                     viewModel.setEqualizerEnabled(it) 
                 },
                 colors = SwitchDefaults.colors(
@@ -80,7 +79,6 @@ fun EqualizerControls(
                             shape = RoundedCornerShape(16.dp)
                         )
                         .clickable { 
-                            Log.d("EqualizerControls", "Nastavuji preset: ${preset.title}")
                             viewModel.setEqualizerPreset(preset) 
                         }
                 ) {
@@ -112,7 +110,6 @@ fun EqualizerControls(
                         Slider(
                             value = value,
                             onValueChange = { newValue ->
-                                Log.d("EqualizerControls", "Nastavuji pásmo $index na hodnotu $newValue")
                                 viewModel.setBandValue(index, newValue.coerceIn(-12f, 12f))
                             },
                             valueRange = -12f..12f,

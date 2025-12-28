@@ -140,7 +140,6 @@ class RadioBrowserApi @Inject constructor() {
             for (baseUrl in baseUrls) {
                 try {
                     val url = "$baseUrl/stations/search?$queryString"
-                    Log.d("RadioBrowserApi", "Volám API: $url")
 
                     val request = Request.Builder()
                         .url(url)
@@ -154,21 +153,20 @@ class RadioBrowserApi @Inject constructor() {
                             if (json != null) {
                                 val listType = object : TypeToken<List<RadioStation>>() {}.type
                                 val stations = gson.fromJson<List<RadioStation>>(json, listType)
-                                Log.d("RadioBrowserApi", "Počet nalezených stanic: ${stations?.size ?: 0}")
                                 return@withContext stations
                             }
                         } else {
-                            Log.e("RadioBrowserApi", "API Error: ${response.code} on $baseUrl")
+                            if (cz.internetradio.app.BuildConfig.DEBUG) Log.e("RadioBrowserApi", "API Error: ${response.code} on $baseUrl")
                         }
                     } finally {
                         response.close()
                     }
                 } catch (e: Exception) {
-                    Log.e("RadioBrowserApi", "Chyba při komunikaci se serverem $baseUrl: ${e.message}")
+                    if (cz.internetradio.app.BuildConfig.DEBUG) Log.e("RadioBrowserApi", "Chyba při komunikaci se serverem $baseUrl: ${e.message}")
                     // Pokračujeme na další server
                 }
             }
-            Log.e("RadioBrowserApi", "Všechny servery selhaly")
+            if (cz.internetradio.app.BuildConfig.DEBUG) Log.e("RadioBrowserApi", "Všechny servery selhaly")
             null
         }
     }
