@@ -41,20 +41,17 @@ class RadioBrowserApi @Inject constructor() {
                 return okhttp3.Dns.SYSTEM.lookup(hostname)
             } catch (e: java.net.UnknownHostException) {
                 // 2. If System DNS fails, try Google DoH via generic IP (8.8.8.8)
-                Log.w("RadioDebug", "System DNS failed for $hostname, trying Google DoH...")
                 try {
                     return resolveViaGoogleDoH(hostname)
                 } catch (e2: Exception) {
-                    Log.w("RadioDebug", "DoH for $hostname failed: $e2")
                     
                     // 3. Fallback: If this is a radio-browser domain, try to resolve 'all.api.radio-browser.info'
                     // This works because servers use wildcard certs (*.api.radio-browser.info)
                     if (hostname.contains("radio-browser.info")) {
-                        Log.w("RadioDebug", "Fallback: Resolving all.api.radio-browser.info via DoH")
                         try {
                              return resolveViaGoogleDoH("all.api.radio-browser.info")
                         } catch (e3: Exception) {
-                             Log.e("RadioDebug", "Critical: All DNS fallbacks failed")
+                             // Critical: All DNS fallbacks failed
                         }
                     }
                     // If fallback also fails or not applicable, throw the original exception
@@ -103,7 +100,6 @@ class RadioBrowserApi @Inject constructor() {
 
         if (result.isEmpty()) throw java.net.UnknownHostException("No A records found via DoH for $hostname")
         
-        Log.d("RadioDebug", "Resolved $hostname via DoH to: $result")
         return result
     }
 
@@ -169,12 +165,10 @@ class RadioBrowserApi @Inject constructor() {
                     }
                 } catch (e: Exception) {
                     Log.e("RadioBrowserApi", "Chyba při komunikaci se serverem $baseUrl: ${e.message}")
-                    Log.e("RadioDebug", "searchStations: Error on $baseUrl: $e", e)
                     // Pokračujeme na další server
                 }
             }
             Log.e("RadioBrowserApi", "Všechny servery selhaly")
-            Log.e("RadioDebug", "searchStations: All servers failed")
             null
         }
     }

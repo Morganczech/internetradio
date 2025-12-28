@@ -165,16 +165,13 @@ class RadioViewModel @Inject constructor(
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: android.net.Network) {
-             Log.d("RadioDebug", "NetworkCallback: onAvailable")
              _isOnline.value = true
              viewModelScope.launch(Dispatchers.IO) {
                  // Wait for stability
                  delay(3000)
                  
                  repeat(3) {
-                     Log.d("RadioDebug", "NetworkCallback: Retrying initialization attempt ${it + 1}")
                      if (prefs.getBoolean("favorites_initialized", false)) {
-                         Log.d("RadioDebug", "NetworkCallback: Already initialized, skipping")
                          return@repeat
                      }
                      ensureDatabaseInitialized()
@@ -184,7 +181,6 @@ class RadioViewModel @Inject constructor(
              }
         }
         override fun onLost(network: android.net.Network) {
-             Log.d("RadioDebug", "NetworkCallback: onLost")
              _isOnline.value = false
         }
     }
@@ -349,12 +345,10 @@ class RadioViewModel @Inject constructor(
         viewModelScope.launch {
             // Simplified: Always use Locale
             val countryCode = java.util.Locale.getDefault().country.uppercase()
-            Log.d("RadioDebug", "loadLocalStations: Loading for country $countryCode")
             if (countryCode.isNotEmpty()) {
                 _currentCountryCode.value = countryCode
                 RadioCategory.setCurrentCountryCode(countryCode)
                 val stations = radioRepository.getStationsByCountry(countryCode)
-                Log.d("RadioDebug", "loadLocalStations: Found ${stations?.size ?: 0} stations in DB")
                 _localStations.value = stations
             }
         }
@@ -369,11 +363,8 @@ class RadioViewModel @Inject constructor(
         val isInitialized = prefs.getBoolean("favorites_initialized", false)
         val totalStations = radioRepository.getAllRadios().first().size
         
-        Log.d("RadioDebug", "ensureDatabaseInitialized: Start. isInitialized=$isInitialized, totalStations=$totalStations")
-
         // Pokud je již inicializováno a DB není prázdná, nic neděláme
         if (isInitialized && totalStations > 0) {
-            Log.d("RadioDebug", "ensureDatabaseInitialized: Abort. Data exists.")
             return
         }
 
@@ -381,18 +372,15 @@ class RadioViewModel @Inject constructor(
         // Ochrana proti prázdnému locale (např. emulátor), default CZ
         val targetCountry = if (countryCode.isBlank()) "CZ" else countryCode
         
-        Log.d("RadioDebug", "ensureDatabaseInitialized: Calling initializeFromApi($targetCountry)")
-        
         // Removed strict isNetworkAvailable check. Attempt connection directly.
         try {
             val success = radioRepository.initializeFromApi(targetCountry)
-            Log.d("RadioDebug", "ensureDatabaseInitialized: Result success=$success")
             if (success) {
                 prefs.edit().putBoolean("favorites_initialized", true).apply()
                 refreshLocalStations()
             }
         } catch (e: Exception) {
-            Log.e("RadioDebug", "ensureDatabaseInitialized: Error", e)
+            if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
         }
     }
 
