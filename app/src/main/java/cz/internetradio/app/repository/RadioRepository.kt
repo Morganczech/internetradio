@@ -33,6 +33,7 @@ class RadioRepository @Inject constructor(
 
     suspend fun initializeFromApi(countryCode: String): Boolean {
         return try {
+            Log.d("RadioDebug", "initializeFromApi: Calling searchStations for country=$countryCode")
             val stations = radioBrowserApi.searchStations(
                 SearchParams(
                     name = "", // Search by country only
@@ -41,6 +42,7 @@ class RadioRepository @Inject constructor(
                     orderBy = "clickcount"
                 )
             )
+            Log.d("RadioDebug", "initializeFromApi: Received ${stations?.size ?: "null"} stations")
 
             if (stations.isNullOrEmpty()) return false
 
@@ -63,8 +65,10 @@ class RadioRepository @Inject constructor(
                 val entity = RadioEntity.fromRadio(radio).copy(orderIndex = currentMaxOrder + index)
                 radioDao.insertRadio(entity)
             }
+            Log.d("RadioDebug", "initializeFromApi: Inserted ${stations.size} stations into DB")
             true
         } catch (e: Exception) {
+            Log.e("RadioDebug", "initializeFromApi: Error", e)
             false
         }
     }
