@@ -94,7 +94,7 @@ class RadioBrowserApi @Inject constructor() {
                     }
                 } catch (e: Exception) {
                     Log.e("RadioBrowserApi", "Chyba při komunikaci se serverem $baseUrl: ${e.message}")
-                    Log.e("RadioDebug", "searchStations: Error on $baseUrl", e)
+                    Log.e("RadioDebug", "searchStations: Error on $baseUrl: $e", e)
                     // Pokračujeme na další server
                 }
             }
