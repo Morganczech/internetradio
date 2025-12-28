@@ -1,20 +1,21 @@
-Touch Radio is a modern and privacy-friendly internet radio player focused on
-stability, clean design and smooth background playback.
+Touch Radio is a privacy-friendly internet radio player focused on
+stability, clean design, and reliable background playback.
 
 Features:
-• Internet radio playback using Media3
-• Favorites and station categories
-• Drag-and-drop station ordering
-• Import / Export stations (JSON)
-• 5-band equalizer
-• Sleep timer and widgets
-• Multi-language support (CZ / SK / EN / DE)
+- Internet radio playback using Media3
+- Favorites and station categories
+- Drag-and-drop station ordering
+- Import and export stations (JSON)
+- 5-band equalizer
+- Sleep timer and home screen widgets
+- Multi-language support (CZ, SK, EN, DE)
 
 Privacy:
-• No ads
-• No tracking
-• No analytics
-• No location permission required (region detected via system language)
-• The app works fully offline except when streaming
+- No ads
+- No tracking
+- No analytics
+- No location permission required
+- Region is resolved using system language only
 
-Touch Radio is fully open-source.
+The app works offline except when streaming audio
+and is fully open-source.
