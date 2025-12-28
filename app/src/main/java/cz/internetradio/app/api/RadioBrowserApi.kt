@@ -45,8 +45,19 @@ class RadioBrowserApi @Inject constructor() {
                 try {
                     return resolveViaGoogleDoH(hostname)
                 } catch (e2: Exception) {
-                    // If fallback also fails, throw the original exception
-                    Log.e("RadioDebug", "Google DoH also failed for $hostname: $e2")
+                    Log.w("RadioDebug", "DoH for $hostname failed: $e2")
+                    
+                    // 3. Fallback: If this is a radio-browser domain, try to resolve 'all.api.radio-browser.info'
+                    // This works because servers use wildcard certs (*.api.radio-browser.info)
+                    if (hostname.contains("radio-browser.info")) {
+                        Log.w("RadioDebug", "Fallback: Resolving all.api.radio-browser.info via DoH")
+                        try {
+                             return resolveViaGoogleDoH("all.api.radio-browser.info")
+                        } catch (e3: Exception) {
+                             Log.e("RadioDebug", "Critical: All DNS fallbacks failed")
+                        }
+                    }
+                    // If fallback also fails or not applicable, throw the original exception
                     throw e
                 }
             }
@@ -54,12 +65,14 @@ class RadioBrowserApi @Inject constructor() {
     }
 
     private fun resolveViaGoogleDoH(hostname: String): List<java.net.InetAddress> {
-        // Construct request to Google Public DNS JSON API using raw IP to avoid DNS lookup for the resolver itself
-        val url = "https://8.8.8.8/resolve?name=$hostname&type=A"
+        // Construct request to Google Public DNS JSON API using raw IP
+        // Using type=1 (A record) explicitly
+        val url = "https://8.8.8.8/resolve?name=$hostname&type=1"
         val request = Request.Builder()
             .url(url)
             .addHeader("Accept", "application/json")
             .build()
+
 
         // We use a separate fresh client for DNS to avoid recursion loops
         val dnsClient = OkHttpClient()
