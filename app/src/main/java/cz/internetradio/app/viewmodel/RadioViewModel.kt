@@ -367,28 +367,20 @@ class RadioViewModel @Inject constructor(
         // Ochrana proti prázdnému locale (např. emulátor), default CZ
         val targetCountry = if (countryCode.isBlank()) "CZ" else countryCode
         
-        // Strict Online Initialization
-        if (isNetworkAvailable()) {
-            try {
-                val success = radioRepository.initializeFromApi(targetCountry)
-                if (success) {
-                    prefs.edit().putBoolean("favorites_initialized", true).apply()
-                    refreshLocalStations()
-                }
-            } catch (e: Exception) {
-                if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
+        // Removed strict isNetworkAvailable check. Attempt connection directly.
+        try {
+            val success = radioRepository.initializeFromApi(targetCountry)
+            if (success) {
+                prefs.edit().putBoolean("favorites_initialized", true).apply()
+                refreshLocalStations()
             }
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) Log.e("RadioViewModel", "Init DB error", e)
         }
-        // If OFFline -> DB stays empty, favorites_initialized stays false.
-        // User will see Empty State in UI.
     }
 
     fun playRadio(radio: Radio, categoryContext: RadioCategory? = null) {
-        // Strict Offline Check
-        if (!isNetworkAvailable()) {
-             _message.value = context.getString(R.string.empty_state_offline_title)
-             return
-        }
+        // Strict Offline Check removed. We try to play. ExoPlayer will handle errors.
         viewModelScope.launch {
             _currentRadio.value = radio
             if (categoryContext != null) {
@@ -416,11 +408,7 @@ class RadioViewModel @Inject constructor(
     }
 
     fun togglePlayPause() {
-        // Strict Offline Check
-        if (!isNetworkAvailable()) {
-            _message.value = context.getString(R.string.empty_state_offline_title)
-            return
-        }
+        // Strict Offline Check removed.
         val intent = Intent(context, RadioService::class.java).apply {
             action = if (_isPlaying.value) RadioService.ACTION_PAUSE else RadioService.ACTION_PLAY
             if (!_isPlaying.value) putExtra(RadioService.EXTRA_RADIO_ID, _currentRadio.value?.id)
@@ -559,11 +547,7 @@ class RadioViewModel @Inject constructor(
     }
 
     fun searchStations(query: String, country: String? = null, minBitrate: Int? = null, orderBy: String = "votes", onResult: (List<RadioStation>?) -> Unit) {
-        if (!isNetworkAvailable()) {
-            _message.value = context.getString(R.string.error_no_internet)
-            onResult(null)
-            return
-        }
+        // Strict Network Check REMOVED. Let OkHttp handle the connection.
         viewModelScope.launch {
             try {
                 val res = radioRepository.searchStations(SearchParams(name = query, country = country, minBitrate = minBitrate, orderBy = orderBy))
@@ -575,7 +559,12 @@ class RadioViewModel @Inject constructor(
                     else s.copy(isFromRadioBrowser = true, category = determineCategory(s.tags))
                 }
                 onResult(processed)
-            } catch (e: Exception) { onResult(null) }
+            } catch (e: Exception) { 
+                // Don't show generic 'no internet' immediately, only if real error.
+                // Or inform UI about failure via onResult(null)
+                if (BuildConfig.DEBUG && e !is java.net.UnknownHostException) Log.e("RadioViewModel", "Search error", e)
+                onResult(null) 
+            }
         }
     }
 
